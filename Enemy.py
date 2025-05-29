@@ -2,7 +2,6 @@ import random
 from config import MIN_XP_REWARD, MAX_XP_REWARD, MIN_GOLD_REWARD, MAX_GOLD_REWARD
 
 class Enemy:
-    """Enhanced Enemy class with better AI and consistency"""
     
     def __init__(self, name, health, damage, enemy_type="monster", description=""):
         self.name = name

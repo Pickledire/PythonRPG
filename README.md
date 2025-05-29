@@ -2,16 +2,6 @@
 
 A comprehensive turn-based RPG game written in Python with improved mechanics, inventory system, gold economy, shop system, and **beautiful colorful interface**.
 
-## ✨ New Features - Enhanced Visual Experience!
-
-🎨 **Colorful Interface**: The game now features a beautiful, colorful terminal interface using colorama!
-- **Vibrant Colors**: Different colors for health, XP, gold, weapons, armor, and more
-- **Visual Health Bars**: See your health and XP as colorful progress bars
-- **Enhanced Combat**: Combat messages are now color-coded for better readability
-- **Improved Menus**: All menus and options are beautifully styled
-- **ASCII Art**: Enhanced title screen with ASCII art
-- **Fullscreen Mode**: Optimized for larger terminal windows
-
 ## 🚀 How to Run
 
 ### Easy Method (Recommended)
@@ -195,7 +185,6 @@ python test_colors.py
 - **NEW**: 🌈 Comprehensive color scheme for all game elements
 - **NEW**: 📦 Virtual environment setup with requirements.txt
 - **NEW**: 🚀 Easy launcher (run_game.bat) for Windows users
-- **NEW**: 🧪 Color demo script (test_colors.py)
 - **IMPROVED**: 📱 Fullscreen terminal optimization (120x40 characters)
 - **IMPROVED**: 🎮 Enhanced user interface with borders and visual elements
 - **IMPROVED**: 🎨 All menus, status screens, and combat displays now colorful
@@ -227,5 +216,3 @@ python test_colors.py
 - Minimal functionality
 
 ---
-
-Enjoy your epic adventure with beautiful colors and enhanced visuals! 🗡️⚔️🛡️💰🎨 
