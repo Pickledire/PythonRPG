@@ -1,11 +1,11 @@
 import random
+from colorama import Fore, Style
 from config import RACE_STATS, DEFAULT_STATS, BASE_XP_REQUIREMENT, XP_INCREASE_PER_LEVEL, HEALTH_GAIN_PER_LEVEL, MIN_XP_REWARD, MAX_XP_REWARD, DAMAGE_VARIANCE, STARTING_GOLD
 from Inventory import Inventory
 from Weapon import Weapon
 from Item import Consumable, Armor
 
 class Character:
-    """Enhanced Character class with improved stats, inventory, and combat"""
     
     def __init__(self, name, race):
         self.name = name
@@ -14,6 +14,21 @@ class Character:
         self.xp = 0
         self.alive = True
         self.gold = STARTING_GOLD
+        
+        # Color scheme for character display
+        self.colors = {
+            'name': Fore.CYAN + Style.BRIGHT,
+            'race': Fore.YELLOW + Style.BRIGHT,
+            'level': Fore.GREEN + Style.BRIGHT,
+            'health': Fore.RED + Style.BRIGHT,
+            'gold': Fore.YELLOW + Style.BRIGHT,
+            'stats': Fore.BLUE + Style.BRIGHT,
+            'weapon': Fore.CYAN,
+            'armor': Fore.MAGENTA,
+            'xp': Fore.GREEN,
+            'border': Fore.CYAN + Style.BRIGHT,
+            'reset': Style.RESET_ALL
+        }
         
         # Get race stats or use defaults
         race_data = RACE_STATS.get(race, DEFAULT_STATS)
@@ -30,7 +45,6 @@ class Character:
         self._give_starting_equipment()
     
     def _give_starting_equipment(self):
-        """Give race-appropriate starting equipment"""
         if self.race == 'Elf':
             bow = Weapon("Elven Bow", 12, 80, "A graceful elven bow", 50, "ranged")
             self.inventory.add_item(bow)
@@ -56,28 +70,62 @@ class Character:
         return f"{self.name} (Level {self.level} {self.race})"
     
     def get_status(self):
-        """Get detailed character status"""
-        status = f"\n=== {self.name} ===\n"
-        status += f"Race: {self.race}\n"
-        status += f"Level: {self.level}\n"
-        status += f"XP: {self.xp}/{self.xp_required()}\n"
-        status += f"Health: {self.health}/{self.max_health}\n"
-        status += f"Gold: {self.gold} 💰\n"
-        status += f"Stats: STR:{self.stats['strength']} AGI:{self.stats['agility']} INT:{self.stats['intelligence']}\n"
+        # Create visual health and XP bars
+        def create_bar(current, maximum, width=20, filled_char="█", empty_char="░"):
+            if maximum == 0:
+                percentage = 0
+            else:
+                percentage = current / maximum
+            filled = int(width * percentage)
+            empty = width - filled
+            return filled_char * filled + empty_char * empty
         
+        # Health bar with color coding
+        health_percentage = self.health / self.max_health if self.max_health > 0 else 0
+        if health_percentage > 0.6:
+            health_color = Fore.GREEN + Style.BRIGHT
+        elif health_percentage > 0.3:
+            health_color = Fore.YELLOW + Style.BRIGHT
+        else:
+            health_color = Fore.RED + Style.BRIGHT
+        
+        health_bar = create_bar(self.health, self.max_health)
+        
+        # XP bar
+        xp_required = self.xp_required()
+        xp_bar = create_bar(self.xp, xp_required)
+        
+        # Build status string with colors
+        status = f"\n{self.colors['border']}{'═' * 50}{self.colors['reset']}\n"
+        status += f"{self.colors['name']}🛡️  {self.name}{self.colors['reset']} - {self.colors['race']}{self.race}{self.colors['reset']} {self.colors['level']}(Level {self.level}){self.colors['reset']}\n"
+        status += f"{self.colors['border']}{'═' * 50}{self.colors['reset']}\n"
+        
+        # Health display
+        status += f"{health_color}❤️  Health: [{health_bar}] {self.health}/{self.max_health}{self.colors['reset']}\n"
+        
+        # XP display
+        status += f"{self.colors['xp']}⭐ XP: [{xp_bar}] {self.xp}/{xp_required}{self.colors['reset']}\n"
+        
+        # Gold
+        status += f"{self.colors['gold']}💰 Gold: {self.gold}{self.colors['reset']}\n"
+        
+        # Stats
+        status += f"{self.colors['stats']}📊 Stats: STR:{self.stats['strength']} AGI:{self.stats['agility']} INT:{self.stats['intelligence']}{self.colors['reset']}\n"
+        
+        # Equipment
         weapon = self.inventory.equipped_weapon
         armor = self.inventory.equipped_armor
-        status += f"Weapon: {weapon.name if weapon else 'None'}\n"
-        status += f"Armor: {armor.name if armor else 'None'}\n"
+        status += f"{self.colors['weapon']}⚔️  Weapon: {weapon.name if weapon else 'None'}{self.colors['reset']}\n"
+        status += f"{self.colors['armor']}🛡️  Armor: {armor.name if armor else 'None'}{self.colors['reset']}\n"
+        
+        status += f"{self.colors['border']}{'═' * 50}{self.colors['reset']}"
         
         return status
     
     def xp_required(self):
-        """Calculate XP required for next level"""
         return BASE_XP_REQUIREMENT + ((self.level - 1) * XP_INCREASE_PER_LEVEL)
     
     def gain_xp(self, amount):
-        """Gain experience points and handle leveling"""
         self.xp += amount
         levels_gained = 0
         
@@ -94,18 +142,16 @@ class Character:
             self.stats['intelligence'] += 1
         
         if levels_gained > 0:
-            print(f"\n🎉 {self.name} leveled up {levels_gained} time(s)! Now level {self.level}")
-            print(f"Health increased to {self.max_health}! All stats increased!")
+            print(f"\n{self.colors['level']}🎉 {self.name} leveled up {levels_gained} time(s)! Now level {self.level}{self.colors['reset']}")
+            print(f"{self.colors['health']}Health increased to {self.max_health}! All stats increased!{self.colors['reset']}")
     
     def heal(self, amount):
-        """Heal the character"""
         old_health = self.health
         self.health = min(self.max_health, self.health + amount)
         healed = self.health - old_health
         return healed
     
     def take_damage(self, damage):
-        """Take damage, considering armor"""
         armor = self.inventory.equipped_armor
         defense = armor.defense if armor else 0
         
@@ -120,16 +166,15 @@ class Character:
         return reduced_damage
     
     def attack(self, target):
-        """Attack a target with equipped weapon"""
         if not self.alive:
-            return f"{self.name} is dead and cannot attack!"
+            return f"{self.colors['name']}{self.name}{self.colors['reset']} is dead and cannot attack!"
         
         weapon = self.inventory.equipped_weapon
         if not weapon:
-            return f"{self.name} has no weapon equipped!"
+            return f"{self.colors['name']}{self.name}{self.colors['reset']} has no weapon equipped!"
         
         if weapon.is_broken():
-            return f"{self.name}'s {weapon.name} is broken!"
+            return f"{self.colors['name']}{self.name}{self.colors['reset']}'s {self.colors['weapon']}{weapon.name}{self.colors['reset']} is broken!"
         
         # Calculate damage
         base_damage = weapon.get_effective_damage()
@@ -147,12 +192,12 @@ class Character:
         # Apply damage to target
         actual_damage = target.take_damage(final_damage)
         
-        result = f"{self.name} attacks {target.name} with {weapon.name} for {actual_damage} damage!"
+        result = f"{self.colors['name']}{self.name}{self.colors['reset']} attacks {Fore.RED}{target.name}{self.colors['reset']} with {self.colors['weapon']}{weapon.name}{self.colors['reset']} for {Fore.RED + Style.BRIGHT}{actual_damage}{self.colors['reset']} damage!"
         
         if not target.alive:
             xp_gained = random.randint(MIN_XP_REWARD, MAX_XP_REWARD)
             self.gain_xp(xp_gained)
-            result += f"\n💀 {target.name} has been defeated! Gained {xp_gained} XP!"
+            result += f"\n{Fore.RED + Style.BRIGHT}💀 {target.name} has been defeated!{self.colors['reset']} {self.colors['xp']}Gained {xp_gained} XP!{self.colors['reset']}"
         
         return result
     
@@ -189,12 +234,12 @@ class Character:
     def add_gold(self, amount):
         """Add gold to the character"""
         self.gold += amount
-        return f"Gained {amount} gold! Total: {self.gold} 💰"
+        return f"{self.colors['gold']}Gained {amount} gold! Total: {self.gold} 💰{self.colors['reset']}"
     
     def spend_gold(self, amount):
         """Spend gold if the character has enough"""
         if self.gold >= amount:
             self.gold -= amount
-            return True, f"Spent {amount} gold. Remaining: {self.gold} 💰"
+            return True, f"{self.colors['gold']}Spent {amount} gold. Remaining: {self.gold} 💰{self.colors['reset']}"
         else:
-            return False, f"Not enough gold! You have {self.gold} but need {amount}." 
+            return False, f"{Fore.RED}Not enough gold! You have {self.gold} but need {amount}.{self.colors['reset']}" 
