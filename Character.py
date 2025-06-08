@@ -4,6 +4,7 @@ from config import RACE_STATS, DEFAULT_STATS, BASE_XP_REQUIREMENT, XP_INCREASE_P
 from Inventory import Inventory
 from Weapon import Weapon
 from Item import Consumable, Armor
+from Magic import Magic
 
 class Character:
     
@@ -14,6 +15,8 @@ class Character:
         self.xp = 0
         self.alive = True
         self.gold = STARTING_GOLD
+        self.mana = 100
+        self.max_mana = 100
         
         # Color scheme for character display
         self.colors = {
@@ -27,6 +30,7 @@ class Character:
             'armor': Fore.MAGENTA,
             'xp': Fore.GREEN,
             'border': Fore.CYAN + Style.BRIGHT,
+            'magic': Fore.BLUE + Style.BRIGHT,
             'reset': Style.RESET_ALL
         }
         
@@ -47,8 +51,11 @@ class Character:
     def _give_starting_equipment(self):
         if self.race == 'Elf':
             bow = Weapon("Elven Bow", 12, 80, "A graceful elven bow", 50, "ranged")
+            elven_magic = Magic("Elven Blast", "A magical blast of energy", 22, 10, 100)
             self.inventory.add_item(bow)
+            self.inventory.add_item(elven_magic)
             self.inventory.equip_weapon("Elven Bow")
+            self.inventory.equip_magic("Elven Blast")
         elif self.race == 'Orc':
             axe = Weapon("Orcish Axe", 18, 120, "A brutal orcish war axe", 75, "melee")
             self.inventory.add_item(axe)
@@ -59,8 +66,11 @@ class Character:
             self.inventory.equip_weapon("Iron Sword")
         elif self.race == 'Dwarf':
             hammer = Weapon("Dwarven Hammer", 16, 150, "A sturdy dwarven war hammer", 80, "melee")
+            dwarven_magic = Magic("Dwarven Scream", "A powerful dwarven scream", 14, 10, 80)
             self.inventory.add_item(hammer)
+            self.inventory.add_item(dwarven_magic)
             self.inventory.equip_weapon("Dwarven Hammer")
+            self.inventory.equip_magic("Dwarven Scream")
         
         # Give starting consumables
         health_potion = Consumable("Health Potion", "heal", 50, "Restores 50 HP", 25)
@@ -103,6 +113,10 @@ class Character:
         # Health display
         status += f"{health_color}❤️  Health: [{health_bar}] {self.health}/{self.max_health}{self.colors['reset']}\n"
         
+        # Mana display
+        mana_bar = create_bar(self.mana, self.max_mana)
+        status += f"{self.colors['magic']}🔮 Mana: [{mana_bar}] {self.mana}/{self.max_mana}{self.colors['reset']}\n"
+        
         # XP display
         status += f"{self.colors['xp']}⭐ XP: [{xp_bar}] {self.xp}/{xp_required}{self.colors['reset']}\n"
         
@@ -113,10 +127,12 @@ class Character:
         status += f"{self.colors['stats']}📊 Stats: STR:{self.stats['strength']} AGI:{self.stats['agility']} INT:{self.stats['intelligence']}{self.colors['reset']}\n"
         
         # Equipment
+        magic = self.inventory.equipped_magic
         weapon = self.inventory.equipped_weapon
         armor = self.inventory.equipped_armor
         status += f"{self.colors['weapon']}⚔️  Weapon: {weapon.name if weapon else 'None'}{self.colors['reset']}\n"
         status += f"{self.colors['armor']}🛡️  Armor: {armor.name if armor else 'None'}{self.colors['reset']}\n"
+        status += f"{self.colors['magic']}🔮  Magic: {magic.name if magic else 'None'}{self.colors['reset']}\n"
         
         status += f"{self.colors['border']}{'═' * 50}{self.colors['reset']}"
         
@@ -140,6 +156,10 @@ class Character:
             self.stats['strength'] += 1
             self.stats['agility'] += 1
             self.stats['intelligence'] += 1
+            
+            # Increase mana on level up
+            self.max_mana += 10
+            self.mana += 10
         
         if levels_gained > 0:
             print(f"\n{self.colors['level']}🎉 {self.name} leveled up {levels_gained} time(s)! Now level {self.level}{self.colors['reset']}")
@@ -150,6 +170,18 @@ class Character:
         self.health = min(self.max_health, self.health + amount)
         healed = self.health - old_health
         return healed
+    
+    def restore_mana(self, amount):
+        old_mana = self.mana
+        self.mana = min(self.max_mana, self.mana + amount)
+        restored = self.mana - old_mana
+        return restored
+    
+    def rest(self):
+        """Rest to restore health and mana"""
+        health_restored = self.heal(self.max_health // 4)  # Restore 25% health
+        mana_restored = self.restore_mana(self.max_mana // 2)  # Restore 50% mana
+        return f"You rest and recover {health_restored} HP and {mana_restored} mana."
     
     def take_damage(self, damage):
         armor = self.inventory.equipped_armor
@@ -181,6 +213,7 @@ class Character:
         strength_bonus = self.stats['strength'] * 0.5
         agility_bonus = self.stats['agility'] * 0.3
         
+
         # Add some randomness
         damage_variance = random.uniform(-DAMAGE_VARIANCE, DAMAGE_VARIANCE)
         final_damage = int((base_damage + strength_bonus + agility_bonus) * (1 + damage_variance))
@@ -198,6 +231,31 @@ class Character:
             xp_gained = random.randint(MIN_XP_REWARD, MAX_XP_REWARD)
             self.gain_xp(xp_gained)
             result += f"\n{Fore.RED + Style.BRIGHT}💀 {target.name} has been defeated!{self.colors['reset']} {self.colors['xp']}Gained {xp_gained} XP!{self.colors['reset']}"
+        
+        return result
+    
+    def cast_magic(self, target):
+        if not self.alive:
+            return f"{self.colors['name']}{self.name}{self.colors['reset']} is dead and cannot cast magic!"
+        
+        magic = self.inventory.equipped_magic
+        if not magic:
+            return f"{self.colors['name']}{self.name}{self.colors['reset']} has no magic equipped!"
+        
+        if magic.mana > self.mana:
+            return f"{self.colors['name']}{self.name}{self.colors['reset']} does not have enough mana to cast {magic.name}! Need {magic.mana}, have {self.mana}."
+        
+        # Deduct mana
+        self.mana -= magic.mana
+        
+        # Cast the spell
+        result, damage = magic.cast(self, target)
+        
+        # Give XP if target is killed
+        if not target.alive:
+            xp_gained = target.get_xp_reward()
+            self.gain_xp(xp_gained)
+            result += f"\n{self.colors['xp']}Gained {xp_gained} XP!{self.colors['reset']}"
         
         return result
     

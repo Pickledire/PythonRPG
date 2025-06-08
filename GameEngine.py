@@ -7,7 +7,6 @@ from Weapon import Weapon
 from Item import Consumable, Armor
 from config import RACE_STATS
 from Shop import Shop
-
 # Initialize colorama for Windows compatibility
 init(autoreset=True)
 
@@ -36,6 +35,7 @@ class GameEngine:
             'xp': Fore.GREEN,
             'weapon': Fore.CYAN,
             'armor': Fore.BLUE,
+            'magic': Fore.MAGENTA + Style.BRIGHT,
             'item': Fore.MAGENTA,
             'enemy': Fore.RED,
             'player': Fore.GREEN,
@@ -277,7 +277,8 @@ class GameEngine:
             # Player turn
             self.player_turn()
             
-            if not self.current_enemy.alive:
+            # Check if player fled or enemy died
+            if not self.in_combat or not self.current_enemy.alive:
                 break
             
             # Enemy turn
@@ -299,7 +300,8 @@ class GameEngine:
         combat_options = [
             ("1", "⚔️ Attack", self.colors['combat']),
             ("2", "🧪 Use item", self.colors['item']),
-            ("3", "🏃 Try to flee", self.colors['warning'])
+            ("3", "🏃 Try to flee", self.colors['warning']),
+            ("4", "🔮 Cast magic", self.colors['magic'])
         ]
         
         for num, text, color in combat_options:
@@ -315,6 +317,9 @@ class GameEngine:
         elif choice == "3":
             if self.try_flee():
                 return
+        elif choice == "4":
+            result = self.player.cast_magic(self.current_enemy)
+            print(f"\n{self.colors['magic']}{result}{self.colors['reset']}")
         else:
             print(f"{self.colors['error']}Invalid choice! You lose your turn.{self.colors['reset']}")
     
@@ -442,8 +447,9 @@ class GameEngine:
             inventory_options = [
                 ("1", "⚔️ Equip weapon", self.colors['weapon']),
                 ("2", "🛡️ Equip armor", self.colors['armor']),
-                ("3", "🧪 Use item", self.colors['item']),
-                ("4", "🔙 Back to main menu", self.colors['warning'])
+                ("3", "🔮 Equip magic", self.colors['magic']),
+                ("4", "🧪 Use item", self.colors['item']),
+                ("5", "🔙 Back to main menu", self.colors['warning'])
             ]
             
             for num, text, color in inventory_options:
@@ -456,8 +462,10 @@ class GameEngine:
             elif choice == "2":
                 self.equip_armor_menu()
             elif choice == "3":
-                self.use_item_menu()
+                self.equip_magic_menu()
             elif choice == "4":
+                self.use_item_menu()
+            elif choice == "5":
                 break
             else:
                 print(f"{self.colors['error']}Invalid choice!{self.colors['reset']}")
@@ -519,6 +527,39 @@ class GameEngine:
                 armor = armors[choice - 1]
                 result = self.player.equip_armor(armor.name)
                 print(f"\n{self.colors['success']}{result}{self.colors['reset']}")
+            else:
+                print(f"{self.colors['error']}Invalid choice!{self.colors['reset']}")
+        except ValueError:
+            print(f"{self.colors['error']}Invalid input!{self.colors['reset']}")
+        
+        input(f"{self.colors['menu']}Press Enter to continue...{self.colors['reset']}")
+    
+    def equip_magic_menu(self):
+        """Menu for equipping magic"""
+        magic_items = self.player.inventory.get_magic()
+        
+        if not magic_items:
+            print(f"{self.colors['warning']}You have no magic to equip!{self.colors['reset']}")
+            input(f"{self.colors['menu']}Press Enter to continue...{self.colors['reset']}")
+            return
+        
+        print(f"\n{self.colors['header']}Available magic:{self.colors['reset']}")
+        self.print_border("─", 60, self.colors['magic'])
+        
+        for i, magic in enumerate(magic_items, 1):
+            print(f"{self.colors['menu']}{i}. {self.colors['magic']}{magic}{self.colors['reset']}")
+        
+        try:
+            choice = int(input(f"\n{self.colors['menu']}Choose magic to equip (0 to cancel): {self.colors['reset']}"))
+            if choice == 0:
+                return
+            if 1 <= choice <= len(magic_items):
+                magic = magic_items[choice - 1]
+                result = self.player.inventory.equip_magic(magic.name)
+                if result[0]:
+                    print(f"\n{self.colors['success']}{result[1]}{self.colors['reset']}")
+                else:
+                    print(f"\n{self.colors['error']}{result[1]}{self.colors['reset']}")
             else:
                 print(f"{self.colors['error']}Invalid choice!{self.colors['reset']}")
         except ValueError:
@@ -591,10 +632,11 @@ class GameEngine:
             shop_options = [
                 ("1", "🗡️  Browse weapons", self.colors['weapon']),
                 ("2", "🛡️  Browse armor", self.colors['armor']),
-                ("3", "🧪 Browse consumables", self.colors['item']),
-                ("4", "📋 View all items", self.colors['info']),
-                ("5", "💰 Sell items", self.colors['warning']),
-                ("6", "🚪 Leave shop", self.colors['error'])
+                ("3", "🔮 Browse magic", self.colors['magic']),
+                ("4", "🧪 Browse consumables", self.colors['item']),
+                ("5", "📋 View all items", self.colors['info']),
+                ("6", "💰 Sell items", self.colors['warning']),
+                ("7", "🚪 Leave shop", self.colors['error'])
             ]
             
             for num, text, color in shop_options:
@@ -607,12 +649,14 @@ class GameEngine:
             elif choice == "2":
                 self.shop_category("armor")
             elif choice == "3":
-                self.shop_category("consumable")
+                self.shop_category("magic")
             elif choice == "4":
-                self.shop_category(None)
+                self.shop_category("consumable")
             elif choice == "5":
-                self.sell_items_menu()
+                self.shop_category(None)
             elif choice == "6":
+                self.sell_items_menu()
+            elif choice == "7":
                 print(f"{self.colors['success']}Thank you for visiting! Come back anytime!{self.colors['reset']}")
                 input(f"{self.colors['menu']}Press Enter to continue...{self.colors['reset']}")
                 break

@@ -1,5 +1,6 @@
 from Weapon import Weapon
 from Item import Consumable, Armor
+from Magic import Magic
 
 class Shop:
     """Shop class for buying and selling items"""
@@ -28,6 +29,12 @@ class Shop:
             
             Weapon("War Hammer", 25, 150, "A heavy two-handed hammer", 200, "melee"),
             Weapon("Battle Axe", 30, 130, "A fearsome two-handed axe", 280, "melee"),
+            Weapon("Axe", 10, 100, "A basic axe", 50, "melee"),
+            Weapon("Morning Star", 10, 100, "A basic morning star", 50, "melee"),
+            Weapon("Halberd", 10, 100, "A basic halberd", 50, "melee"),
+            Weapon("Polearm", 10, 100, "A basic polearm", 50, "melee"),
+            Weapon("Spear", 10, 100, "A basic spear", 50, "melee"),
+            
         ]
         
         # Armor
@@ -40,6 +47,7 @@ class Shop:
             Armor("Plate Armor", 20, 200, "Heavy metal plates", 450),
             Armor("Enchanted Robes", 10, 80, "Magically protected robes", 280),
             Armor("Dragon Scale", 25, 180, "Armor made from dragon scales", 600),
+            Armor("Mithril Armor", 20, 250, "A mithril armor", 2000),
         ]
         
         # Consumables
@@ -48,10 +56,19 @@ class Shop:
             Consumable("Greater Health Potion", "heal", 100, "Restores 100 HP", 50),
             Consumable("Superior Health Potion", "heal", 200, "Restores 200 HP", 100),
             Consumable("Mega Health Potion", "heal", 500, "Restores 500 HP", 200),
+            Consumable("Mana Potion", "mana", 30, "Restores 30 mana", 20),
+            Consumable("Greater Mana Potion", "mana", 60, "Restores 60 mana", 40),
+            Consumable("Superior Mana Potion", "mana", 100, "Restores 100 mana", 75),
         ]
         
+        # Magic
+        magic = [
+            Magic("Fireball", "A fiery ball of energy", 50, 20, 200),
+            Magic("Ice Shard", "A sharp ice shard", 30, 15, 150),
+            Magic("Lightning Bolt", "A powerful lightning bolt", 40, 25, 250),
+        ]
         # Add all items to shop inventory
-        for item in weapons + armors + consumables:
+        for item in weapons + armors + consumables + magic:
             shop_items.append({
                 'item': item,
                 'stock': 99 if item.item_type == 'consumable' else 1,
@@ -84,6 +101,8 @@ class Shop:
                 print(f"{i}. {item.name} - {price}💰 (Defense: {item.defense}, Durability: {item.max_durability})")
             elif item.item_type == 'consumable':
                 print(f"{i}. {item.name} - {price}💰 (Effect: {item.effect_value}, Stock: {stock})")
+            elif item.item_type == 'magic':
+                print(f"{i}. {item.name} - {price}💰 (Damage: {item.damage}, Mana: {item.mana})")
             else:
                 print(f"{i}. {item.name} - {price}💰")
             

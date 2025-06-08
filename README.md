@@ -49,7 +49,7 @@ A comprehensive turn-based RPG game written in Python with improved mechanics, i
 
 ### Character Creation
 1. Enter your character's name
-2. Choose your race from the available options (now with colorful display!)
+2. Choose your race from the available options
 3. Each race has different starting stats and equipment
 4. You start with 100 gold
 
@@ -64,7 +64,8 @@ A comprehensive turn-based RPG game written in Python with improved mechanics, i
 1. **⚔️ Attack**: Use your equipped weapon to damage enemies
 2. **🧪 Use item**: Consume health potions or other items
 3. **🏃 Try to flee**: Attempt to escape from combat (70% success rate)
-4. **🎉 Earn rewards**: Gain XP and gold from victories (with colorful notifications!)
+4. **🔮 Cast spell**: Attack using current spell
+4. **🎉 Earn rewards**: Gain XP and gold from victories 
 
 ### Shopping System
 - **Browse Categories**: View weapons, armor, or consumables separately
@@ -75,6 +76,7 @@ A comprehensive turn-based RPG game written in Python with improved mechanics, i
 ### Inventory Management
 - **Equip weapons**: Change your active weapon
 - **Equip armor**: Change your defensive equipment
+- **Equip magic**: Change your current spell
 - **Use items**: Consume potions and other usable items
 
 ## 📁 File Structure
@@ -82,17 +84,17 @@ A comprehensive turn-based RPG game written in Python with improved mechanics, i
 ```
 RPG Game/
 ├── Main.py           # Main entry point
-├── GameEngine.py     # Game loop and UI management (now with colorama!)
-├── Character.py      # Player character class (enhanced with colors)
+├── GameEngine.py     # Game loop and UI management
+├── Character.py      # Player character class
 ├── Enemy.py          # Enemy classes and factory
 ├── Weapon.py         # Weapon class with durability
 ├── Item.py           # Base item classes (Item, Consumable, Armor)
+├── Magic.py          # Base magic system
 ├── Inventory.py      # Inventory management system
 ├── Shop.py           # Shop system for buying/selling
 ├── config.py         # Game configuration and constants
 ├── run_game.bat      # Easy launcher for Windows
 ├── requirements.txt  # Python dependencies
-├── test_colors.py    # Color demo script
 ├── .venv/            # Virtual environment
 └── README.md         # This file
 ```
@@ -159,14 +161,14 @@ python test_colors.py
 - **Cave Troll**: Strong and tough (120 HP, 20 damage) - High gold reward
 - **Young Dragon**: Powerful boss-type (200 HP, 35 damage) - Very high gold reward
 
+- **Titan Boss**: Strongest enemy in the game - You should probably run
+
 ## 🔮 Future Enhancements
 
 - **Save/Load System**: Persistent game progress
-- **Magic System**: Spells and mana
 - **Quests**: Story-driven objectives
 - **Multiple Areas**: Different locations to explore
 - **Crafting System**: Create items from materials
-- **Multiplayer**: Online or local multiplayer support
 - **More Shop Features**: Item repairs, special deals, rare items
 
 ## 🐛 Known Issues
@@ -177,7 +179,8 @@ python test_colors.py
 
 ## 📝 Changelog
 
-### Version 3.0 (Current) - Visual Enhancement Update
+### Version (Current) - Visual Enhancement Update + Magic
+- **NEW**: 🔮 New magic system for mages, and spells you can buy in shop
 - **NEW**: 🎨 Complete colorama integration for beautiful terminal colors
 - **NEW**: 📊 Visual health and XP progress bars
 - **NEW**: 🖼️ ASCII art title screen with enhanced startup experience
@@ -189,30 +192,3 @@ python test_colors.py
 - **IMPROVED**: 🎮 Enhanced user interface with borders and visual elements
 - **IMPROVED**: 🎨 All menus, status screens, and combat displays now colorful
 - **IMPROVED**: 📈 Character status display with visual progress indicators
-
-### Version 2.1
-- **NEW**: Gold system with earning and spending mechanics
-- **NEW**: Complete shop system with buying and selling
-- **NEW**: Expanded weapon, armor, and consumable selection
-- **NEW**: Dynamic pricing based on item power
-- **NEW**: Gold rewards from combat victories
-- **IMPROVED**: Main menu now shows gold amount
-- **IMPROVED**: Character status displays gold
-- **IMPROVED**: Combat rewards include both XP and gold
-
-### Version 2.0
-- Added inventory management system
-- Implemented equipment system
-- Added multiple races with unique stats
-- Improved combat mechanics
-- Added durability system for weapons and armor
-- Enhanced user interface
-- Added random loot system
-- Implemented proper game loop
-
-### Version 1.0 (Original)
-- Basic character and enemy classes
-- Simple combat system
-- Minimal functionality
-
----

@@ -33,6 +33,11 @@ class Consumable(Item):
             target.health = min(target.max_health, target.health + self.effect_value)
             healed = target.health - old_health
             return f"{target.name} was healed for {healed} HP!"
+        elif self.effect_type == "mana":
+            old_mana = target.mana
+            target.mana = min(target.max_mana, target.mana + self.effect_value)
+            restored = target.mana - old_mana
+            return f"{target.name} restored {restored} mana!"
         # Add more effect types as needed
         return f"{self.name} was used on {target.name}"
 

@@ -1,6 +1,8 @@
 import random
 from config import MIN_XP_REWARD, MAX_XP_REWARD, MIN_GOLD_REWARD, MAX_GOLD_REWARD
 
+boss_names = {"Olgath": "The Titan of Fire", "Herix": "The Titan of Ice", "Forgin": "The Titan of Earth", "Vexer": "The Titan of Wind", "Morrg": "The Titan of Shadow", "Gorren": "The Titan of Light", "Zodd": "The Titan of Darkness", "Implex": "The Titan of Chaos"}
+
 class Enemy:
     
     def __init__(self, name, health, damage, enemy_type="monster", description=""):
@@ -95,6 +97,37 @@ class Enemy:
         # Stronger enemies give more gold
         strength_multiplier = 1 + (self.stats['strength'] / 30)
         return int(base_gold * strength_multiplier)
+    
+class Boss(Enemy):
+    """Boss class that inherits from Enemy"""
+    
+    def __init__(self, name, health, damage, enemy_type="boss", description=""):
+        super().__init__(name, health, damage, enemy_type, description)
+        
+        # Boss-specific stats - ensure they remain integers
+        self.stats['strength'] = int(self.stats['strength'] * 1.5)  # Bosses are stronger
+        self.stats['agility'] = int(self.stats['agility'] * 1.2)  # Bosses are faster
+        self.stats['defense'] = int(self.stats['defense'] * 1.3)  # Bosses are tougher
+        
+        # Add boss level
+        self.level = random.randint(3, 7)
+    
+    def get_xp_reward(self):
+        """Bosses give more XP"""
+        return int(super().get_xp_reward() * 1.5)
+    
+    def get_gold_reward(self):
+        """Bosses give more gold"""
+        return int(super().get_gold_reward() * 1.5)
+    
+    def get_info(self):
+        """Get detailed boss information"""
+        info = super().get_info()
+        info += f"Boss Level: {self.level}\n"
+        return info
+
+        
+        
 
 
 # Predefined enemy types for easy creation
@@ -122,12 +155,19 @@ class EnemyFactory:
         return Enemy("Young Dragon", 200, 35, "dragon", "A fearsome winged beast with fiery breath")
     
     @staticmethod
+    def create_boss():
+        boss_name = random.choice(list(boss_names.keys()))
+        boss_title = boss_names[boss_name]
+        return Boss(f"Titan: {boss_name}", 1000, 50, "boss", boss_title)
+    
+    @staticmethod
     def create_random_enemy():
         """Create a random enemy"""
         enemy_types = [
             EnemyFactory.create_goblin,
             EnemyFactory.create_orc,
             EnemyFactory.create_skeleton,
-            EnemyFactory.create_troll
+            EnemyFactory.create_troll,
+            EnemyFactory.create_boss
         ]
         return random.choice(enemy_types)() 

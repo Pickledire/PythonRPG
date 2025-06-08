@@ -1,5 +1,6 @@
 from Item import Item, Consumable, Armor
 from Weapon import Weapon
+from Magic import Magic
 
 class Inventory:
     """Manages character inventory and equipment"""
@@ -9,6 +10,7 @@ class Inventory:
         self.max_size = max_size
         self.equipped_weapon = None
         self.equipped_armor = None
+        self.equipped_magic = None
     
     def add_item(self, item, quantity=1):
         """Add an item to inventory"""
@@ -62,6 +64,14 @@ class Inventory:
             return True, f"Equipped {armor_name}"
         return False, f"Cannot equip {armor_name}"
     
+    def equip_magic(self, magic_name):
+        """Equip a magic spell"""
+        magic = self.get_item(magic_name)
+        if magic and isinstance(magic, Magic):
+            self.equipped_magic = magic
+            return True, f"Equipped {magic_name}"
+        return False, f"Cannot equip {magic_name}"
+    
     def use_item(self, item_name, target=None):
         """Use a consumable item"""
         item = self.get_item(item_name)
@@ -85,7 +95,7 @@ class Inventory:
         result += "\n=== EQUIPPED ===\n"
         result += f"Weapon: {self.equipped_weapon.name if self.equipped_weapon else 'None'}\n"
         result += f"Armor: {self.equipped_armor.name if self.equipped_armor else 'None'}\n"
-        
+        result += f"Magic: {self.equipped_magic.name if self.equipped_magic else 'None'}\n"
         return result
     
     def get_weapons(self):
@@ -96,6 +106,14 @@ class Inventory:
                 weapons.append(inv_item['item'])
         return weapons
     
+    def get_magic(self):
+        """Get all magic in inventory"""
+        magic = []
+        for inv_item in self.items:
+            if isinstance(inv_item['item'], Magic):
+                magic.append(inv_item['item'])
+        return magic
+
     def get_consumables(self):
         """Get all consumable items"""
         consumables = []
