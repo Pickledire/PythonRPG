@@ -17,7 +17,7 @@ class Character:
         self.gold = STARTING_GOLD
         self.mana = 100
         self.max_mana = 100
-        
+        self.level_10_boss = False
         # Color scheme for character display
         self.colors = {
             'name': Fore.CYAN + Style.BRIGHT,
@@ -26,11 +26,14 @@ class Character:
             'health': Fore.RED + Style.BRIGHT,
             'gold': Fore.YELLOW + Style.BRIGHT,
             'stats': Fore.BLUE + Style.BRIGHT,
+            'success': Fore.GREEN + Style.BRIGHT,
+            'error': Fore.RED + Style.BRIGHT,
             'weapon': Fore.CYAN,
             'armor': Fore.MAGENTA,
             'xp': Fore.GREEN,
             'border': Fore.CYAN + Style.BRIGHT,
             'magic': Fore.BLUE + Style.BRIGHT,
+            'menu': Fore.WHITE + Style.BRIGHT,
             'reset': Style.RESET_ALL
         }
         
@@ -44,6 +47,7 @@ class Character:
         
         # Initialize inventory system
         self.inventory = Inventory()
+        self.inventory.owner = self
         
         # Give starting equipment based on race
         self._give_starting_equipment()
@@ -152,10 +156,8 @@ class Character:
             self.health += HEALTH_GAIN_PER_LEVEL  # Heal on level up
             levels_gained += 1
             
-            # Increase stats on level up
-            self.stats['strength'] += 1
-            self.stats['agility'] += 1
-            self.stats['intelligence'] += 1
+            # Let the player choose a stat to increase
+            self._choose_stat_increase()
             
             # Increase mana on level up
             self.max_mana += 10
@@ -163,7 +165,31 @@ class Character:
         
         if levels_gained > 0:
             print(f"\n{self.colors['level']}🎉 {self.name} leveled up {levels_gained} time(s)! Now level {self.level}{self.colors['reset']}")
-            print(f"{self.colors['health']}Health increased to {self.max_health}! All stats increased!{self.colors['reset']}")
+            print(f"{self.colors['health']}Health increased to {self.max_health}! Choose a stat each level.{self.colors['reset']}")
+
+    def _choose_stat_increase(self):
+        """Prompt the player to choose a stat to increase on level up."""
+        while True:
+            print(f"\n{self.colors['border']}{'─'*40}{self.colors['reset']}")
+            print(f"{self.colors['xp']}Choose a stat to increase:{self.colors['reset']}\n")
+            print(f"{self.colors['stats']}1. Strength{self.colors['reset']} (current: {self.stats['strength']})")
+            print(f"{self.colors['stats']}2. Agility{self.colors['reset']} (current: {self.stats['agility']})")
+            print(f"{self.colors['stats']}3. Intelligence{self.colors['reset']} (current: {self.stats['intelligence']})")
+            choice = input(f"{self.colors['menu']}Enter 1, 2, or 3: {self.colors['reset']}").strip()
+            if choice == '1':
+                self.stats['strength'] += 1
+                print(f"{self.colors['success']}Strength increased to {self.stats['strength']}{self.colors['reset']}")
+                break
+            elif choice == '2':
+                self.stats['agility'] += 1
+                print(f"{self.colors['success']}Agility increased to {self.stats['agility']}{self.colors['reset']}")
+                break
+            elif choice == '3':
+                self.stats['intelligence'] += 1
+                print(f"{self.colors['success']}Intelligence increased to {self.stats['intelligence']}{self.colors['reset']}")
+                break
+            else:
+                print(f"{self.colors['error']}Invalid choice. Please enter 1, 2, or 3.{self.colors['reset']}")
     
     def heal(self, amount):
         old_health = self.health
@@ -266,11 +292,26 @@ class Character:
     
     def equip_weapon(self, weapon_name):
         """Equip a weapon from inventory"""
+        weapon = self.inventory.get_item(weapon_name)
+        if not weapon or not isinstance(weapon, Weapon):
+            return f"Cannot equip {weapon_name}"
+        # Check stat requirement
+        req_stat, req_value = weapon.get_requirement()
+        if self.stats.get(req_stat, 0) < req_value:
+            return f"You need {req_stat.capitalize()} {req_value} to equip {weapon.name}. (Current: {self.stats.get(req_stat,0)})"
         success, message = self.inventory.equip_weapon(weapon_name)
         return message
     
     def equip_armor(self, armor_name):
         """Equip armor from inventory"""
+        armor = self.inventory.get_item(armor_name)
+        if not armor or not isinstance(armor, Armor):
+            return f"Cannot equip {armor_name}"
+        # Check stat requirement
+        if hasattr(armor, 'get_requirement'):
+            req_stat, req_value = armor.get_requirement()
+            if self.stats.get(req_stat, 0) < req_value:
+                return f"You need {req_stat.capitalize()} {req_value} to equip {armor.name}. (Current: {self.stats.get(req_stat,0)})"
         success, message = self.inventory.equip_armor(armor_name)
         return message
     
@@ -281,6 +322,7 @@ class Character:
     def get_available_actions(self):
         """Get list of available combat actions"""
         actions = ["attack"]
+
         
         # Add consumable items
         consumables = self.inventory.get_consumables()

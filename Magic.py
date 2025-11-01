@@ -29,3 +29,14 @@ class Magic(Item):
             result += f"\n💀 {self.name} has killed {target.name}!"
         
         return result, actual_damage 
+
+    def get_requirement(self):
+        """Return a tuple (stat_name, min_value) representing the intelligence requirement to equip this spell.
+        Stronger spells require higher intelligence.
+        """
+        if self.damage <= 20:
+            return ("intelligence", 10)
+        elif self.damage <= 35:
+            return ("intelligence", 12)
+        else:
+            return ("intelligence", 14)

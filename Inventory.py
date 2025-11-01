@@ -11,6 +11,7 @@ class Inventory:
         self.equipped_weapon = None
         self.equipped_armor = None
         self.equipped_magic = None
+        self.owner = None  # Character that owns this inventory
     
     def add_item(self, item, quantity=1):
         """Add an item to inventory"""
@@ -68,6 +69,11 @@ class Inventory:
         """Equip a magic spell"""
         magic = self.get_item(magic_name)
         if magic and isinstance(magic, Magic):
+            # Enforce intelligence requirement if owner is available
+            if self.owner is not None and hasattr(magic, 'get_requirement'):
+                req_stat, req_value = magic.get_requirement()
+                if getattr(self.owner, 'stats', {}).get(req_stat, 0) < req_value:
+                    return False, f"You need {req_stat.capitalize()} {req_value} to equip {magic.name}. (Current: {self.owner.stats.get(req_stat,0)})"
             self.equipped_magic = magic
             return True, f"Equipped {magic_name}"
         return False, f"Cannot equip {magic_name}"

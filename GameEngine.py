@@ -2,12 +2,13 @@ import random
 import os
 from colorama import init, Fore, Back, Style
 from Character import Character
-from Enemy import Enemy, EnemyFactory
+from Enemy import Enemy, EnemyFactory, Boss
 from Weapon import Weapon
 from Item import Consumable, Armor
 from config import RACE_STATS
 from Shop import Shop
-# Initialize colorama for Windows compatibility
+# Initialize colorama for cross-platform color support (Windows, macOS, Linux)
+# autoreset=True automatically resets colors after each print statement
 init(autoreset=True)
 
 class GameEngine:
@@ -19,6 +20,7 @@ class GameEngine:
         self.game_running = True
         self.in_combat = False
         self.shop = Shop()
+        self.level_10_boss = False
         
         # Color scheme
         self.colors = {
@@ -200,7 +202,7 @@ class GameEngine:
                 ("6", "📁 Load game", self.colors['warning']),
                 ("7", "❌ Quit game", self.colors['error'])
             ]
-            
+
             # Center the menu options
             for num, text, color in menu_options:
                 option_text = f"{num}. {text}"
@@ -227,6 +229,59 @@ class GameEngine:
                 print(f"{self.colors['error']}Invalid choice! Please try again.{self.colors['reset']}")
                 input(f"{self.colors['menu']}Press Enter to continue...{self.colors['reset']}")
     
+    def display_boss_intro(self):
+        """Display an epic boss introduction with narrative storytelling"""
+        self.clear_screen()
+        
+        # Extra spacing for dramatic effect
+        print("\n" * 2)
+        
+        boss_name = self.current_enemy.name
+        boss_title = self.current_enemy.description if self.current_enemy.description else "a fearsome creature"
+        
+        # Narrative story intro
+        story_lines = [
+            "As you adventure around looking for enemies to slay, you find yourself entering a dark cave.",
+            "The air grows cold and heavy as you venture deeper into its depths...",
+            "",
+            f"Walking further in, you see {boss_name}, {boss_title.lower()}.",
+            "",
+            "The ground shakes as it rises to stand at your arrival.",
+            "You have never seen anything this massive before.",
+            "",
+            f"Its eyes burn with ancient power as {boss_name} turns to face you.",
+            "The very walls of the cave tremble with each movement it makes.",
+            "",
+            "This is not just an enemy... This is a Titan."
+        ]
+        
+        # Display the story with minimal colors (mostly white, some yellow)
+        for line in story_lines:
+            if line:
+                self.print_centered(line, 120, Fore.WHITE)
+            else:
+                print()  # Empty line for spacing
+        
+        print("\n" * 2)
+        
+        # Boss name reveal with accent color
+        self.print_border("═", 100, Fore.YELLOW)
+        self.print_centered(f"{boss_name}", 120, Fore.RED + Style.BRIGHT)
+        self.print_border("═", 100, Fore.YELLOW)
+        
+        print("\n" * 2)
+        
+        # Final warning in yellow
+        self.print_centered("⚠️  Prepare yourself, adventurer... This will be your greatest challenge yet!  ⚠️", 120, Fore.YELLOW + Style.BRIGHT)
+        
+        print("\n" * 2)
+        
+        # Get ready message in white
+        self.print_centered("GET READY TO FIGHT!", 120, Fore.WHITE + Style.BRIGHT)
+        
+        print("\n" * 2)
+        input(f"{Fore.WHITE}Press Enter to begin the battle...{Style.RESET_ALL}")
+    
     def start_combat(self):
         """Start a combat encounter"""
         if not self.player.alive:
@@ -234,16 +289,21 @@ class GameEngine:
             input(f"{self.colors['menu']}Press Enter to continue...{self.colors['reset']}")
             return
         
-        # Generate random enemy
-        self.current_enemy = EnemyFactory.create_random_enemy()
+        # Generate random enemy based on player level
+        player_level = self.player.level if self.player else 1
+        self.current_enemy = EnemyFactory.create_random_enemy(player_level, self)
         self.in_combat = True
         
-        print()
-        self.print_border("⚔", 60, self.colors['combat'])
-        print(f"{self.colors['combat']}⚔️ A wild {self.colors['enemy']}{self.current_enemy.name}{self.colors['combat']} appears!{self.colors['reset']}")
-        self.print_border("⚔", 60, self.colors['combat'])
-        print(self.current_enemy.get_info())
-        input(f"{self.colors['menu']}Press Enter to start combat...{self.colors['reset']}")
+        # Check if boss and show epic intro
+        if isinstance(self.current_enemy, Boss):
+            self.display_boss_intro()
+        else:
+            print()
+            self.print_border("⚔", 60, self.colors['combat'])
+            print(f"{self.colors['combat']}⚔️ A wild {self.colors['enemy']}{self.current_enemy.name}{self.colors['combat']} appears!{self.colors['reset']}")
+            self.print_border("⚔", 60, self.colors['combat'])
+            print(self.current_enemy.get_info())
+            input(f"{self.colors['menu']}Press Enter to start combat...{self.colors['reset']}")
         
         self.combat_loop()
     
@@ -383,22 +443,76 @@ class GameEngine:
             gold_reward = self.current_enemy.get_gold_reward()
             
             print()
-            self.print_border("🎉", 60, self.colors['success'])
-            print(f"{self.colors['success']}🎉 Victory! You defeated the {self.current_enemy.name}!{self.colors['reset']}")
+            self.print_border("═", 60, self.colors['success'])
+            print(f"{self.colors['success']}Victory! You defeated the {self.current_enemy.name}!{self.colors['reset']}")
             print(f"{self.colors['xp']}You gained {xp_reward} XP{self.colors['reset']} and {self.colors['gold']}{gold_reward} gold!{self.colors['reset']}")
-            self.print_border("🎉", 60, self.colors['success'])
+            self.print_border("═", 60, self.colors['success'])
             
             self.player.gain_xp(xp_reward)
             self.player.add_gold(gold_reward)
             
             # Chance for loot
             self.give_loot()
+
+            # Special boss reward at level 10
+            if isinstance(self.current_enemy, Boss):
+                self.grant_boss_reward()
         
         input(f"{self.colors['menu']}Press Enter to continue...{self.colors['reset']}")
+
+    def grant_boss_reward(self):
+        """Offer the player a choice of one of three Titan rewards after defeating the boss."""
+        print("\n")
+        self.print_border("═", 100, self.colors['gold'])
+        self.print_centered("Choose your Titan Reward", 120, self.colors['gold'])
+        self.print_border("═", 100, self.colors['gold'])
+        print()
+
+        # Define rewards
+        titan_hammer = Weapon("Titan Hammer", 40, 200, "A colossal hammer forged with Titan power", 0, "melee")
+        titan_dagger = Weapon("Titan Claw Dagger", 28, 160, "A razor-fast dagger carved from Titan claws", 0, "melee")
+        titans_curse = Magic("Titan's Curse", "An ancient curse that devastates foes", 45, 35, 0)
+
+        # Show lightweight requirement hints
+        req_h_name, req_h_val = titan_hammer.get_requirement()
+        req_d_name, req_d_val = titan_dagger.get_requirement()
+        req_c_name, req_c_val = titans_curse.get_requirement()
+
+        options = [
+            ("1", f"{self.colors['weapon']}Titan Hammer{self.colors['reset']} - requires {req_h_name.capitalize()} {req_h_val}+"),
+            ("2", f"{self.colors['weapon']}Titan Claw Dagger{self.colors['reset']} - requires {req_d_name.capitalize()} {req_d_val}+"),
+            ("3", f"{self.colors['magic']}Titan's Curse{self.colors['reset']} - requires {req_c_name.capitalize()} {req_c_val}+"),
+        ]
+
+        for num, text in options:
+            self.print_centered(f"{num}. {text}", 120, self.colors['menu'])
+
+        print()
+        while True:
+            choice = input(f"{self.colors['menu']}Enter your choice (1-3): {self.colors['reset']}").strip()
+            if choice == "1":
+                self.player.inventory.add_item(titan_hammer)
+                print(f"\n{self.colors['success']}You received the Titan Hammer!{self.colors['reset']}")
+                break
+            elif choice == "2":
+                self.player.inventory.add_item(titan_dagger)
+                print(f"\n{self.colors['success']}You received the Titan Claw Dagger!{self.colors['reset']}")
+                break
+            elif choice == "3":
+                self.player.inventory.add_item(titans_curse)
+                print(f"\n{self.colors['success']}You received Titan's Curse!{self.colors['reset']}")
+                break
+            else:
+                print(f"{self.colors['error']}Invalid choice, please enter 1, 2, or 3.{self.colors['reset']}")
     
     def give_loot(self):
         """Give random loot after combat"""
-        loot_chance = 0.6  # 60% chance for loot
+        loot_chance = 0.5  # 50% chance for loot
+
+        if isinstance(self.current_enemy, Boss):
+            loot_chance = 1.0 # Bosses always drop loot
+            print(f"{self.colors['info']}The {self.current_enemy.name} drops a powerful item!{self.colors['reset']}")
+            
         
         if random.random() < loot_chance:
             loot_type = random.choice(['weapon', 'consumable', 'armor'])
@@ -422,7 +536,8 @@ class GameEngine:
                 armors = [
                     Armor("Leather Armor", 5, 100, "Basic leather protection", 50),
                     Armor("Chain Mail", 8, 150, "Interlocked metal rings", 100),
-                    Armor("Plate Armor", 12, 200, "Heavy metal plates", 200)
+                    Armor("Plate Armor", 12, 200, "Heavy metal plates", 200),
+                    Armor("Cracked Iron Armor", 3, 30, "Medium half broken plate", 25)
                 ]
                 loot = random.choice(armors)
                 loot_color = self.colors['armor']
@@ -430,6 +545,21 @@ class GameEngine:
             success, message = self.player.inventory.add_item(loot)
             print(f"\n{self.colors['gold']}💰 Loot found: {loot_color}{loot.name}{self.colors['reset']}!")
             print(f"{self.colors['info']}{message}{self.colors['reset']}")
+            # Show item stats and requirements
+            if hasattr(loot, 'damage'):
+                # Weapon
+                req_txt = ""
+                if hasattr(loot, 'get_requirement'):
+                    stat, val = loot.get_requirement()
+                    req_txt = f" | Req: {stat.capitalize()} {val}+"
+                print(f"{self.colors['weapon']}Stats: Damage {loot.damage}, Durability {loot.max_durability}{req_txt}{self.colors['reset']}")
+            elif hasattr(loot, 'defense'):
+                # Armor
+                req_txt = ""
+                if hasattr(loot, 'get_requirement'):
+                    stat, val = loot.get_requirement()
+                    req_txt = f" | Req: {stat.capitalize()} {val}+"
+                print(f"{self.colors['armor']}Stats: Defense {loot.defense}, Durability {loot.max_durability}{req_txt}{self.colors['reset']}")
     
     def show_inventory_menu(self):
         """Show inventory management menu"""

@@ -18,7 +18,9 @@ class Shop:
             Weapon("Steel Sword", 20, 120, "A sharp steel blade", 150, "melee"),
             Weapon("Silver Sword", 28, 100, "A gleaming silver sword", 250, "melee"),
             Weapon("Enchanted Blade", 35, 150, "A magically enhanced sword", 400, "melee"),
-            
+            Weapon("Greatsword", 40, 180, "A massive two-handed sword", 500, "melee"),
+            Weapon("Broadsword", 30, 150, "A wide blade sword", 350, "melee"),
+
             Weapon("Short Bow", 15, 90, "A simple wooden bow", 100, "ranged"),
             Weapon("Long Bow", 22, 110, "A powerful longbow", 180, "ranged"),
             Weapon("Crossbow", 30, 80, "A mechanical crossbow", 300, "ranged"),
@@ -29,25 +31,22 @@ class Shop:
             
             Weapon("War Hammer", 25, 150, "A heavy two-handed hammer", 200, "melee"),
             Weapon("Battle Axe", 30, 130, "A fearsome two-handed axe", 280, "melee"),
-            Weapon("Axe", 10, 100, "A basic axe", 50, "melee"),
-            Weapon("Morning Star", 10, 100, "A basic morning star", 50, "melee"),
-            Weapon("Halberd", 10, 100, "A basic halberd", 50, "melee"),
-            Weapon("Polearm", 10, 100, "A basic polearm", 50, "melee"),
-            Weapon("Spear", 10, 100, "A basic spear", 50, "melee"),
-            
+            Weapon("Axe", 24, 100, "A basic axe", 50, "melee"),
+            Weapon("Halberd", 30, 100, "A basic halberd", 50, "melee"),
+            Weapon("Spear", 28, 100, "A basic spear", 50, "melee"),        
         ]
         
         # Armor
         armors = [
-            Armor("Cloth Robes", 2, 60, "Basic cloth protection", 30),
-            Armor("Leather Armor", 5, 100, "Flexible leather protection", 80),
-            Armor("Studded Leather", 8, 120, "Reinforced leather armor", 150),
-            Armor("Chain Mail", 12, 150, "Interlocked metal rings", 220),
-            Armor("Scale Mail", 15, 140, "Overlapping metal scales", 300),
-            Armor("Plate Armor", 20, 200, "Heavy metal plates", 450),
-            Armor("Enchanted Robes", 10, 80, "Magically protected robes", 280),
-            Armor("Dragon Scale", 25, 180, "Armor made from dragon scales", 600),
-            Armor("Mithril Armor", 20, 250, "A mithril armor", 2000),
+            Armor("Cloth Robes", 8, 60, "Basic cloth protection", 30),
+            Armor("Leather Armor", 12, 100, "Flexible leather protection", 80),
+            Armor("Studded Leather", 16, 120, "Reinforced leather armor", 150),
+            Armor("Chain Mail", 20, 150, "Interlocked metal rings", 220),
+            Armor("Scale Mail", 25, 140, "Overlapping metal scales", 300),
+            Armor("Plate Armor", 30, 200, "Heavy metal plates", 450),
+            Armor("Enchanted Robes", 35, 80, "Magically protected robes", 280),
+            Armor("Dragon Scale", 45, 180, "Armor made from dragon scales", 400),
+            Armor("Mithril Armor", 55, 250, "A mithril armor", 600),
         ]
         
         # Consumables
@@ -63,9 +62,12 @@ class Shop:
         
         # Magic
         magic = [
-            Magic("Fireball", "A fiery ball of energy", 50, 20, 200),
-            Magic("Ice Shard", "A sharp ice shard", 30, 15, 150),
-            Magic("Lightning Bolt", "A powerful lightning bolt", 40, 25, 250),
+            Magic("Fireball", "A fiery ball of energy", 67, 20, 200),
+            Magic("Ice Shard", "A sharp ice shard", 45, 15, 150),
+            Magic("Lightning Bolt", "A powerful lightning bolt", 80, 25, 300),
+            Magic("Fire Bolt", "A fiery bolt of energy", 30, 10, 100),
+            Magic("Ice Bolt", "A sharp ice bolt", 25, 10, 100),
+            Magic("Lightning Bolt", "A powerful lightning bolt", 23, 10, 150),
         ]
         # Add all items to shop inventory
         for item in weapons + armors + consumables + magic:
@@ -96,13 +98,26 @@ class Shop:
             stock = shop_item['stock']
             
             if item.item_type == 'weapon':
-                print(f"{i}. {item.name} - {price}💰 (Damage: {item.damage}, Durability: {item.max_durability})")
+                # Show stat requirement if available
+                req_txt = ""
+                if hasattr(item, 'get_requirement'):
+                    stat, val = item.get_requirement()
+                    req_txt = f", Req: {stat.capitalize()} {val}+"
+                print(f"{i}. {item.name} - {price}💰 (Damage: {item.damage}, Durability: {item.max_durability}{req_txt})")
             elif item.item_type == 'armor':
-                print(f"{i}. {item.name} - {price}💰 (Defense: {item.defense}, Durability: {item.max_durability})")
+                req_txt = ""
+                if hasattr(item, 'get_requirement'):
+                    stat, val = item.get_requirement()
+                    req_txt = f", Req: {stat.capitalize()} {val}+"
+                print(f"{i}. {item.name} - {price}💰 (Defense: {item.defense}, Durability: {item.max_durability}{req_txt})")
             elif item.item_type == 'consumable':
                 print(f"{i}. {item.name} - {price}💰 (Effect: {item.effect_value}, Stock: {stock})")
             elif item.item_type == 'magic':
-                print(f"{i}. {item.name} - {price}💰 (Damage: {item.damage}, Mana: {item.mana})")
+                req_txt = ""
+                if hasattr(item, 'get_requirement'):
+                    stat, val = item.get_requirement()
+                    req_txt = f", Req: {stat.capitalize()} {val}+"
+                print(f"{i}. {item.name} - {price}💰 (Damage: {item.damage}, Mana: {item.mana}{req_txt})")
             else:
                 print(f"{i}. {item.name} - {price}💰")
             

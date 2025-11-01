@@ -101,24 +101,28 @@ class Enemy:
 class Boss(Enemy):
     """Boss class that inherits from Enemy"""
     
-    def __init__(self, name, health, damage, enemy_type="boss", description=""):
+    def __init__(self, name, health, damage, enemy_type="Boss", description=""):
         super().__init__(name, health, damage, enemy_type, description)
         
         # Boss-specific stats - ensure they remain integers
-        self.stats['strength'] = int(self.stats['strength'] * 1.5)  # Bosses are stronger
-        self.stats['agility'] = int(self.stats['agility'] * 1.2)  # Bosses are faster
-        self.stats['defense'] = int(self.stats['defense'] * 1.3)  # Bosses are tougher
-        
-        # Add boss level
+        self.stats['strength'] = int(self.stats['strength'] * 1.2)  # Bosses are stronger
+        self.stats['agility'] = int(self.stats['agility'] * 1.1)  # Bosses are faster
+        self.stats['defense'] = int(self.stats['defense'] * 1.1)  # Bosses are tougher
+
+        # Add boss level first (needed for description)
         self.level = random.randint(3, 7)
+        
+        # Update boss description with level
+        if not description:  # Only update if no description was provided
+            self.description = f"A powerful {self.enemy_type} with a level {self.level} boss."
     
     def get_xp_reward(self):
         """Bosses give more XP"""
-        return int(super().get_xp_reward() * 1.5)
+        return int(super().get_xp_reward() * 2)
     
     def get_gold_reward(self):
         """Bosses give more gold"""
-        return int(super().get_gold_reward() * 1.5)
+        return int(super().get_gold_reward() * 2)
     
     def get_info(self):
         """Get detailed boss information"""
@@ -158,16 +162,22 @@ class EnemyFactory:
     def create_boss():
         boss_name = random.choice(list(boss_names.keys()))
         boss_title = boss_names[boss_name]
-        return Boss(f"Titan: {boss_name}", 1000, 50, "boss", boss_title)
-    
+        return Boss(f"Titan: {boss_name}", random.randint(450, 800), random.randint(30, 50), "Boss", boss_title)
+
     @staticmethod
-    def create_random_enemy():
+    def create_random_enemy(level, game_engine):
         """Create a random enemy"""
         enemy_types = [
             EnemyFactory.create_goblin,
             EnemyFactory.create_orc,
             EnemyFactory.create_skeleton,
             EnemyFactory.create_troll,
-            EnemyFactory.create_boss
         ]
-        return random.choice(enemy_types)() 
+
+        if level == 10 and not game_engine.level_10_boss:
+            game_engine.level_10_boss = True
+            return EnemyFactory.create_boss()
+        else:
+            return random.choice(enemy_types)() 
+
+
