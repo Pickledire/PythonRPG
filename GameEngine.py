@@ -1,5 +1,9 @@
 import random
 import os
+import shutil
+import time
+import threading
+from queue import Queue, Empty
 from colorama import init, Fore, Back, Style
 from Character import Character
 from Enemy import Enemy, EnemyFactory, Boss
@@ -57,8 +61,15 @@ class GameEngine:
         """Print a decorative border"""
         if color is None:
             color = self.colors['border']
+        # Responsive width based on current terminal size
+        try:
+            term_width = shutil.get_terminal_size(fallback=(120, 40)).columns
+        except Exception:
+            term_width = 120
+        ui_width = max(60, min(140, term_width - 0))
+        effective_length = ui_width
         if len(char) == 1:
-            print(color + char * length + self.colors['reset'])
+            print(color + char * effective_length + self.colors['reset'])
         else:
             # For special characters like ╔, ╚, just print them once
             print(color + char + self.colors['reset'])
@@ -67,8 +78,18 @@ class GameEngine:
         """Print centered text"""
         if color is None:
             color = self.colors['title']
-        padding = (width - len(text)) // 2
+        try:
+            term_width = shutil.get_terminal_size(fallback=(120, 40)).columns
+        except Exception:
+            term_width = 120
+        ui_width = max(60, min(140, term_width - 0))
+        padding = max(0, (ui_width - len(text)) // 2)
         print(color + " " * padding + text + self.colors['reset'])
+
+    def print_centered_block(self, block_text: str, color=None):
+        """Center-print a multi-line block of text line-by-line."""
+        for line in block_text.splitlines():
+            self.print_centered(line, color=color)
     
     def display_title(self):
         """Display the game title with enhanced styling"""
@@ -79,6 +100,13 @@ class GameEngine:
     
     def display_health_bar(self, current, maximum, width=50, label="Health"):
         """Display a visual health bar"""
+        # Clamp bar width to current UI width
+        try:
+            term_width = shutil.get_terminal_size(fallback=(120, 40)).columns
+        except Exception:
+            term_width = 120
+        max_bar = max(10, min(80, term_width - 30))
+        width = min(width, max_bar)
         if maximum == 0:
             percentage = 0
         else:
@@ -100,6 +128,13 @@ class GameEngine:
     
     def display_xp_bar(self, current, required, width=50):
         """Display a visual XP bar"""
+        # Clamp bar width to current UI width
+        try:
+            term_width = shutil.get_terminal_size(fallback=(120, 40)).columns
+        except Exception:
+            term_width = 120
+        max_bar = max(10, min(80, term_width - 30))
+        width = min(width, max_bar)
         if required == 0:
             percentage = 0
         else:
@@ -161,7 +196,7 @@ class GameEngine:
         self.print_border("═", 100)
         self.print_centered(f"🎉 Welcome, {self.player}!", 120, self.colors['success'])
         self.print_border("═", 100)
-        print(self.player.get_status())
+        self.print_centered_block(self.player.get_status())
         input(f"\n{self.colors['menu']}Press Enter to continue...{self.colors['reset']}")
     
     def main_menu(self):
@@ -209,7 +244,15 @@ class GameEngine:
                 self.print_centered(option_text, 120, color)
             
             print("\n" * 2)
-            choice = input(f"{self.colors['menu']}Enter your choice: {self.colors['reset']}").strip()
+            choice = self._prompt_with_haunting(f"{self.colors['menu']}Enter your choice: {self.colors['reset']}", total_timeout=30)
+            if choice is None:
+                # Summon Ghost Horror if player lingers on the main menu
+                self.current_enemy = EnemyFactory.create_ghost_horror()
+                self.in_combat = True
+                self.display_ghost_intro()
+                self.combat_loop()
+                continue
+            choice = choice.strip()
             
             if choice == "1":
                 self.start_combat()
@@ -300,9 +343,9 @@ class GameEngine:
         else:
             print()
             self.print_border("⚔", 60, self.colors['combat'])
-            print(f"{self.colors['combat']}⚔️ A wild {self.colors['enemy']}{self.current_enemy.name}{self.colors['combat']} appears!{self.colors['reset']}")
+            self.print_centered(f"{self.colors['combat']}⚔️ A wild {self.colors['enemy']}{self.current_enemy.name}{self.colors['combat']} appears!{self.colors['reset']}")
             self.print_border("⚔", 60, self.colors['combat'])
-            print(self.current_enemy.get_info())
+            self.print_centered_block(self.current_enemy.get_info(), self.colors['info'])
             input(f"{self.colors['menu']}Press Enter to start combat...{self.colors['reset']}")
         
         self.combat_loop()
@@ -356,18 +399,23 @@ class GameEngine:
     def player_turn(self):
         """Handle player's turn in combat"""
         print(f"{self.colors['header']}Your turn! Choose an action:{self.colors['reset']}")
-        
+
         combat_options = [
             ("1", "⚔️ Attack", self.colors['combat']),
             ("2", "🧪 Use item", self.colors['item']),
             ("3", "🏃 Try to flee", self.colors['warning']),
             ("4", "🔮 Cast magic", self.colors['magic'])
         ]
-        
+
         for num, text, color in combat_options:
             print(f"{self.colors['menu']}{num}. {color}{text}{self.colors['reset']}")
-        
-        choice = input(f"\n{self.colors['menu']}Enter your choice: {self.colors['reset']}").strip()
+
+        # Combat timed input: skip turn silently (no narrative) if too slow
+        choice = self._timed_input(f"\n{self.colors['menu']}Enter your choice: {self.colors['reset']}", total_timeout=10)
+        if choice is None:
+            print(f"{self.colors['warning']}You took too long and the {self.current_enemy.name} attacked!{self.colors['reset']}")
+            return
+        choice = choice.strip()
         
         if choice == "1":
             result = self.player.attack(self.current_enemy)
@@ -382,6 +430,98 @@ class GameEngine:
             print(f"\n{self.colors['magic']}{result}{self.colors['reset']}")
         else:
             print(f"{self.colors['error']}Invalid choice! You lose your turn.{self.colors['reset']}")
+
+    def _prompt_with_haunting(self, prompt: str, total_timeout: int = 30):
+        """Prompt for input with a timeout. While waiting, print haunting narrative at intervals.
+        Returns the input string, or None if timeout elapsed.
+        """
+        q: Queue = Queue()
+
+        def reader():
+            try:
+                s = input(prompt)
+            except Exception:
+                s = ""
+            q.put(s)
+
+        t = threading.Thread(target=reader, daemon=True)
+        t.start()
+
+        start = time.time()
+        milestones = {
+            10: "The air grows cold...",
+            20: "Whispers echo from the darkness...",
+            28: "A presence gathers just beyond your sight...",
+        }
+        printed = set()
+        while True:
+            elapsed = int(time.time() - start)
+            if elapsed >= total_timeout:
+                return None
+            try:
+                return q.get(timeout=1)
+            except Empty:
+                if elapsed in milestones and elapsed not in printed:
+                    self.print_centered(milestones[elapsed], 120, self.colors['warning'])
+                    printed.add(elapsed)
+
+    def _timed_input(self, prompt: str, total_timeout: int = 15):
+        """Simple timed input without additional messages. Returns input or None on timeout."""
+        q: Queue = Queue()
+
+        def reader():
+            try:
+                s = input(prompt)
+            except Exception:
+                s = ""
+            q.put(s)
+
+        t = threading.Thread(target=reader, daemon=True)
+        t.start()
+
+        start = time.time()
+        while True:
+            elapsed = time.time() - start
+            if elapsed >= total_timeout:
+                return None
+            try:
+                return q.get(timeout=0.5)
+            except Empty:
+                continue
+
+    def _summon_ghost_horror(self):
+        """Summon the Ghost Horror with a cinematic intro and replace the current enemy."""
+        self.current_enemy = EnemyFactory.create_ghost_horror()
+        self.display_ghost_intro()
+
+    def display_ghost_intro(self):
+        """Display a haunting cinematic intro for the Ghost Horror."""
+        self.clear_screen()
+        print("\n" * 2)
+        self.print_border("═", 120, self.colors['border'])
+        self.print_centered("A HAUNTING PRESENCE ARRIVES", 120, self.colors['error'])
+        self.print_border("═", 120, self.colors['border'])
+        print("\n")
+
+        lines = [
+            "You wait... and something waits with you...",
+            "Frost creeps along the cavern floor, swallowing your footprints...",
+            "The torches gutter. Breath fogs the air. All goes silent...",
+            f"From the stillness, {self.current_enemy.name} takes shape—sorrow given form...",
+        ]
+        for line in lines:
+            self.print_centered(line, 120, self.colors['info'])
+            time.sleep(0.3)
+
+        print("\n")
+        self.print_border("─", 100, self.colors['warning'])
+        self.print_centered("It has come to punish hesitation.", 120, self.colors['warning'])
+        self.print_border("─", 100, self.colors['warning'])
+        print("\n")
+        # Brief stats reveal
+        self.print_centered(f"Health: {self.current_enemy.max_health}  |  Damage: {self.current_enemy.base_damage}", 120, self.colors['enemy'])
+        print("\n")
+        input(f"{self.colors['menu']}Press Enter to face the horror...{self.colors['reset']}")
     
     def enemy_turn(self):
         """Handle enemy's turn in combat"""
@@ -437,7 +577,14 @@ class GameEngine:
             print(f"{self.colors['error']}💀 GAME OVER! You have been defeated!{self.colors['reset']}")
             print(f"{self.colors['warning']}Better luck next time, adventurer...{self.colors['reset']}")
             self.print_border("☠", 60, self.colors['error'])
-            self.game_running = False
+            # Restart flow: allow creating a new character without closing the game
+            input(f"{self.colors['menu']}Press Enter to create a new character...{self.colors['reset']}")
+            # Reset run-specific flags
+            self.level_10_boss = False
+            self.current_enemy = None
+            # Create a new character and return to main menu loop
+            self.create_character()
+            return
         elif not self.current_enemy.alive:
             xp_reward = self.current_enemy.get_xp_reward()
             gold_reward = self.current_enemy.get_gold_reward()
@@ -543,8 +690,8 @@ class GameEngine:
                 loot_color = self.colors['armor']
             
             success, message = self.player.inventory.add_item(loot)
-            print(f"\n{self.colors['gold']}💰 Loot found: {loot_color}{loot.name}{self.colors['reset']}!")
-            print(f"{self.colors['info']}{message}{self.colors['reset']}")
+            self.print_centered(f"\n{self.colors['gold']}💰 Loot found: {loot_color}{loot.name}{self.colors['reset']}!")
+            self.print_centered(f"{self.colors['info']}{message}{self.colors['reset']}")
             # Show item stats and requirements
             if hasattr(loot, 'damage'):
                 # Weapon
@@ -567,7 +714,7 @@ class GameEngine:
             self.clear_screen()
             self.display_title()
             
-            print(self.player.show_inventory())
+            self.print_centered_block(self.player.show_inventory(), self.colors['menu'])
             print()
             
             self.print_border("─", 50, self.colors['header'])
@@ -583,7 +730,7 @@ class GameEngine:
             ]
             
             for num, text, color in inventory_options:
-                print(f"{self.colors['menu']}{num}. {color}{text}{self.colors['reset']}")
+                self.print_centered(f"{self.colors['menu']}{num}. {color}{text}{self.colors['reset']}")
             
             choice = input(f"\n{self.colors['menu']}Enter your choice: {self.colors['reset']}").strip()
             
@@ -610,11 +757,11 @@ class GameEngine:
             input(f"{self.colors['menu']}Press Enter to continue...{self.colors['reset']}")
             return
         
-        print(f"\n{self.colors['header']}Available weapons:{self.colors['reset']}")
+        self.print_centered(f"\n{self.colors['header']}Available weapons:{self.colors['reset']}")
         self.print_border("─", 60, self.colors['weapon'])
         
         for i, weapon in enumerate(weapons, 1):
-            print(f"{self.colors['menu']}{i}. {self.colors['weapon']}{weapon}{self.colors['reset']}")
+            self.print_centered(f"{self.colors['menu']}{i}. {self.colors['weapon']}{weapon}{self.colors['reset']}")
         
         try:
             choice = int(input(f"\n{self.colors['menu']}Choose a weapon to equip (0 to cancel): {self.colors['reset']}"))
@@ -643,11 +790,11 @@ class GameEngine:
             input(f"{self.colors['menu']}Press Enter to continue...{self.colors['reset']}")
             return
         
-        print(f"\n{self.colors['header']}Available armor:{self.colors['reset']}")
+        self.print_centered(f"\n{self.colors['header']}Available armor:{self.colors['reset']}")
         self.print_border("─", 60, self.colors['armor'])
         
         for i, armor in enumerate(armors, 1):
-            print(f"{self.colors['menu']}{i}. {self.colors['armor']}{armor}{self.colors['reset']}")
+            self.print_centered(f"{self.colors['menu']}{i}. {self.colors['armor']}{armor}{self.colors['reset']}")
         
         try:
             choice = int(input(f"\n{self.colors['menu']}Choose armor to equip (0 to cancel): {self.colors['reset']}"))
@@ -673,11 +820,11 @@ class GameEngine:
             input(f"{self.colors['menu']}Press Enter to continue...{self.colors['reset']}")
             return
         
-        print(f"\n{self.colors['header']}Available magic:{self.colors['reset']}")
+        self.print_centered(f"\n{self.colors['header']}Available magic:{self.colors['reset']}")
         self.print_border("─", 60, self.colors['magic'])
         
         for i, magic in enumerate(magic_items, 1):
-            print(f"{self.colors['menu']}{i}. {self.colors['magic']}{magic}{self.colors['reset']}")
+            self.print_centered(f"{self.colors['menu']}{i}. {self.colors['magic']}{magic}{self.colors['reset']}")
         
         try:
             choice = int(input(f"\n{self.colors['menu']}Choose magic to equip (0 to cancel): {self.colors['reset']}"))
@@ -706,11 +853,11 @@ class GameEngine:
             input(f"{self.colors['menu']}Press Enter to continue...{self.colors['reset']}")
             return
         
-        print(f"\n{self.colors['header']}Available items:{self.colors['reset']}")
+        self.print_centered(f"\n{self.colors['header']}Available items:{self.colors['reset']}")
         self.print_border("─", 60, self.colors['item'])
         
         for i, item in enumerate(consumables, 1):
-            print(f"{self.colors['menu']}{i}. {self.colors['item']}{item.name}{self.colors['reset']} - {self.colors['info']}{item.description}{self.colors['reset']}")
+            self.print_centered(f"{self.colors['menu']}{i}. {self.colors['item']}{item.name}{self.colors['reset']} - {self.colors['info']}{item.description}{self.colors['reset']}")
         
         try:
             choice = int(input(f"\n{self.colors['menu']}Choose an item to use (0 to cancel): {self.colors['reset']}"))
@@ -732,16 +879,16 @@ class GameEngine:
         self.clear_screen()
         self.display_title()
         
-        print(self.player.get_status())
+        self.print_centered_block(self.player.get_status())
         
         weapon = self.player.inventory.equipped_weapon
         if weapon:
-            print(f"\n{self.colors['weapon']}Weapon Details: {weapon}{self.colors['reset']}")
-            print(f"{self.colors['info']}Effective Damage: {weapon.get_effective_damage()}{self.colors['reset']}")
+            self.print_centered(f"\n{self.colors['weapon']}Weapon Details: {weapon}{self.colors['reset']}")
+            self.print_centered(f"{self.colors['info']}Effective Damage: {weapon.get_effective_damage()}{self.colors['reset']}")
         
         armor = self.player.inventory.equipped_armor
         if armor:
-            print(f"\n{self.colors['armor']}Armor Details: {armor}{self.colors['reset']}")
+            self.print_centered(f"\n{self.colors['armor']}Armor Details: {armor}{self.colors['reset']}")
         
         input(f"\n{self.colors['menu']}Press Enter to continue...{self.colors['reset']}")
     
@@ -751,8 +898,8 @@ class GameEngine:
             self.clear_screen()
             self.display_title()
             
-            print(f"{self.colors['gold']}🏪 Welcome to Merchant's Emporium!{self.colors['reset']}")
-            print(f"{self.colors['gold']}Your gold: {self.player.gold} 💰{self.colors['reset']}")
+            self.print_centered(f"{self.colors['gold']}🏪 Welcome to Merchant's Emporium!{self.colors['reset']}")
+            self.print_centered(f"{self.colors['gold']}Your gold: {self.player.gold} 💰{self.colors['reset']}")
             print()
             
             self.print_border("─", 50, self.colors['header'])
@@ -770,7 +917,7 @@ class GameEngine:
             ]
             
             for num, text, color in shop_options:
-                print(f"{self.colors['menu']}{num}. {color}{text}{self.colors['reset']}")
+                self.print_centered(f"{self.colors['menu']}{num}. {color}{text}{self.colors['reset']}")
             
             choice = input(f"\n{self.colors['menu']}Enter your choice: {self.colors['reset']}").strip()
             

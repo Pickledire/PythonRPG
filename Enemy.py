@@ -105,7 +105,7 @@ class Boss(Enemy):
         super().__init__(name, health, damage, enemy_type, description)
         
         # Boss-specific stats - ensure they remain integers
-        self.stats['strength'] = int(self.stats['strength'] * 1.2)  # Bosses are stronger
+        self.stats['strength'] = int(self.stats['strength'] * 1.1)  # Bosses are stronger
         self.stats['agility'] = int(self.stats['agility'] * 1.1)  # Bosses are faster
         self.stats['defense'] = int(self.stats['defense'] * 1.1)  # Bosses are tougher
 
@@ -162,7 +162,12 @@ class EnemyFactory:
     def create_boss():
         boss_name = random.choice(list(boss_names.keys()))
         boss_title = boss_names[boss_name]
-        return Boss(f"Titan: {boss_name}", random.randint(450, 800), random.randint(30, 50), "Boss", boss_title)
+        return Boss(f"Titan: {boss_name}", random.randint(400, 600), random.randint(25, 45), "Boss", boss_title)
+
+    @staticmethod
+    def create_ghost_horror():
+        """Summon a terrifying Ghost Horror that punishes hesitation."""
+        return Enemy("Ghost Horror", 140, 24, "undead", "A formless terror of whispers and frostbitten dread")
 
     @staticmethod
     def create_random_enemy(level, game_engine):

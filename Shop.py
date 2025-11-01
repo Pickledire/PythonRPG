@@ -1,3 +1,4 @@
+import shutil
 from Weapon import Weapon
 from Item import Consumable, Armor
 from Magic import Magic
@@ -81,12 +82,20 @@ class Shop:
     
     def display_items(self, item_type=None):
         """Display shop items, optionally filtered by type"""
+        def center(line: str):
+            try:
+                term_width = shutil.get_terminal_size(fallback=(120, 40)).columns
+            except Exception:
+                term_width = 120
+            ui_width = max(60, min(140, term_width - 0))
+            padding = max(0, (ui_width - len(line)) // 2)
+            print(" " * padding + line)
         if item_type:
             items = [item for item in self.inventory if item['item'].item_type == item_type and item['stock'] > 0]
-            print(f"\n=== {item_type.upper()} ===")
+            center(f"\n=== {item_type.upper()} ===")
         else:
             items = [item for item in self.inventory if item['stock'] > 0]
-            print("\n=== SHOP INVENTORY ===")
+            center("\n=== SHOP INVENTORY ===")
         
         if not items:
             print("No items available in this category.")
@@ -103,26 +112,26 @@ class Shop:
                 if hasattr(item, 'get_requirement'):
                     stat, val = item.get_requirement()
                     req_txt = f", Req: {stat.capitalize()} {val}+"
-                print(f"{i}. {item.name} - {price}💰 (Damage: {item.damage}, Durability: {item.max_durability}{req_txt})")
+                center(f"{i}. {item.name} - {price}💰 (Damage: {item.damage}, Durability: {item.max_durability}{req_txt})")
             elif item.item_type == 'armor':
                 req_txt = ""
                 if hasattr(item, 'get_requirement'):
                     stat, val = item.get_requirement()
                     req_txt = f", Req: {stat.capitalize()} {val}+"
-                print(f"{i}. {item.name} - {price}💰 (Defense: {item.defense}, Durability: {item.max_durability}{req_txt})")
+                center(f"{i}. {item.name} - {price}💰 (Defense: {item.defense}, Durability: {item.max_durability}{req_txt})")
             elif item.item_type == 'consumable':
-                print(f"{i}. {item.name} - {price}💰 (Effect: {item.effect_value}, Stock: {stock})")
+                center(f"{i}. {item.name} - {price}💰 (Effect: {item.effect_value}, Stock: {stock})")
             elif item.item_type == 'magic':
                 req_txt = ""
                 if hasattr(item, 'get_requirement'):
                     stat, val = item.get_requirement()
                     req_txt = f", Req: {stat.capitalize()} {val}+"
-                print(f"{i}. {item.name} - {price}💰 (Damage: {item.damage}, Mana: {item.mana}{req_txt})")
+                center(f"{i}. {item.name} - {price}💰 (Damage: {item.damage}, Mana: {item.mana}{req_txt})")
             else:
-                print(f"{i}. {item.name} - {price}💰")
+                center(f"{i}. {item.name} - {price}💰")
             
             if item.description:
-                print(f"    {item.description}")
+                center(f"{item.description}")
         
         return items
     
