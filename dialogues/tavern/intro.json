@@ -14,10 +14,10 @@
     {
       "id": "ask_rumors",
       "text": "Ask for rumors",
+      "next": "tavern/rumors",
       "effects": [
-        {"set_flag": ["heard_wizard_rumor", true]}
-      ],
-      "next": "tavern/rumors"
+        {"set_flag": ["heard_dark_mage_rumor", true]}
+      ]
     },
     {
       "id": "ask_work",
