@@ -1,0 +1,12 @@
+{
+  "id": "mages/intro",
+  "speaker": "Archmage",
+  "lines": [
+    "Knowledge asks its price.",
+    "What do you seek?"
+  ],
+  "choices": [
+    {"id": "seek_power", "text": "Seek power", "effects": [{"give_item": {"type": "magic", "name": "Arcane Bolt", "damage": 22, "mana": 10, "value": 120, "description": "A focused projectile of pure mana"}}]},
+    {"id": "leave", "text": "Leave"}
+  ]
+}

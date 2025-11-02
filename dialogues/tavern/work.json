@@ -1,0 +1,13 @@
+{
+  "id": "tavern/work",
+  "speaker": "Tavern Keeper",
+  "lines": [
+    "A caravan needs guards on the east road.",
+    "Coin is decent. Bandits are not."
+  ],
+  "effects": [
+    {"add_gold": 50},
+    {"set_flag": ["caravan_job_taken", true]},
+    {"give_item": {"type": "weapon", "name": "Traveler's Dagger", "damage": 12, "description": "A trusty blade for quick hands", "value": 60, "weapon_type": "melee"}}
+  ]
+}

@@ -1,0 +1,34 @@
+{
+    "id": "tavern/dark_mage",
+    "speaker": "Dark Mage",
+    "lines": [
+        "You find the dark mage miles away from the academy",
+        "Seeing you approach, he quickly casts a spell and you are transported to his lair",
+        "The wizard is a tall, thin man with a long white beard and a pointy hat",
+        "He is sitting in a large chair made of stone",
+        "",
+        "'Why have you come in search of me?' he asks you."
+    ],
+    "choices": [
+        {
+            "id": "learn_dark_mage_spells",
+            "text": "You ask the dark mage to teach you his spells",
+            "effects": [
+                {"set_flag": ["dark_mage_lead", true]},
+                {"give_item": {"type": "magic", "name": "Poison Plague", "damage": 78, "mana": 32, "value": 120, "description": "A spell infesting the target with a deadly plague"}}
+            ]
+        },
+        {
+            "id": "fight_dark_mage",
+            "text": "You decide to fight the dark mage.",
+            "next": "tavern/dark_mage_fight"
+        },
+        {
+            "id": "leave",
+            "text": "You decide to leave the dark mage's lair.",
+            "effects": [
+                {"set_flag": ["dark_mage_lead", false]}
+            ]
+        }
+    ]
+}

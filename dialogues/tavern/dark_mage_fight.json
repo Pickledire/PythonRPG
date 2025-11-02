@@ -1,0 +1,27 @@
+{
+    "id": "tavern/dark_mage_fight",
+    "speaker": "Dark Mage",
+    "lines": [
+        "You confront the dark mage",
+        "Yet he doesn't seem to move from his chair.",
+        "Except to raise one hand",
+        "",
+        "Magic fills the room, and a horrid monster appears before you."
+    ],
+    "choices": [
+        {
+            "id": "attack_dark_mage",
+            "text": "You defend yourself.",
+            "effects": [
+                {"start_combat": "horrid_monster"}
+            ]
+        },
+        {
+            "id": "flee",
+            "text": "You flee from the dark mage.",
+            "effects": [
+                {"set_flag": ["dark_mage_lead", false]}
+            ]
+        }
+    ]
+}

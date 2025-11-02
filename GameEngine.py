@@ -9,8 +9,20 @@ from Character import Character
 from Enemy import Enemy, EnemyFactory, Boss
 from Weapon import Weapon
 from Item import Consumable, Armor
+from Magic import Magic
 from config import RACE_STATS
 from Shop import Shop
+from DialogueEngine import show_dialogue as run_dialogue
+from Quests import (
+    quest_tavern_keeper,
+    quest_blacksmith,
+    quest_mages_academy,
+    quest_dark_forest,
+    quest_local_fighters,
+    quest_mt_aegis,
+    quest_ancient_city_valoria,
+    quest_local_graveyard,
+)
 # Initialize colorama for cross-platform color support (Windows, macOS, Linux)
 # autoreset=True automatically resets colors after each print statement
 init(autoreset=True)
@@ -25,6 +37,8 @@ class GameEngine:
         self.in_combat = False
         self.shop = Shop()
         self.level_10_boss = False
+        self.ghost_horror = False
+        self.quest_flags = {}
         
         # Color scheme
         self.colors = {
@@ -230,12 +244,13 @@ class GameEngine:
             
             menu_options = [
                 ("1", "🗡️  Find an enemy to fight", self.colors['combat']),
-                ("2", "📦 Check inventory", self.colors['item']),
-                ("3", "📊 View character status", self.colors['info']),
-                ("4", "🏪 Visit shop", self.colors['gold']),
-                ("5", "💾 Save game", self.colors['warning']),
-                ("6", "📁 Load game", self.colors['warning']),
-                ("7", "❌ Quit game", self.colors['error'])
+                ("2", "🔮  Go on a quest", self.colors['magic']),
+                ("3", "📦 Check inventory", self.colors['item']),
+                ("4", "📊 View character status", self.colors['info']),
+                ("5", "🏪 Visit shop", self.colors['gold']),
+                ("6", "💾 Save game", self.colors['warning']),
+                ("7", "📁 Load game", self.colors['warning']),
+                ("8", "❌ Quit game", self.colors['error'])
             ]
 
             # Center the menu options
@@ -245,28 +260,30 @@ class GameEngine:
             
             print("\n" * 2)
             choice = self._prompt_with_haunting(f"{self.colors['menu']}Enter your choice: {self.colors['reset']}", total_timeout=30)
-            if choice is None:
-                # Summon Ghost Horror if player lingers on the main menu
-                self.current_enemy = EnemyFactory.create_ghost_horror()
+            if choice is None and not self.ghost_horror:
+                self._summon_ghost_horror()
                 self.in_combat = True
-                self.display_ghost_intro()
                 self.combat_loop()
+                continue
+            if choice is None:
                 continue
             choice = choice.strip()
             
             if choice == "1":
                 self.start_combat()
             elif choice == "2":
-                self.show_inventory_menu()
+                self.go_on_quest()
             elif choice == "3":
-                self.show_character_status()
+                self.show_inventory_menu()
             elif choice == "4":
-                self.visit_shop()
+                self.show_character_status()
             elif choice == "5":
-                self.save_game()
+                self.visit_shop()
             elif choice == "6":
-                self.load_game()
+                self.save_game()
             elif choice == "7":
+                self.load_game()
+            elif choice == "8":
                 self.quit_game()
             else:
                 print(f"{self.colors['error']}Invalid choice! Please try again.{self.colors['reset']}")
@@ -332,9 +349,13 @@ class GameEngine:
             input(f"{self.colors['menu']}Press Enter to continue...{self.colors['reset']}")
             return
         
-        # Generate random enemy based on player level
+        # Generate enemy: force level 10+ boss once, regardless of prior encounters (like Ghost Horror)
         player_level = self.player.level if self.player else 1
-        self.current_enemy = EnemyFactory.create_random_enemy(player_level, self)
+        if player_level >= 10 and not self.level_10_boss:
+            self.level_10_boss = True
+            self.current_enemy = EnemyFactory.create_boss()
+        else:
+            self.current_enemy = EnemyFactory.create_random_enemy(player_level, self)
         self.in_combat = True
         
         # Check if boss and show epic intro
@@ -461,7 +482,7 @@ class GameEngine:
             try:
                 return q.get(timeout=1)
             except Empty:
-                if elapsed in milestones and elapsed not in printed:
+                if (not self.ghost_horror) and (elapsed in milestones) and (elapsed not in printed):
                     self.print_centered(milestones[elapsed], 120, self.colors['warning'])
                     printed.add(elapsed)
 
@@ -491,6 +512,9 @@ class GameEngine:
 
     def _summon_ghost_horror(self):
         """Summon the Ghost Horror with a cinematic intro and replace the current enemy."""
+        if self.ghost_horror:
+            return
+        self.ghost_horror = True
         self.current_enemy = EnemyFactory.create_ghost_horror()
         self.display_ghost_intro()
 
@@ -581,6 +605,7 @@ class GameEngine:
             input(f"{self.colors['menu']}Press Enter to create a new character...{self.colors['reset']}")
             # Reset run-specific flags
             self.level_10_boss = False
+            self.ghost_horror = False
             self.current_enemy = None
             # Create a new character and return to main menu loop
             self.create_character()
@@ -708,6 +733,57 @@ class GameEngine:
                     req_txt = f" | Req: {stat.capitalize()} {val}+"
                 print(f"{self.colors['armor']}Stats: Defense {loot.defense}, Durability {loot.max_durability}{req_txt}{self.colors['reset']}")
     
+
+    def go_on_quest(self):
+        """Go on a quest"""
+        while True:
+            self.clear_screen()
+            self.display_title()
+            
+            print(f"{self.colors['info']}You go looking for a quest!{self.colors['reset']}")
+            input(f"{self.colors['menu']}Press Enter to continue...{self.colors['reset']}")
+
+            quest_options = [
+                ("1", "🔍 Ask the tavern keeper if he has heard about something interesting", self.colors['info']),
+                ("2", "🔍 Ask the blacksmith if he knows about a strange artifact", self.colors['weapon']),
+                ("3", "🔍 Go to the mages academy in search of a powerful wizard", self.colors['magic']),
+                ("4", "🔍 Head to the dark forest blindly", self.colors['enemy']),
+                ("5", "🔍 Start a fighting competition with the local fighters", self.colors['combat']),
+                ("6", "🔍 Climb Mt. Aegis in search of something strange", self.colors['header']),
+                ("7", "🔍 Explore the ruins of the ancient city of Valoria", self.colors['info']),
+                ("8", "🔍 Visit the local graveyard in search of a lost soul", self.colors['enemy']),
+                ("9", "🔙 Back to main menu", self.colors['warning'])
+            ]
+
+            for num, text, color in quest_options:
+                self.print_centered(f"{num}. {text}", 120, color)
+
+            print()
+            
+            choice = input(f"{self.colors['menu']}Enter your choice: {self.colors['reset']}").strip()
+            if choice == "1":
+                # Use dialogue engine for branching
+                run_dialogue(self, "tavern/intro")
+            elif choice == "2":
+                quest_blacksmith(self)
+            elif choice == "3":
+                quest_mages_academy(self)
+            elif choice == "4":
+                quest_dark_forest(self)
+            elif choice == "5":
+                quest_local_fighters(self)
+            elif choice == "6":
+                quest_mt_aegis(self)
+            elif choice == "7":
+                quest_ancient_city_valoria(self)
+            elif choice == "8":
+                quest_local_graveyard(self)
+            elif choice == "9":
+                break
+            else:
+                print(f"{self.colors['error']}Invalid choice!{self.colors['reset']}")
+                input(f"{self.colors['menu']}Press Enter to continue...{self.colors['reset']}")
+
     def show_inventory_menu(self):
         """Show inventory management menu"""
         while True:

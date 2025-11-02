@@ -159,13 +159,19 @@ class EnemyFactory:
         return Enemy("Young Dragon", 200, 35, "dragon", "A fearsome winged beast with fiery breath")
     
     @staticmethod
+    def create_horrid_monster():
+        """Special encounter used by dialogue-driven events."""
+        return Enemy("Horrid Monster", 160, 26, "aberration", "A grotesque being stitched from nightmare and shadow")
+
+    @staticmethod
     def create_boss():
         boss_name = random.choice(list(boss_names.keys()))
         boss_title = boss_names[boss_name]
         return Boss(f"Titan: {boss_name}", random.randint(400, 600), random.randint(25, 45), "Boss", boss_title)
+    
 
     @staticmethod
-    def create_ghost_horror():
+    def create_ghost_horror(game_engine=None):
         """Summon a terrifying Ghost Horror that punishes hesitation."""
         return Enemy("Ghost Horror", 140, 24, "undead", "A formless terror of whispers and frostbitten dread")
 
@@ -177,9 +183,10 @@ class EnemyFactory:
             EnemyFactory.create_orc,
             EnemyFactory.create_skeleton,
             EnemyFactory.create_troll,
+            EnemyFactory.create_dragon,
         ]
 
-        if level == 10 and not game_engine.level_10_boss:
+        if level >= 10 and not game_engine.level_10_boss:
             game_engine.level_10_boss = True
             return EnemyFactory.create_boss()
         else:

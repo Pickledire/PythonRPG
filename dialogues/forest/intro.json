@@ -1,0 +1,8 @@
+{
+  "id": "forest/intro",
+  "speaker": "Dark Forest",
+  "lines": [
+    "The trees whisper. Few listen twice."
+  ],
+  "effects": [{"start_combat": "goblin"}]
+}

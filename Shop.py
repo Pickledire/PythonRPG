@@ -15,23 +15,23 @@ class Shop:
         
         # Weapons
         weapons = [
-            Weapon("Bronze Sword", 12, 80, "A basic bronze sword", 80, "melee"),
-            Weapon("Steel Sword", 20, 120, "A sharp steel blade", 150, "melee"),
-            Weapon("Silver Sword", 28, 100, "A gleaming silver sword", 250, "melee"),
-            Weapon("Enchanted Blade", 35, 150, "A magically enhanced sword", 400, "melee"),
-            Weapon("Greatsword", 40, 180, "A massive two-handed sword", 500, "melee"),
-            Weapon("Broadsword", 30, 150, "A wide blade sword", 350, "melee"),
+            Weapon("Bronze Sword", 12, 80, "A basic bronze sword", 40, "melee"),
+            Weapon("Steel Sword", 20, 120, "A sharp steel blade", 80, "melee"),
+            Weapon("Silver Sword", 28, 100, "A gleaming silver sword", 125, "melee"),
+            Weapon("Enchanted Blade", 35, 150, "A magically enhanced sword", 200, "melee"),
+            Weapon("Greatsword", 40, 180, "A massive two-handed sword", 300, "melee"),
+            Weapon("Broadsword", 30, 150, "A wide blade sword", 175, "melee"),
 
-            Weapon("Short Bow", 15, 90, "A simple wooden bow", 100, "ranged"),
+            Weapon("Short Bow", 15, 90, "A simple wooden bow", 50, "ranged"),
             Weapon("Long Bow", 22, 110, "A powerful longbow", 180, "ranged"),
-            Weapon("Crossbow", 30, 80, "A mechanical crossbow", 300, "ranged"),
+            Weapon("Crossbow", 30, 80, "A mechanical crossbow", 150, "ranged"),
             
-            Weapon("Oak Staff", 14, 70, "A wooden magic staff", 120, "magic"),
-            Weapon("Crystal Staff", 25, 90, "A staff with a crystal orb", 220, "magic"),
-            Weapon("Arcane Staff", 32, 110, "A staff humming with power", 350, "magic"),
+            Weapon("Oak Staff", 14, 70, "A wooden magic staff", 60, "magic"),
+            Weapon("Crystal Staff", 25, 90, "A staff with a crystal orb", 110, "magic"),
+            Weapon("Arcane Staff", 32, 110, "A staff humming with power", 175, "magic"),
             
-            Weapon("War Hammer", 25, 150, "A heavy two-handed hammer", 200, "melee"),
-            Weapon("Battle Axe", 30, 130, "A fearsome two-handed axe", 280, "melee"),
+            Weapon("War Hammer", 25, 150, "A heavy two-handed hammer", 100, "melee"),
+            Weapon("Battle Axe", 30, 130, "A fearsome two-handed axe", 140, "melee"),
             Weapon("Axe", 24, 100, "A basic axe", 50, "melee"),
             Weapon("Halberd", 30, 100, "A basic halberd", 50, "melee"),
             Weapon("Spear", 28, 100, "A basic spear", 50, "melee"),        
@@ -40,14 +40,14 @@ class Shop:
         # Armor
         armors = [
             Armor("Cloth Robes", 8, 60, "Basic cloth protection", 30),
-            Armor("Leather Armor", 12, 100, "Flexible leather protection", 80),
-            Armor("Studded Leather", 16, 120, "Reinforced leather armor", 150),
-            Armor("Chain Mail", 20, 150, "Interlocked metal rings", 220),
-            Armor("Scale Mail", 25, 140, "Overlapping metal scales", 300),
-            Armor("Plate Armor", 30, 200, "Heavy metal plates", 450),
-            Armor("Enchanted Robes", 35, 80, "Magically protected robes", 280),
-            Armor("Dragon Scale", 45, 180, "Armor made from dragon scales", 400),
-            Armor("Mithril Armor", 55, 250, "A mithril armor", 600),
+            Armor("Leather Armor", 12, 100, "Flexible leather protection", 40),
+            Armor("Studded Leather", 16, 120, "Reinforced leather armor", 75),
+            Armor("Chain Mail", 20, 150, "Interlocked metal rings", 110),
+            Armor("Scale Mail", 25, 140, "Overlapping metal scales", 150),
+            Armor("Plate Armor", 30, 200, "Heavy metal plates", 225),
+            Armor("Enchanted Robes", 35, 80, "Magically protected robes", 140),
+            Armor("Dragon Scale", 45, 180, "Armor made from dragon scales", 200),
+            Armor("Mithril Armor", 55, 250, "A mithril armor", 300),
         ]
         
         # Consumables

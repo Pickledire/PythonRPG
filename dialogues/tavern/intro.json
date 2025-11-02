@@ -1,0 +1,38 @@
+{
+  "id": "tavern/intro",
+  "speaker": "Tavern Keeper",
+  "lines": [
+    "'Welcome, traveler. Looking for trouble or coin?'",
+    "",
+    "The Broken Mug is loud tonight; dice clatter and songs stumble.",
+    "A barmaid weaves through the crowd with a tray of frothing mugs.",
+    "Old maps and dented shields hang crooked on the walls.",
+    "The keeper wipes a glass with a threadbare cloth, eyeing you.",
+    "He leans closer, voice low enough to cut beneath the noise."
+  ],
+  "choices": [
+    {
+      "id": "ask_rumors",
+      "text": "Ask for rumors",
+      "effects": [
+        {"set_flag": ["heard_wizard_rumor", true]}
+      ],
+      "next": "tavern/rumors"
+    },
+    {
+      "id": "ask_work",
+      "text": "Ask for paying work",
+      "effects": [
+        {"set_flag": ["got_caravan_job", true]}
+      ],
+      "next": "tavern/work"
+    },
+    {
+      "id": "leave",
+      "text": "Leave",
+      "effects": [
+        {"set_flag": ["met_tavern_keeper", true]}
+      ]
+    }
+  ]
+}

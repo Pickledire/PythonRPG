@@ -1,0 +1,19 @@
+{
+  "id": "tavern/rumors",
+  "speaker": "Tavern Keeper",
+  "lines": [
+    "They say a hooded wizard was seen near the Mages Academy.",
+    "If you seek power, seek him. If you seek peace, avoid him."
+  ],
+  "choices": [
+    {
+      "text": "Seek the dark mage",
+      "effects": [{ "set_flag": ["dark_mage_lead", true] }],
+      "next": "tavern/dark_mage"
+    },
+    {
+      "text": "Leave",
+      "effects": [{ "set_flag": ["wizard_lead", true] }]
+    }
+  ]
+}

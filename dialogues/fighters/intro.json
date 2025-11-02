@@ -1,0 +1,8 @@
+{
+  "id": "fighters/intro",
+  "speaker": "Arena Master",
+  "lines": [
+    "Steel speaks louder than words."
+  ],
+  "effects": [{"start_combat": "orc"}]
+}
