@@ -1,0 +1,25 @@
+{
+    "id": "fighters/woman_investigate",
+    "speaker": "Young Woman",
+    "lines": [
+        "You investigate the woman, a little closer.",
+        "",
+        "As you had noticed, her eyes where not human.",
+        "Her skin paler than a normal humans.",
+        "",
+        "You remember about the stories of the Hagraven, a creature of the night.",
+        "Commonly known as the Nightstalkers.",
+        "They use dark magic to shape shift, luring humans into their traps and eating them alive.",
+        "",
+        "You are not sure what to do..."
+    ],
+    "choices": [
+        {"id": "attack_woman",
+        "text": "Attack the woman",
+        "effects": [{"start_combat": "Hagraven"}]},
+
+        
+        {"id": "leave",
+        "text": "Leave the woman alone"}
+    ]
+}

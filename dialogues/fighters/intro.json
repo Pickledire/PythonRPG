@@ -1,8 +1,22 @@
 {
   "id": "fighters/intro",
-  "speaker": "Arena Master",
+  "speaker": "Arena",
   "lines": [
-    "Steel speaks louder than words."
+    "You explore the city in search of worthy fighters.",
+    "",
+    "After many days of searching, you gather and convience other to create a fighting arena.",
+    "They band together and create a fighting arena in the center of the city.",
+    "You think this will be a good way to get stronger and earn some gold.",
+    "",
+    "There are many fighters, who are willing to fight for a chance to earn some gold."
   ],
-  "effects": [{"start_combat": "orc"}]
+  "choices": [
+    {"id": "enter_arena", "text": "Enter the newly formed arena", "effects": [{"set_flag": ["arena_created", true]}], "next": "fighters/arena"},
+    {"id": "fight_Yjurgen", "text": "Fight Yjurgen", "effects": [{"set_flag": ["arena_created", true]}, {"start_combat": "Yjurgen"}]},
+    {"id": "fight_Ziggy", "text": "Fight Ziggy", "effects": [{"set_flag": ["arena_created", true]}, {"start_combat": "Ziggy"}]},
+    {"id": "fight_Jarvask", "text": "Fight Jarvask", "effects": [{"set_flag": ["arena_created", true]}, {"start_combat": "Jarvask"}]},
+    {"id": "fight_Gorren", "text": "Fight Gorren", "effects": [{"set_flag": ["arena_created", true]}, {"start_combat": "Gorren"}]},
+    {"id": "fight_Morrg", "text": "Fight Morrg", "effects": [{"set_flag": ["arena_created", true]}, {"start_combat": "Morrg"}]},
+    {"id": "leave", "text": "Leave"}
+  ]
 }

@@ -622,6 +622,9 @@ class GameEngine:
             
             self.player.gain_xp(xp_reward)
             self.player.add_gold(gold_reward)
+            # Track kills for quest conditions
+            if hasattr(self.player, 'kills'):
+                self.player.kills += 1
             
             # Chance for loot
             self.give_loot()

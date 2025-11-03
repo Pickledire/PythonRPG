@@ -1,0 +1,16 @@
+{
+  "id": "fighters/arena",
+  "speaker": "Arena",
+  "lines": [
+    "You walk into the bustling arena. Fighters size you up from the ring.",
+    "The sand is stained with old victories and fresh ambitions."
+  ],
+  "choices": [
+    {"id": "fight_Yjurgen", "text": "Fight Yjurgen", "effects": [{"start_combat": "Yjurgen"}]},
+    {"id": "fight_Ziggy", "text": "Fight Ziggy", "effects": [{"start_combat": "Ziggy"}]},
+    {"id": "fight_Jarvask", "text": "Fight Jarvask", "effects": [{"start_combat": "Jarvask"}]},
+    {"id": "fight_Gorren", "text": "Fight Gorren", "effects": [{"start_combat": "Gorren"}]},
+    {"id": "fight_Morrg", "text": "Fight Morrg", "effects": [{"start_combat": "Morrg"}]},
+    {"id": "leave", "text": "Leave"}
+  ]
+}

@@ -2,7 +2,23 @@
   "id": "forest/intro",
   "speaker": "Dark Forest",
   "lines": [
-    "The trees whisper. Few listen twice."
+    "The trees whisper. Few listen twice.",
+    "You walk deeper into the forest, the trees are getting thicker and the air is getting darker.",
+    "You hear the sounds of animals in the distance, but you can't see them.",
+    "",
+    "You continue to walk",
+    "There is an odd clearing which streches out in front of you, the trees are thinned out and you can see the sky.",
+    "There is a young woman sitting in the clearing, crying and looking around nervously."
   ],
-  "effects": [{"start_combat": "goblin"}]
+  "choices": [
+    {
+      "id": "talk_to_woman",
+      "text": "Talk to the woman",
+      "next": "forest/woman"
+    },
+    {
+      "id": "leave",
+      "text": "Leave"
+    }
+  ]
 }

@@ -14,8 +14,12 @@ def _dialogue_path(dialogue_id: str) -> str:
 
 def _load_dialogue(dialogue_id: str) -> dict:
     path = _dialogue_path(dialogue_id)
-    with open(path, "r", encoding="utf-8") as f:
-        return json.load(f)
+    try:
+        with open(path, "r", encoding="utf-8") as f:
+            return json.load(f)
+    except json.JSONDecodeError as e:
+        # Surface which file is malformed to aid debugging
+        raise RuntimeError(f"Dialogue JSON error in {path}: {e}")
 
 
 def _check_conditions(engine, node: dict) -> bool:
@@ -29,7 +33,24 @@ def _check_conditions(engine, node: dict) -> bool:
             key = cond["flag_not_set"]
             if engine.quest_flags.get(key):
                 return False
+        if "min_kills" in cond:
+            try:
+                needed = int(cond["min_kills"])
+            except Exception:
+                needed = 0
+            current = getattr(getattr(engine, 'player', None), 'kills', 0)
+            if current < needed:
+                return False
     return True
+
+
+def _choice_allowed(engine, choice: dict) -> bool:
+    """Check optional conditions on a choice entry."""
+    conds = choice.get("conditions")
+    if not conds:
+        return True
+    # Reuse the same structure as node conditions
+    return _check_conditions(engine, {"conditions": conds})
 
 
 def _apply_effects(engine, effects: list):
@@ -47,17 +68,39 @@ def _apply_effects(engine, effects: list):
             engine.print_centered(f"{engine.colors['gold']}[Shop] Unlocked: {item}{engine.colors['reset']}")
         elif "start_combat" in eff:
             enemy_id = eff["start_combat"]
-            from Enemy import EnemyFactory
+            from Enemy import EnemyFactory, Boss
             if enemy_id == "goblin":
                 engine.current_enemy = EnemyFactory.create_goblin()
             elif enemy_id == "orc":
                 engine.current_enemy = EnemyFactory.create_orc()
             elif enemy_id == "horrid_monster":
                 engine.current_enemy = EnemyFactory.create_horrid_monster()
+            elif enemy_id == "Yjurgen":
+                engine.current_enemy = EnemyFactory.create_Yjurgen()
+            elif enemy_id == "Ziggy":
+                engine.current_enemy = EnemyFactory.create_Ziggy()
+            elif enemy_id == "Jarvask":
+                engine.current_enemy = EnemyFactory.create_Jarvask()
+            elif enemy_id == "Gorren":
+                engine.current_enemy = EnemyFactory.create_Gorren()
+            elif enemy_id == "Morrg":
+                engine.current_enemy = EnemyFactory.create_Morrg()
             else:
                 engine.current_enemy = EnemyFactory.create_goblin()
             engine.in_combat = True
-            engine.print_centered(f"{engine.colors['combat']}An enemy approaches!{engine.colors['reset']}")
+            # Mirror normal combat intro with description
+            if isinstance(engine.current_enemy, Boss) and hasattr(engine, 'display_boss_intro'):
+                engine.display_boss_intro()
+            else:
+                print()
+                engine.print_border("⚔", 60, engine.colors['combat'])
+                engine.print_centered(f"{engine.colors['combat']}⚔️ A wild {engine.colors['enemy']}{engine.current_enemy.name}{engine.colors['combat']} appears!{engine.colors['reset']}")
+                engine.print_border("⚔", 60, engine.colors['combat'])
+                if hasattr(engine, 'print_centered_block'):
+                    engine.print_centered_block(engine.current_enemy.get_info(), engine.colors['info'])
+                else:
+                    engine.print_centered(engine.current_enemy.get_info(), 120, engine.colors['info'])
+                input(f"{engine.colors['menu']}Press Enter to start combat...{engine.colors['reset']}")
             engine.combat_loop()
         elif "give_item" in eff:
             from Item import Consumable, Armor
@@ -72,7 +115,6 @@ def _apply_effects(engine, effects: list):
                 elif name.lower() == "spark":
                     item = Magic("Spark", "A tiny burst of lightning", 12, 5, 50)
                 else:
-                    # Default to a basic trinket-like consumable
                     item = Consumable(name, "heal", 0, f"A mysterious item named {name}", 0)
             elif isinstance(payload, dict):
                 name = payload.get("name", "Unknown Item")
@@ -114,6 +156,9 @@ def show_dialogue(engine, dialogue_id: str):
             engine.print_centered(f"{engine.colors['warning']}You cannot do this right now.{engine.colors['reset']}")
             return
 
+
+        engine.clear_screen()
+
         speaker = node.get("speaker")
         if speaker:
             engine.print_border("─", 80, engine.colors['header'])
@@ -129,19 +174,27 @@ def show_dialogue(engine, dialogue_id: str):
             input(f"{engine.colors['menu']}Press Enter to continue...{engine.colors['reset']}")
             return
 
-        for idx, ch in enumerate(choices, 1):
+        filtered = []
+        for ch in choices:
+            if _choice_allowed(engine, ch):
+                filtered.append(ch)
+        if not filtered:
+            engine.print_centered(f"{engine.colors['warning']}There is nothing you can do right now.{engine.colors['reset']}")
+            input(f"{engine.colors['menu']}Press Enter to continue...{engine.colors['reset']}")
+            return
+        for idx, ch in enumerate(filtered, 1):
             engine.print_centered(f"{idx}. {engine.colors['menu']}{ch['text']}{engine.colors['reset']}")
 
         sel = input(f"{engine.colors['menu']}Enter your choice: {engine.colors['reset']}").strip()
         try:
             idx = int(sel) - 1
-            if idx < 0 or idx >= len(choices):
+            if idx < 0 or idx >= len(filtered):
                 raise ValueError()
         except ValueError:
             engine.print_centered(f"{engine.colors['error']}Invalid choice.{engine.colors['reset']}")
             continue
 
-        chosen = choices[idx]
+        chosen = filtered[idx]
         _apply_effects(engine, chosen.get("effects"))
         next_id = chosen.get("next")
         if next_id:

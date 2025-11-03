@@ -1,0 +1,36 @@
+{
+    "id": "forest/woman_help",
+    "speaker": "Young Woman",
+    "lines": [
+        "You give the woman some of the food and water you have.",
+        "She thanks you for your help.",
+        "And starts to head off into the direction you pointed her in.",
+        "",
+        "After a few minutes, continuing on, you notice yourself feeling drowsy and start to fall asleep.",
+        "",
+        "She must have been a Hagraven, poisining your drink,",
+        "",
+        "You wake up to find yourself in a cell, chained to the wall.",
+        "An ugly Hagraven is standing over you, laughing at your weakness, this time in her true form.",
+        "She says she will eat you alive, and you will be her next meal.",
+        "",
+        "After she leaves, you hear a voice from a nearby cell, calling out to you.",
+        "Another prisoner is calling out to you.",
+        "He is a human, holding out a key in his hands.",
+        "",
+        "'Take it, I can't reach the lock from here.' He says."
+    ],
+    "choices": [
+        {"id": "take_key",
+        "text": "Take the key",
+        "next": "forest/woman_help_take_key"},
+
+        {"id": "try_to_escape",
+        "text": "Try to break the chains yourself",
+        "next": "forest/woman_help_try_to_escape"},
+
+        {"id": "wait_for_help",
+        "text": "Wait for help to come",
+        "next": "forest/woman_help_wait_for_help"}
+    ]
+}

@@ -137,32 +137,43 @@ class Boss(Enemy):
 # Predefined enemy types for easy creation
 class EnemyFactory:
     """Factory class to create different types of enemies"""
-    
+
+    @staticmethod
+    def create_Hagraven():
+        return Enemy("Hagraven", 200, 40, "undead", "A creature of the night, commonly known as the Nightstalkers")
+    def create_Yjurgen():
+        return Enemy("Yjurgen", 150, 50, "humanoid", "A large brute of a man, with a thick beard and a strong sense of honor and justice")
+    @staticmethod
+    def create_Ziggy():
+        return Enemy("Ziggy", 340, 8, "humanoid", "A fat man, covered head to toe in armor but slow and weak")
+    @staticmethod
+    def create_Jarvask():
+        return Enemy("Jarvask", 200, 12, "humanoid", "Well rounded fighter, not too strong, not too weak")
+    @staticmethod
+    def create_Gorren():
+        return Enemy("Gorren", 60, 80, "humanoid", "Berserk madman with no armor, yet weilding a massive axe")
+    @staticmethod
+    def create_Morrg():
+        return Enemy("Morrg", 90, 20, "humanoid", "A dark and twisted figure, with a twisted sense of humor")
     @staticmethod
     def create_goblin():
         return Enemy("Goblin", 40, 8, "humanoid", "A small, green-skinned creature with sharp teeth")
-    
     @staticmethod
     def create_orc():
         return Enemy("Orc Warrior", 80, 15, "humanoid", "A large, brutish warrior with crude armor")
-    
     @staticmethod
     def create_skeleton():
         return Enemy("Skeleton", 35, 10, "undead", "Animated bones held together by dark magic")
-    
     @staticmethod
     def create_troll():
         return Enemy("Cave Troll", 120, 20, "giant", "A massive creature with regenerative abilities")
-    
     @staticmethod
     def create_dragon():
         return Enemy("Young Dragon", 200, 35, "dragon", "A fearsome winged beast with fiery breath")
-    
     @staticmethod
     def create_horrid_monster():
         """Special encounter used by dialogue-driven events."""
         return Enemy("Horrid Monster", 160, 26, "aberration", "A grotesque being stitched from nightmare and shadow")
-
     @staticmethod
     def create_boss():
         boss_name = random.choice(list(boss_names.keys()))

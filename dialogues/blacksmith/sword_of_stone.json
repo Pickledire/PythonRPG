@@ -1,0 +1,33 @@
+{
+    "id": "blacksmith/sword_of_stone",
+    "speaker": "Sword of Stone",
+    "lines": [
+        "The sword in the stone is waiting for you.",
+        "Nothing more than a unique sword lodged in a lump of rock.",
+        "",
+        "As you get closer, you see an inscription on the rock.",
+        "It reads: 'To the one who can pull me from the stone, I will be yours to command.'",
+        "'Though you must be worthy...'",
+        "",
+        "You reach out and touch the rock.",
+        "The rock is cold and smooth.",
+        "You feel a tingling sensation as you touch the rock."
+    ],
+    "choices": [
+        {
+            "id": "pull_the_sword_success",
+            "text": "Attempt to pull the sword from the stone",
+            "conditions": [{"min_kills": 10}],
+            "next": "blacksmith/sword_of_stone_pulled"
+        },
+        {
+            "id": "pull_the_sword_fail",
+            "text": "Attempt to pull the sword from the stone",
+            "next": "blacksmith/sword_of_stone_failed"
+        },
+        {
+            "id": "leave",
+            "text": "Leave"
+        }
+    ]
+}

@@ -24,7 +24,10 @@ def quest_dark_forest(self):
 
 def quest_local_fighters(self):
     """Quest from the local fighters"""
-    run_dialogue(self, "fighters/intro")
+    if self.quest_flags.get("arena_created"):
+        run_dialogue(self, "fighters/arena")
+    else:
+        run_dialogue(self, "fighters/intro")
 
 
 def quest_mt_aegis(self):

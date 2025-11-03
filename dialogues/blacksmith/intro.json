@@ -2,11 +2,22 @@
   "id": "blacksmith/intro",
   "speaker": "Blacksmith",
   "lines": [
-    "Looking for steel or secrets?",
-    "I might have both, for a price."
+    "'Looking for steel or secrets?'",
+    "'I might have both, for a price.'",
+    "'What do you seek?'"
   ],
   "choices": [
-    {"id": "ask_artifact", "text": "Ask about a strange artifact", "effects": [{"set_flag": ["artifact_lead", true]}]},
-    {"id": "leave", "text": "Leave"}
+    {
+      "id": "ask_artifact",
+      "text": "Ask about a strange artifact",
+      "next": "blacksmith/artifact",
+      "effects": [
+        { "set_flag": ["artifact_lead", true] }
+      ]
+    },
+    {
+      "id": "leave",
+      "text": "Leave"
+    }
   ]
 }

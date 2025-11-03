@@ -18,6 +18,7 @@ class Character:
         self.mana = 100
         self.max_mana = 100
         self.level_10_boss = False
+        self.kills = 0
         # Color scheme for character display
         self.colors = {
             'name': Fore.CYAN + Style.BRIGHT,

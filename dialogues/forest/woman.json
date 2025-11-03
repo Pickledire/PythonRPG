@@ -1,0 +1,30 @@
+{
+    "id": "forest/woman",
+    "speaker": "Young Woman",
+    "lines": [
+        "'Hello, I'm so glad you found me.'",
+        "I'm lost and I'm scared.",
+        "'Can you help me find my way out of the forest?'",
+        "'I'll give you a reward if you do.'",
+        "",
+        "She seems normal, but her eyes carry something in them, you arn't sure what it is."
+    ],
+    "choices": [
+        {"id": "help_woman",
+        "text": "Help the woman",
+        "next": "forest/woman_help"},
+
+
+
+
+        {"id": "investigate_woman",
+        "text": "Investigate the woman",
+        "next": "forest/woman_investigate"},
+
+
+
+
+
+        {"id": "leave", "text": "Leave"}
+    ]
+}
