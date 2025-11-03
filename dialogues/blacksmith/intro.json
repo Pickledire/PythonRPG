@@ -2,14 +2,14 @@
   "id": "blacksmith/intro",
   "speaker": "Forge",
   "lines": [
-    "Heat blooms from the mouth of the forge like sunrise with teeth.",
-    "Hammers speak a language of reasons; the anvil answers in periods.",
-    "Hooks hold tools that have names and tempers.",
-    "A quench trough dreams of steam and screams and both are true.",
-    "The smith does not look up; steel tells him who you are.",
-    "On a rack, blades that have not learned yet which fights they belong to.",
-    "On a wall, a child’s drawing of a sword that looks like a river.",
-    "'Looking for steel or secrets?' he asks. 'We can forge either, but not both today.'"
+    "You step into the forge. Heat rolls out from the hearth.",
+    "You hear steady hammer blows and see the anvil shine.",
+    "You pass racks of tools hung within easy reach.",
+    "You notice a quench trough steaming beside the hearth.",
+    "The smith glances up and nods for you to speak.",
+    "Blades rest on a rack, edges covered in oil.",
+    "A child’s drawing of a sword hangs on the wall.",
+    "'Looking for work or a commission?' the smith asks."
   ],
   "choices": [
     { "text": "Step to the counter and speak business.", "next": "blacksmith/counter" },

@@ -2,14 +2,14 @@
   "id": "blacksmith/anvil_trial",
   "speaker": "Anvil Trial",
   "lines": [
-    "You draw heat and lose nerve; you draw nerve and lose heat. This is how it goes.",
-    "The bar's red fades to orange while the hammer learns your wrist.",
-    "A bevel appears because you ask politely.",
-    "Scale flakes like black snow and tells you not to rush.",
-    "A straight thing bends until you convince it, then pretends it chose to.",
-    "The anvil gives back exactly what you give it, except heavier.",
+    "You heat the bar and lay it on the anvil.",
+    "You strike and watch the color fade from red to orange.",
+    "You raise a bevel along the edge.",
+    "Scale flakes away; you brush it clear.",
+    "You straighten a bend and check your line.",
+    "The anvil answers your hammer with every blow.",
     "You can stop now and call it a lesson.",
-    "Or you can hit once more and call it yours."
+    "Or you can strike once more and call it yours."
   ],
   "choices": [
     { "text": "Stop and breathe.", "effects": [{"stat_change": ["intelligence", 1]}], "next": "blacksmith/forge_floor" },

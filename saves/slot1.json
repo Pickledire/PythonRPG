@@ -1,0 +1,71 @@
+{
+  "version": 1,
+  "world_bells": 8,
+  "flags": {
+    "level_10_boss": false,
+    "level_15_boss": false,
+    "level_20_boss": false,
+    "level_25_boss": false,
+    "ghost_horror": false
+  },
+  "quest_flags": {},
+  "player": {
+    "name": "Brenden",
+    "race": "Elf",
+    "level": 1,
+    "xp": 0,
+    "gold": 100,
+    "stats": {
+      "strength": 8,
+      "agility": 11,
+      "intelligence": 15
+    },
+    "health": 80,
+    "max_health": 80,
+    "mana": 100,
+    "max_mana": 100,
+    "kills": 0,
+    "inventory": {
+      "items": [
+        {
+          "item": {
+            "name": "Elven Bow",
+            "type": "weapon",
+            "value": 50,
+            "description": "A graceful elven bow",
+            "damage": 12,
+            "durability": 80,
+            "max_durability": 80,
+            "weapon_type": "ranged"
+          },
+          "quantity": 1
+        },
+        {
+          "item": {
+            "name": "Elven Blast",
+            "type": "magic",
+            "value": 100,
+            "description": "A magical blast of energy",
+            "damage": 22,
+            "mana": 10,
+            "spell_type": "damage"
+          },
+          "quantity": 1
+        },
+        {
+          "item": {
+            "name": "Health Potion",
+            "type": "consumable",
+            "value": 25,
+            "description": "Restores 50 HP",
+            "effect_type": "heal",
+            "effect_value": 50
+          },
+          "quantity": 3
+        }
+      ],
+      "equipped_weapon": "Elven Bow",
+      "equipped_armor": null
+    }
+  }
+}

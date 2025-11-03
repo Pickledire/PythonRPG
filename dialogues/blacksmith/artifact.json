@@ -2,12 +2,11 @@
   "id": "blacksmith/artifact",
   "speaker": "Blacksmith",
   "lines": [
-    "'I have heard whispers, of a sword covered in stone.'",
-    "'It's a strange one, buried in rock.'",
-    "'Not guarded by anything, yet no one has managed to pull it out.'",
-    "'Here ill mark it on your map.'",
+    "'There's word of a sword set in stone,' the smith says.",
+    "'It sits in a field of rock. No guard, but no one pulls it free.'",
+    "He marks the spot on your map.",
     "",
-    "'If you somehow do manage it, bring it back, I would like to study how it was made.'"
+    "'If you manage it, bring it back. I want to study the work.'"
   ],
   "choices": [
     {

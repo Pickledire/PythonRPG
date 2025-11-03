@@ -4,6 +4,7 @@ import shutil
 import time
 import threading
 from queue import Queue, Empty
+import json
 from colorama import init, Fore, Back, Style
 from Character import Character
 from Enemy import Enemy, EnemyFactory, Boss
@@ -364,7 +365,9 @@ class GameEngine:
                 ("4", "📦 Check inventory", self.colors['item']),
                 ("5", "📊 View character status", self.colors['info']),
                 ("6", "🏪 Visit shop", self.colors['gold']),
-                ("7", "❌ Quit game", self.colors['error'])
+                ("7", "💾 Save game", self.colors['warning']),
+                ("8", "📁 Load game", self.colors['info']),
+                ("9", "❌ Quit game", self.colors['error'])
             ]
 
             # Center the menu options
@@ -396,6 +399,10 @@ class GameEngine:
             elif choice == "6":
                 self.visit_shop()
             elif choice == "7":
+                self.save_game()
+            elif choice == "8":
+                self.load_game()
+            elif choice == "9":
                 self.quit_game()
             else:
                 print(f"{self.colors['error']}Invalid choice! Please try again.{self.colors['reset']}")
@@ -1713,13 +1720,172 @@ class GameEngine:
                 input(f"{self.colors['menu']}Press Enter to continue...{self.colors['reset']}")
     
     def save_game(self):
-        """Save game functionality"""
-        print(f"\n{self.colors['warning']}💾 Save game functionality coming soon!{self.colors['reset']}")
+        """Serialize and save game state to saves/slot1.json"""
+        try:
+            if not self.player:
+                print(f"{self.colors['error']}No character to save.{self.colors['reset']}")
+                input(f"{self.colors['menu']}Press Enter to continue...{self.colors['reset']}")
+                return
+            save_dir = os.path.join(os.path.dirname(__file__), 'saves')
+            os.makedirs(save_dir, exist_ok=True)
+            path = os.path.join(save_dir, 'slot1.json')
+
+            def serialize_item(it):
+                if it is None:
+                    return None
+                base = {
+                    'name': getattr(it, 'name', ''),
+                    'type': getattr(it, 'item_type', ''),
+                    'value': getattr(it, 'value', 0),
+                    'description': getattr(it, 'description', ''),
+                }
+                if base['type'] == 'weapon':
+                    base.update({
+                        'damage': getattr(it, 'damage', 0),
+                        'durability': getattr(it, 'durability', 0),
+                        'max_durability': getattr(it, 'max_durability', 0),
+                        'weapon_type': getattr(it, 'weapon_type', 'melee'),
+                    })
+                elif base['type'] == 'armor':
+                    base.update({
+                        'defense': getattr(it, 'defense', 0),
+                        'durability': getattr(it, 'durability', 0),
+                        'max_durability': getattr(it, 'max_durability', 0),
+                    })
+                elif base['type'] == 'consumable':
+                    base.update({
+                        'effect_type': getattr(it, 'effect_type', ''),
+                        'effect_value': getattr(it, 'effect_value', 0),
+                    })
+                elif base['type'] == 'magic':
+                    base.update({
+                        'damage': getattr(it, 'damage', 0),
+                        'mana': getattr(it, 'mana', 0),
+                        'spell_type': getattr(it, 'spell_type', 'damage'),
+                    })
+                return base
+
+            payload = {
+                'version': 1,
+                'world_bells': getattr(self, 'world_bells', 0),
+                'flags': {
+                    'level_10_boss': getattr(self, 'level_10_boss', False),
+                    'level_15_boss': getattr(self, 'level_15_boss', False),
+                    'level_20_boss': getattr(self, 'level_20_boss', False),
+                    'level_25_boss': getattr(self, 'level_25_boss', False),
+                    'ghost_horror': getattr(self, 'ghost_horror', False),
+                },
+                'quest_flags': getattr(self, 'quest_flags', {}),
+                'player': {
+                    'name': self.player.name,
+                    'race': self.player.race,
+                    'level': self.player.level,
+                    'xp': self.player.xp,
+                    'gold': self.player.gold,
+                    'stats': self.player.stats,
+                    'health': self.player.health,
+                    'max_health': self.player.max_health,
+                    'mana': self.player.mana,
+                    'max_mana': self.player.max_mana,
+                    'kills': getattr(self.player, 'kills', 0),
+                    'inventory': {
+                        'items': [
+                            {
+                                'item': serialize_item(entry['item']),
+                                'quantity': entry['quantity']
+                            } for entry in self.player.inventory.items
+                        ],
+                        'equipped_weapon': getattr(self.player.inventory.equipped_weapon, 'name', None),
+                        'equipped_armor': getattr(self.player.inventory.equipped_armor, 'name', None),
+                    }
+                }
+            }
+
+            with open(path, 'w', encoding='utf-8') as f:
+                json.dump(payload, f, indent=2)
+            print(f"{self.colors['success']}Game saved to {path}{self.colors['reset']}")
+        except Exception as e:
+            print(f"{self.colors['error']}Failed to save: {e}{self.colors['reset']}")
         input(f"{self.colors['menu']}Press Enter to continue...{self.colors['reset']}")
     
     def load_game(self):
-        """Load game functionality"""
-        print(f"\n{self.colors['warning']}📁 Load game functionality coming soon!{self.colors['reset']}")
+        """Load game state from saves/slot1.json"""
+        try:
+            save_dir = os.path.join(os.path.dirname(__file__), 'saves')
+            path = os.path.join(save_dir, 'slot1.json')
+            if not os.path.isfile(path):
+                print(f"{self.colors['error']}No save found at {path}{self.colors['reset']}")
+                input(f"{self.colors['menu']}Press Enter to continue...{self.colors['reset']}")
+                return
+            with open(path, 'r', encoding='utf-8') as f:
+                data = json.load(f)
+
+            p = data.get('player', {})
+            name = p.get('name')
+            race = p.get('race')
+            # Create base character
+            self.player = Character(name, race)
+            # Overwrite stats and vitals
+            self.player.level = int(p.get('level', 1))
+            self.player.xp = int(p.get('xp', 0))
+            self.player.gold = int(p.get('gold', 0))
+            self.player.stats = dict(p.get('stats', self.player.stats))
+            self.player.max_health = int(p.get('max_health', self.player.max_health))
+            self.player.health = int(p.get('health', self.player.max_health))
+            self.player.max_mana = int(p.get('max_mana', self.player.max_mana))
+            self.player.mana = int(p.get('mana', self.player.max_mana))
+            self.player.kills = int(p.get('kills', 0))
+
+            # Rebuild inventory
+            self.player.inventory.items = []
+            inv = p.get('inventory', {})
+            from Item import Consumable, Armor
+            from Weapon import Weapon
+            from Magic import Magic
+            name_to_item = {}
+            for entry in inv.get('items', []):
+                item_data = entry.get('item')
+                qty = entry.get('quantity', 1)
+                if not item_data:
+                    continue
+                t = item_data.get('type')
+                obj = None
+                if t == 'weapon':
+                    obj = Weapon(item_data.get('name'), int(item_data.get('damage', 0)), int(item_data.get('max_durability', 100)), item_data.get('description', ''), int(item_data.get('value', 0)), item_data.get('weapon_type', 'melee'))
+                    obj.durability = int(item_data.get('durability', obj.max_durability))
+                elif t == 'armor':
+                    obj = Armor(item_data.get('name'), int(item_data.get('defense', 0)), int(item_data.get('max_durability', 100)), item_data.get('description', ''), int(item_data.get('value', 0)))
+                    obj.durability = int(item_data.get('durability', obj.max_durability))
+                elif t == 'consumable':
+                    obj = Consumable(item_data.get('name'), item_data.get('effect_type', ''), int(item_data.get('effect_value', 0)), item_data.get('description', ''), int(item_data.get('value', 0)))
+                elif t == 'magic':
+                    obj = Magic(item_data.get('name'), item_data.get('description', ''), int(item_data.get('damage', 0)), int(item_data.get('mana', 0)), int(item_data.get('value', 0)), item_data.get('spell_type', 'damage'))
+                if obj:
+                    self.player.inventory.add_item(obj, max(1, int(qty)))
+                    name_to_item[obj.name] = obj
+
+            # Equip stored gear
+            ew = inv.get('equipped_weapon')
+            if ew and ew in name_to_item:
+                self.player.inventory.equipped_weapon = name_to_item[ew]
+            ea = inv.get('equipped_armor')
+            if ea and ea in name_to_item:
+                self.player.inventory.equipped_armor = name_to_item[ea]
+
+            # Restore flags and world state
+            self.world_bells = int(data.get('world_bells', 0))
+            flags = data.get('flags', {})
+            self.level_10_boss = bool(flags.get('level_10_boss', False))
+            self.level_15_boss = bool(flags.get('level_15_boss', False))
+            self.level_20_boss = bool(flags.get('level_20_boss', False))
+            self.level_25_boss = bool(flags.get('level_25_boss', False))
+            self.ghost_horror = bool(flags.get('ghost_horror', False))
+            self.quest_flags = data.get('quest_flags', {})
+            self.player.quest_flags = self.quest_flags
+
+            print(f"{self.colors['success']}Game loaded from {path}{self.colors['reset']}")
+        except Exception as e:
+            print(f"{self.colors['error']}Failed to load: {e}{self.colors['reset']}")
         input(f"{self.colors['menu']}Press Enter to continue...{self.colors['reset']}")
     
     def visit_magic_shop(self):

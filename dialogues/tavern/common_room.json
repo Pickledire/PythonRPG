@@ -2,14 +2,14 @@
   "id": "tavern/common_room",
   "speaker": "Common Room",
   "lines": [
-    "Benches complain like elders and then settle for newcomers.",
-    "A stew bowl circles the room under its own power, escorted by ladles.",
-    "Three games happen at once on one table: cards, spoons, and staring.",
-    "A cat owns the hearth; it rents warmth to ankles at a fair rate.",
-    "The rafters remember smoke that had opinions.",
-    "A man with two eyepatches listens perfectly.",
-    "Somebody swears they saw a ghost once. Somebody else swears they married one.",
-    "The door to the alley sticks when the wind is thinking."
+    "Benches creak and settle as new faces take their places.",
+    "Serving hands ferry bowls of stew from pot to table.",
+    "Cards slap the wood; dice murmur in a leather cup.",
+    "A gray cat keeps the hearth and naps with one eye open.",
+    "The rafters are black with years of smoke and stories.",
+    "A scarred man listens more than he speaks.",
+    "Someone swears they saw a ghost once; someone else swears they didn't.",
+    "The door to the alley sticks when the damp comes in."
   ],
   "choices": [
     { "text": "Sit at the card table.", "next": "tavern/card_table" },

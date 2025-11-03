@@ -2,14 +2,14 @@
   "id": "blacksmith/bellows_room",
   "speaker": "Bellows",
   "lines": [
-    "Leather lungs breathe in and out; the fire remembers being a dragon.",
-    "Soot writes family trees on the rafters.",
-    "A pulley squeaks on purpose to feel included.",
-    "You pull and the forge says 'more' and then 'enough'.",
-    "The heat kisses your knuckles and decides not to bite.",
-    "A nail falls and stands upright between boards, thinking.",
-    "Sweat draws a map on your arms; the path ends at your hands.",
-    "You understand why bellows talk in pairs."
+    "You step into the bellows room and take the handles.",
+    "You pull in a steady rhythm until the fire glows.",
+    "Soot blackens the rafters above you.",
+    "A pulley squeaks; you add a drop of oil and keep working.",
+    "Heat licks your knuckles; you mind your grip.",
+    "A bent nail rattles on the floorboards.",
+    "Sweat runs down your arms; you keep the air moving.",
+    "The forge is ready for a hotter heat."
   ],
   "choices": [
     { "text": "Stoke the fire for a midnight heat.", "next": "blacksmith/midnight_forge" },

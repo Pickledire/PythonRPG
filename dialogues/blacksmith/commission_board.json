@@ -2,14 +2,14 @@
   "id": "blacksmith/commission_board",
   "speaker": "Commission Board",
   "lines": [
-    "Notices nailed over notices; the oldest hold best.",
-    "'Wheel rim—urgent before rain', 'Gate hinge—stubborn', 'Nails—always'.",
-    "A sketch of a dragon looks like a chicken with opinions.",
-    "A scribble reads 'pay in stew' and someone added 'worth it'.",
-    "The smith's stamp marks the jobs that won't get you killed.",
-    "Someone else's stamp marks the ones that might and calls them 'opportunities'.",
-    "You could earn favor or scars here. Perhaps both.",
-    "Your hand reaches for a task before your head decides."
+    "You read notices tacked over older notices.",
+    "You see: 'Wheel rim—urgent', 'Gate hinge—stubborn', 'Nails—always'.",
+    "A rough dragon sketch marks a hard job.",
+    "Someone wrote 'pay in stew' under a simple repair.",
+    "The smith's stamp marks the safe commissions.",
+    "Another stamp marks risky work.",
+    "You can earn coin or favor here.",
+    "You reach for a task and make up your mind."
   ],
   "choices": [
     { "text": "Take the east road guard brace (fight).", "effects": [{"start_combat": "Bandit"}] },

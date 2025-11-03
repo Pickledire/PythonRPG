@@ -2,14 +2,14 @@
   "id": "blacksmith/counter",
   "speaker": "Counter",
   "lines": [
-    "The counter is scarred in careful places; stories end where dents begin.",
-    "A slate lists iron by the pound and promises by the look.",
-    "A bell sits on the edge; it rings if you touch it and if you don't.",
-    "A ledger is open to a page where no debts have been written yet.",
-    "The smith taps a quill like a man timing a song he wants to start right.",
-    "'Artifact business is dangerous business,' he says without punctuation.",
-    "'Wheel braces, hinges, nails—you can live long on nails.'",
-    "He studies your hands, decides which work fits."
+    "You lean on the counter scarred by years of work.",
+    "You read a slate listing iron by the pound and labor rates.",
+    "A small bell rests on the edge; you ignore it.",
+    "An open ledger waits for the next order.",
+    "The smith taps a quill and looks at you.",
+    "'Artifact work is dangerous,' he says. 'Commissions pay steady.'",
+    "'Braces, hinges, nails—easy coin.'",
+    "He studies your hands and waits for your choice."
   ],
   "choices": [
     { "text": "Ask about the strange artifact.", "next": "blacksmith/artifact" },

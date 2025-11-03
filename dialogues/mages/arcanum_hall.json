@@ -2,15 +2,15 @@
   "id": "mages/arcanum_hall",
   "speaker": "Arcanum Hall",
   "lines": [
-    "Columns carved with theorems hold up a ceiling painted with guesses.",
-    "Lecterns wait for hands and voices; chalk waits for a board it can conquer.",
-    "A brazier burns cold fire; it warms intentions, not fingers.",
-    "Wards hum behind walls like bees behind dreams.",
-    "A professor's silhouette moves on the far side of a curtain; the curtain enjoys the lecture.",
-    "On a table, a focus crystal spins when you lie.",
-    "A bell signals the start of a lesson you did not plan to attend.",
+    "Stone columns are etched with sigils; the ceiling is a careful map of stars.",
+    "Lecterns stand arranged for study; chalk dust hangs in the light.",
+    "A brazier burns low. It warms the room more than the hands.",
+    "Wards hum behind the walls with a steady, watchful note.",
+    "A professor's silhouette moves behind a curtain as a lesson ends.",
+    "On a table, a focus crystal spins in a brass cradle.",
+    "A bell signals the start of a class.",
     "",
-    "The Dean's door is ajar. The training bell rings twice. The archives whisper names."
+    "The Dean's door is ajar. The training bell rings twice. The archives wait."
   ],
   "choices": [
     { "text": "Speak with the Dean.", "next": "mages/dean_office" },

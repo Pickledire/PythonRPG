@@ -2,14 +2,14 @@
   "id": "forest/whisper_clearing",
   "speaker": "Clearing",
   "lines": [
-    "Ferns tilt like listeners; their fronds have questions.",
-    "Midges halo a stump that thinks it is a throne.",
-    "A scarf hangs on a branch and flaps in a wind that is not here.",
+    "Ferns tilt as if listening; the understory holds its breath.",
+    "Midges halo a stump carved flat by years of rain.",
+    "A scarf hangs on a branch and moves though the air is still.",
     "The air tastes of mint and old fire.",
-    "A circle of stones argues about whether it is a circle.",
-    "Someone has left three berries on a flat rock: two red, one apology.",
-    "A root crosses the dirt like a sentence; it could be a warning or a welcome.",
-    "Your name sounds different when you say it under these leaves."
+    "A ring of stones marks a place someone thought important.",
+    "Someone left three berries on a flat rock: two red, one dark.",
+    "A root crosses the dirt like a line; perhaps a warning, perhaps a welcome.",
+    "Your name sounds different when you try it under these leaves."
   ],
   "choices": [
     { "text": "Sit on the stump and listen back.", "next": "forest/hollow_tree" },

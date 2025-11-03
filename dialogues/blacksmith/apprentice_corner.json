@@ -2,14 +2,14 @@
   "id": "blacksmith/apprentice_corner",
   "speaker": "Apprentices",
   "lines": [
-    "Three apprentices argue about whether edges are born or made.",
-    "Files sing in three keys; one is wrong on purpose to find the truth.",
-    "A bucket of chalk sits between them like a referee.",
-    "On the wall: a schedule with 'sleep?' written between 'heat' and 'hammer'.",
-    "A boy hums a quench song; the water hums back.",
-    "A girl flips a coin and lands it on the edge every time.",
-    "They notice you the way steel notices a magnet.",
-    "They ask if you want to learn something you can't buy."
+    "You find three apprentices debating how to hold an edge.",
+    "You hear files working along spines and bevels.",
+    "Chalk marks lie ready on the bench between them.",
+    "A schedule on the wall reads: heat, hammer, quench, repeat.",
+    "One hums a quench rhythm while stirring the trough.",
+    "Another flips a coin and watches balance and timing.",
+    "They notice you and ask what you want to practice.",
+    "They offer a tip you won’t find in a book."
   ],
   "choices": [
     { "text": "Learn the quench song.", "effects": [{"stat_change": ["intelligence", 1]}], "next": "blacksmith/forge_floor" },

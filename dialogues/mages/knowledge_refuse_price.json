@@ -21,7 +21,7 @@
         "As he does, he fades away, leaving you alone in the room with the staff."
     ],
     "choices": [
-        { "id": "take_staff", "text": "Take the staff.", "effects": [{"give_item": {"type": "weapon", "name": "Staff of Knowledge", "damage": 100, "value": 1000, "description": "A staff that grants the power of knowledge"}}], "next": "mages/college_courtyard" },
+        { "id": "take_staff", "text": "Take the staff.", "effects": [{"give_item": {"type": "weapon", "name": "Staff of Knowledge", "damage": 34, "value": 480, "description": "A staff that carries lessons more than force", "weapon_type": "magic"}}], "next": "mages/college_courtyard" },
         { "id": "leave", "text": "Leave the room without taking the staff.", "effects": [{"set_flag": ["knowledge_refuse_price", true]}], "next": "mages/college_courtyard" }
     ]
 }

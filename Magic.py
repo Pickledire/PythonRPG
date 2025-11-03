@@ -47,7 +47,7 @@ class Magic(Item):
                 caster.add_status('shield', { 'reduction_pct': reduction, 'turns': turns })
             return f"{caster.name} casts {self.name}. A ward shimmers around you ({int(reduction*100)}% for {turns} turns).", 0
         elif self.spell_type == 'blind':
-            if not isinstance(target, Enemy) or not target.alive:
+            if not hasattr(target, 'add_status') or not getattr(target, 'alive', True):
                 return f"There is no valid target to blind!", 0
             penalty = 0.25
             turns = 3
@@ -55,14 +55,14 @@ class Magic(Item):
                 target.add_status('blind', { 'accuracy_penalty': penalty, 'turns': turns })
             return f"{caster.name} casts {self.name}. {target.name} staggers, vision clouded!", 0
         elif self.spell_type == 'freeze':
-            if not isinstance(target, Enemy) or not target.alive:
+            if not hasattr(target, 'add_status') or not getattr(target, 'alive', True):
                 return f"There is no valid target to freeze!", 0
             turns = 1
             if hasattr(target, 'add_status'):
                 target.add_status('frozen', { 'turns': turns })
             return f"{caster.name} casts {self.name}. {target.name} is frozen in place!", 0
         elif self.spell_type == 'burn':
-            if not isinstance(target, Enemy) or not target.alive:
+            if not hasattr(target, 'add_status') or not getattr(target, 'alive', True):
                 return f"There is no valid target to burn!", 0
             dot = max(5, int(self.damage or 10))
             turns = 3
@@ -70,7 +70,7 @@ class Magic(Item):
                 target.add_status('burn', { 'damage': dot, 'turns': turns })
             return f"{caster.name} casts {self.name}. Flames cling to {target.name} ({dot}/turn)!", 0
         elif self.spell_type == 'poison':
-            if not isinstance(target, Enemy) or not target.alive:
+            if not hasattr(target, 'add_status') or not getattr(target, 'alive', True):
                 return f"There is no valid target to poison!", 0
             dot = max(6, int(self.damage or 12))
             turns = 3

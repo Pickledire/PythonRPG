@@ -2,14 +2,14 @@
   "id": "blacksmith/slag_heap",
   "speaker": "Slag Heap",
   "lines": [
-    "Mountains of failures steam in the rain; they are beautiful in an honest way.",
-    "Blue glass nodules wink from the ash like promises that kept trying.",
-    "A bent nail straightens when you look away and sulks when you don't.",
-    "Someone dumped a bucket of water that now holds the sky upside down.",
-    "A strip of runed steel lies where no one can see it unless they can.",
-    "A lizard sunbaths on a rivet big as a knuckle.",
-    "The heap shifts with small avalanches of almost.",
-    "Even the trash here has edges."
+    "You step out to the slag heap behind the shop.",
+    "You see blue glass nodules in the ash.",
+    "You spot bent nails and broken rivets half-buried.",
+    "A bucket holds rainwater reflecting the sky.",
+    "You notice a strip of runed steel in the debris.",
+    "A lizard warms itself on an old rivet.",
+    "Loose slag shifts under your boots.",
+    "You mind your hands—some edges are still sharp."
   ],
   "effects": [
     {"give_item": {"type": "armor", "name": "Slag Mantle", "defense": 16, "value": 160, "description": "A cloak pinned with cooled mistakes"}},
