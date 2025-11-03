@@ -180,6 +180,8 @@ def _apply_effects(engine, effects: list):
                 engine.current_enemy = EnemyFactory.create_clockwork_colossus()
             elif enemy_id in ("Earth Eater Worm", "Earth_Eater_Worm"):
                 engine.current_enemy = EnemyFactory.create_earth_eater_worm()
+            elif enemy_id in ("Rat King", "Rat_King"):
+                engine.current_enemy = EnemyFactory.create_rat_king()
             else:
                 engine.current_enemy = EnemyFactory.create_goblin()
             engine.in_combat = True
@@ -187,6 +189,8 @@ def _apply_effects(engine, effects: list):
             if isinstance(engine.current_enemy, Boss) and hasattr(engine, 'display_boss_intro'):
                 if getattr(engine.current_enemy, 'name', '') == 'Elder Dragon' and hasattr(engine, 'display_elder_dragon_intro'):
                     engine.display_elder_dragon_intro()
+                elif getattr(engine.current_enemy, 'name', '') == 'Rat King' and hasattr(engine, 'display_rat_king_intro'):
+                    engine.display_rat_king_intro()
                 elif getattr(engine.current_enemy, 'name', '') == 'Earth Eater Worm' and hasattr(engine, 'display_earth_eater_worm_intro'):
                     engine.display_earth_eater_worm_intro()
                 else:

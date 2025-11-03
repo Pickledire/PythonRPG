@@ -29,12 +29,14 @@ class Character:
             'stats': Fore.BLUE + Style.BRIGHT,
             'success': Fore.GREEN + Style.BRIGHT,
             'error': Fore.RED + Style.BRIGHT,
+            'warning': Fore.YELLOW,
             'weapon': Fore.CYAN,
             'armor': Fore.MAGENTA,
             'xp': Fore.GREEN,
             'border': Fore.CYAN + Style.BRIGHT,
             'magic': Fore.BLUE + Style.BRIGHT,
             'menu': Fore.WHITE + Style.BRIGHT,
+            'enemy': Fore.RED + Style.BRIGHT,
             'reset': Style.RESET_ALL
         }
         
@@ -49,6 +51,7 @@ class Character:
         # Initialize inventory system
         self.inventory = Inventory()
         self.inventory.owner = self
+        self.status_effects = {}
         
         # Give starting equipment based on race
         self._give_starting_equipment()
@@ -132,12 +135,12 @@ class Character:
         status += f"{self.colors['stats']}📊 Stats: STR:{self.stats['strength']} AGI:{self.stats['agility']} INT:{self.stats['intelligence']}{self.colors['reset']}\n"
         
         # Equipment
-        magic = self.inventory.equipped_magic
+        magic_items = self.inventory.get_magic()
         weapon = self.inventory.equipped_weapon
         armor = self.inventory.equipped_armor
         status += f"{self.colors['weapon']}⚔️  Weapon: {weapon.name if weapon else 'None'}{self.colors['reset']}\n"
         status += f"{self.colors['armor']}🛡️  Armor: {armor.name if armor else 'None'}{self.colors['reset']}\n"
-        status += f"{self.colors['magic']}🔮  Magic: {magic.name if magic else 'None'}{self.colors['reset']}\n"
+        status += f"{self.colors['magic']}🔮  Spells Known: {len(magic_items)}{self.colors['reset']}\n"
         
         status += f"{self.colors['border']}{'═' * 50}{self.colors['reset']}"
         
@@ -239,6 +242,11 @@ class Character:
         # Diminishing returns formula for mitigation
         mitigation_multiplier = 100.0 / (100.0 + (effective_defense * 1.5))
         reduced_damage = int(max(1, round(damage * mitigation_multiplier)))
+        # Shield reduces final damage
+        shield = self.status_effects.get('shield')
+        if shield and shield.get('turns', 0) > 0:
+            pct = float(shield.get('reduction_pct', 0))
+            reduced_damage = max(1, int(reduced_damage * (1.0 - pct)))
 
         self.health -= reduced_damage
         if self.health <= 0:
@@ -258,6 +266,15 @@ class Character:
         if weapon.is_broken():
             return f"{self.colors['name']}{self.name}{self.colors['reset']}'s {self.colors['weapon']}{weapon.name}{self.colors['reset']} is broken!"
         
+        # Accuracy and crits
+        base_accuracy = 0.85 + (self.stats['agility'] * 0.003)
+        # Target blind increases hit chance a bit (if enemy is blind, easier to hit)
+        if hasattr(target, 'status_effects') and target.status_effects.get('blind', {}).get('turns', 0) > 0:
+            base_accuracy += 0.10
+        if random.random() > min(0.98, base_accuracy):
+            weapon.use() if weapon else None
+            return f"{self.colors['name']}{self.name}{self.colors['reset']} attacks {self.colors['enemy']}{target.name}{self.colors['reset']} but misses!"
+
         # Calculate damage
         base_damage = weapon.get_effective_damage()
         strength_bonus = self.stats['strength'] * 0.5
@@ -267,6 +284,11 @@ class Character:
         # Add some randomness
         damage_variance = random.uniform(-DAMAGE_VARIANCE, DAMAGE_VARIANCE)
         final_damage = int((base_damage + strength_bonus + agility_bonus) * (1 + damage_variance))
+        # Crits
+        crit_chance = 0.10 + (self.stats['strength'] * 0.002)
+        crit = random.random() < min(0.5, crit_chance)
+        if crit:
+            final_damage = int(final_damage * 1.5)
         final_damage = max(1, final_damage)  # Minimum 1 damage
         
         # Use weapon (reduces durability)
@@ -275,7 +297,8 @@ class Character:
         # Apply damage to target
         actual_damage = target.take_damage(final_damage)
         
-        result = f"{self.colors['name']}{self.name}{self.colors['reset']} attacks {Fore.RED}{target.name}{self.colors['reset']} with {self.colors['weapon']}{weapon.name}{self.colors['reset']} for {Fore.RED + Style.BRIGHT}{actual_damage}{self.colors['reset']} damage!"
+        crit_txt = " (CRIT!)" if crit else ""
+        result = f"{self.colors['name']}{self.name}{self.colors['reset']} attacks {Fore.RED}{target.name}{self.colors['reset']} with {self.colors['weapon']}{weapon.name}{self.colors['reset']} for {Fore.RED + Style.BRIGHT}{actual_damage}{self.colors['reset']} damage{crit_txt}!"
         
         if not target.alive:
             xp_gained = random.randint(MIN_XP_REWARD, MAX_XP_REWARD)
@@ -283,6 +306,52 @@ class Character:
             result += f"\n{Fore.RED + Style.BRIGHT}💀 {target.name} has been defeated!{self.colors['reset']} {self.colors['xp']}Gained {xp_gained} XP!{self.colors['reset']}"
         
         return result
+
+    def add_status(self, name: str, data: dict):
+        if not isinstance(data, dict):
+            return
+        self.status_effects[name] = data
+
+    def on_turn_start(self):
+        messages = []
+        # Poison
+        p = self.status_effects.get('poison')
+        if p and p.get('turns', 0) > 0:
+            dmg = int(p.get('damage', 5))
+            self.health = max(0, self.health - dmg)
+            p['turns'] -= 1
+            messages.append(f"{self.colors['error']}{self.name} suffers {dmg} poison damage!{self.colors['reset']}")
+            if p['turns'] <= 0:
+                self.status_effects.pop('poison', None)
+        # Burn
+        bdot = self.status_effects.get('burn')
+        if bdot and bdot.get('turns', 0) > 0:
+            dmg = int(bdot.get('damage', 6))
+            self.health = max(0, self.health - dmg)
+            bdot['turns'] -= 1
+            messages.append(f"{self.colors['error']}{self.name} takes {dmg} burn damage!{self.colors['reset']}")
+            if bdot['turns'] <= 0:
+                self.status_effects.pop('burn', None)
+        # Shield decay
+        s = self.status_effects.get('shield')
+        if s and s.get('turns', 0) > 0:
+            s['turns'] -= 1
+            if s['turns'] <= 0:
+                self.status_effects.pop('shield', None)
+                messages.append(f"{self.colors['warning']}{self.name}'s ward fades.{self.colors['reset']}")
+        # Blind decay
+        b = self.status_effects.get('blind')
+        if b and b.get('turns', 0) > 0:
+            b['turns'] -= 1
+            if b['turns'] <= 0:
+                self.status_effects.pop('blind', None)
+        # Frozen decay (skip handled in player_turn/enemy_turn)
+        f = self.status_effects.get('frozen')
+        if f and f.get('turns', 0) > 0:
+            f['turns'] -= 1
+            if f['turns'] <= 0:
+                self.status_effects.pop('frozen', None)
+        return messages
     
     def cast_magic(self, target):
         if not self.alive:

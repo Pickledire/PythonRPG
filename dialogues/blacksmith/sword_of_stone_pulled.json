@@ -2,7 +2,7 @@
     "id": "blacksmith/sword_of_stone_pulled",
     "speaker": "Sword of Stone",
     "effects": [
-        {"give_item": {"type": "weapon", "name": "Excalibur", "damage": 65, "description": "A beautiful blade, with an encrusted handle made of gems and gold.", "value": 1000, "weapon_type": "melee"}}
+        {"give_item": {"type": "weapon", "name": "Excalibur", "damage": 56, "description": "A beautiful blade, with an encrusted handle made of gems and gold.", "value": 1000, "weapon_type": "melee"}}
     ],
     "lines": [
         "You hesitate for a moment, but grip the hilt and pull.",

@@ -18,39 +18,39 @@ class Shop:
         
         # Weapons
         weapons = [
-            Weapon("Bronze Sword", 12, 80, "A basic bronze sword", 40, "melee"),
-            Weapon("Steel Sword", 20, 120, "A sharp steel blade", 80, "melee"),
-            Weapon("Silver Sword", 28, 100, "A gleaming silver sword", 125, "melee"),
-            Weapon("Enchanted Blade", 35, 150, "A magically enhanced sword", 200, "melee"),
-            Weapon("Greatsword", 40, 180, "A massive two-handed sword", 300, "melee"),
-            Weapon("Broadsword", 30, 150, "A wide blade sword", 175, "melee"),
+            Weapon("Bronze Sword", 10, 90, "A basic bronze sword", 40, "melee"),
+            Weapon("Steel Sword", 18, 120, "A sharp steel blade", 80, "melee"),
+            Weapon("Silver Sword", 26, 110, "A gleaming silver sword", 125, "melee"),
+            Weapon("Enchanted Blade", 33, 150, "A magically enhanced sword", 200, "melee"),
+            Weapon("Greatsword", 38, 180, "A massive two-handed sword", 300, "melee"),
+            Weapon("Broadsword", 28, 150, "A wide blade sword", 175, "melee"),
 
-            Weapon("Short Bow", 15, 90, "A simple wooden bow", 50, "ranged"),
-            Weapon("Long Bow", 22, 110, "A powerful longbow", 180, "ranged"),
-            Weapon("Crossbow", 30, 80, "A mechanical crossbow", 150, "ranged"),
+            Weapon("Short Bow", 12, 90, "A simple wooden bow", 50, "ranged"),
+            Weapon("Long Bow", 20, 110, "A powerful longbow", 180, "ranged"),
+            Weapon("Crossbow", 28, 100, "A mechanical crossbow", 150, "ranged"),
             
-            Weapon("Oak Staff", 14, 70, "A wooden magic staff", 60, "magic"),
-            Weapon("Crystal Staff", 25, 90, "A staff with a crystal orb", 110, "magic"),
-            Weapon("Arcane Staff", 32, 110, "A staff humming with power", 175, "magic"),
+            Weapon("Oak Staff", 12, 80, "A wooden magic staff", 60, "magic"),
+            Weapon("Crystal Staff", 22, 100, "A staff with a crystal orb", 110, "magic"),
+            Weapon("Arcane Staff", 30, 110, "A staff humming with power", 175, "magic"),
             
-            Weapon("War Hammer", 25, 150, "A heavy two-handed hammer", 100, "melee"),
-            Weapon("Battle Axe", 30, 130, "A fearsome two-handed axe", 140, "melee"),
-            Weapon("Axe", 24, 100, "A basic axe", 50, "melee"),
-            Weapon("Halberd", 30, 100, "A basic halberd", 50, "melee"),
-            Weapon("Spear", 28, 100, "A basic spear", 50, "melee"),        
+            Weapon("War Hammer", 24, 150, "A heavy two-handed hammer", 100, "melee"),
+            Weapon("Battle Axe", 28, 130, "A fearsome two-handed axe", 140, "melee"),
+            Weapon("Axe", 20, 110, "A basic axe", 50, "melee"),
+            Weapon("Halberd", 26, 110, "A basic halberd", 50, "melee"),
+            Weapon("Spear", 24, 110, "A basic spear", 50, "melee"),        
         ]
         
         # Armor
         armors = [
-            Armor("Cloth Robes", 8, 60, "Basic cloth protection", 30),
-            Armor("Leather Armor", 12, 100, "Flexible leather protection", 40),
-            Armor("Studded Leather", 16, 120, "Reinforced leather armor", 75),
-            Armor("Chain Mail", 20, 150, "Interlocked metal rings", 110),
-            Armor("Scale Mail", 25, 140, "Overlapping metal scales", 150),
-            Armor("Plate Armor", 30, 200, "Heavy metal plates", 225),
-            Armor("Enchanted Robes", 35, 80, "Magically protected robes", 140),
-            Armor("Dragon Scale", 45, 180, "Armor made from dragon scales", 200),
-            Armor("Mithril Armor", 55, 250, "A mithril armor", 300),
+            Armor("Cloth Robes", 6, 60, "Basic cloth protection", 30),
+            Armor("Leather Armor", 10, 110, "Flexible leather protection", 40),
+            Armor("Studded Leather", 14, 130, "Reinforced leather armor", 75),
+            Armor("Chain Mail", 18, 150, "Interlocked metal rings", 110),
+            Armor("Scale Mail", 22, 160, "Overlapping metal scales", 150),
+            Armor("Plate Armor", 24, 200, "Heavy metal plates", 225),
+            Armor("Enchanted Robes", 18, 100, "Magically protected robes", 140),
+            Armor("Dragon Scale", 28, 180, "Armor made from dragon scales", 200),
+            Armor("Mithril Armor", 32, 220, "A mithril armor", 300),
         ]
         
         # Consumables
@@ -72,6 +72,10 @@ class Shop:
             Magic("Fire Bolt", "A fiery bolt of energy", 30, 10, 100),
             Magic("Ice Bolt", "A sharp ice bolt", 25, 10, 100),
             Magic("Lightning Bolt", "A powerful lightning bolt", 23, 10, 150),
+            Magic("Heal", "Mend flesh and resolve", 0, 14, 180, spell_type='heal'),
+            Magic("Ward", "Shape a barrier of will", 0, 12, 160, spell_type='shield'),
+            Magic("Blind", "Steal the enemy's surety", 0, 16, 200, spell_type='blind'),
+            Magic("Venom Spray", "Coat the foe in biting poison", 12, 14, 170, spell_type='poison'),
         ]
         for w in weapons:
             pools['weapon'].append(w)
@@ -83,7 +87,7 @@ class Shop:
             pools['magic'].append(m)
         return pools
 
-    def refresh_inventory(self, seed: int | None = None):
+    def refresh_inventory(self, seed=None):
         """Rotate inventory selection. Use optional seed for deterministic rotation."""
         import random
         rnd = random.Random()
@@ -110,6 +114,8 @@ class Shop:
                 Magic("Thunder Chorus", "A chorus of bolts that rarely agree", 80, 30, 360),
                 Magic("Aegis Ward", "A disciplined barrier spell", 0, 14, 180),
                 Magic("Sun Flare", "A bright unmaking for stubborn shadows", 76, 28, 340),
+                Magic("Freeze", "Still the foe's limbs", 0, 18, 240, spell_type='freeze'),
+                Magic("Burn", "Searing flame that lingers", 14, 16, 240, spell_type='burn'),
             ]
             pool = self._pools['magic'] + better_spells
             for item in rnd.sample(pool, k=min(6, len(pool))):
@@ -164,7 +170,10 @@ class Shop:
                 if hasattr(item, 'get_requirement'):
                     stat, val = item.get_requirement()
                     req_txt = f", Req: {stat.capitalize()} {val}+"
-                center(f"{i}. {item.name} - {price}💰 (Damage: {item.damage}, Mana: {item.mana}{req_txt})")
+                if hasattr(item, 'spell_type') and item.spell_type != 'damage':
+                    center(f"{i}. {item.name} - {price}💰 (Spell: {item.spell_type}, Mana: {item.mana}{req_txt})")
+                else:
+                    center(f"{i}. {item.name} - {price}💰 (Damage: {item.damage}, Mana: {item.mana}{req_txt})")
             else:
                 center(f"{i}. {item.name} - {price}💰")
             

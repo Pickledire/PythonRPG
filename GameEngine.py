@@ -39,6 +39,7 @@ class GameEngine:
         self.level_10_boss = False
         self.level_15_boss = False
         self.level_20_boss = False
+        self.level_25_boss = False
         self.ghost_horror = False
         self.quest_flags = {}
         self.world_bells = 8  # simple world time, 0-23
@@ -188,7 +189,7 @@ class GameEngine:
         self.print_border("═", 120)
         print()
     
-    def display_health_bar(self, current, maximum, width=50, label="Health"):
+    def display_health_bar(self, current, maximum, width=50, label="Health", shield_pct: float = 0.0):
         """Display a visual health bar"""
         # Clamp bar width to current UI width
         try:
@@ -214,6 +215,12 @@ class GameEngine:
             bar_color = self.colors['error']
         
         bar = bar_color + "█" * filled + Fore.WHITE + "░" * empty + self.colors['reset']
+        # Shield indicator extension
+        shield_pct = max(0.0, min(0.95, float(shield_pct or 0.0)))
+        if shield_pct > 0.0:
+            shield_units = int(width * shield_pct)
+            if shield_units > 0:
+                bar += " " + (Fore.BLUE + "▒" * shield_units + self.colors['reset'])
         print(f"{label}: [{bar}] {current}/{maximum}")
     
     def display_xp_bar(self, current, required, width=50):
@@ -280,7 +287,13 @@ class GameEngine:
         races = list(RACE_STATS.keys())
         for i, race in enumerate(races, 1):
             race_stats = RACE_STATS[race]
-            race_color = self.colors['success'] if race == 'Human' else self.colors['info']
+            color_map = {
+                'Human': self.colors['menu'],      # bright white
+                'Elf': self.colors['success'],      # green
+                'Orc': self.colors['enemy'],        # red
+                'Dwarf': self.colors['gold'],       # yellow/gold
+            }
+            race_color = color_map.get(race, self.colors['info'])
             race_text = f"{i}. {race} - STR:{race_stats['strength']} AGI:{race_stats['agility']} INT:{race_stats['intelligence']} HP:{race_stats['health']}"
             self.print_centered(race_text, 120, race_color)
         
@@ -319,7 +332,12 @@ class GameEngine:
                 
                 # Health bar
                 print(f"{self.colors['border']}║ {self.colors['reset']}", end="")
-                self.display_health_bar(self.player.health, self.player.max_health, 40, "Health")
+                p_shield = 0.0
+                try:
+                    p_shield = float(self.player.status_effects.get('shield', {}).get('reduction_pct', 0.0))
+                except Exception:
+                    p_shield = 0.0
+                self.display_health_bar(self.player.health, self.player.max_health, 40, "Health", shield_pct=p_shield)
 
                 # Mana bar (blue), between Health and XP
                 print(f"{self.colors['border']}║ {self.colors['reset']}", end="")
@@ -511,6 +529,41 @@ class GameEngine:
         self.print_centered("The tunnel-king comes. Stand, or be unmade.", 120, self.colors['warning'])
         print("\n")
         input(f"{self.colors['menu']}Grip the earth and begin...{self.colors['reset']}")
+
+    def display_rat_king_intro(self):
+        """Cinematic intro for the level 25 Rat King."""
+        self.clear_screen()
+        print("\n" * 1)
+        self.print_border("═", 120, self.colors['border'])
+        self.print_centered("A SCRATCHING CROWN APPROACHES", 120, self.colors['header'])
+        self.print_border("═", 120, self.colors['border'])
+        print()
+
+        name = self.current_enemy.name
+        title = self.current_enemy.description if self.current_enemy.description else "lord of vermin"
+        story = [
+            "Threads of chittering stitch the dark…",
+            "Stone sweats; the air smells of cellar and spoil.",
+            f"Rats pour like water, braiding themselves about a throne—{name}, {title.lower()}.",
+            "Eyes glitter in a hundred small faces. One voice speaks from all of them.",
+            "It promises a kingdom of tunnels, and taxes paid in gnawed bone.",
+        ]
+        for line in story:
+            if line:
+                self.print_centered(line, 120, Fore.WHITE)
+            else:
+                print()
+            # Use shadow sweep to suggest swarming
+            self.play_effect("shadow_sweep", duration=0.10)
+
+        print("\n")
+        self.print_border("═", 100, Fore.YELLOW)
+        self.print_centered(f"{name}", 120, Fore.YELLOW + Style.BRIGHT)
+        self.print_border("═", 100, Fore.YELLOW)
+        print("\n")
+        self.print_centered("The skittering crown lays claim. Refuse it.", 120, self.colors['warning'])
+        print("\n")
+        input(f"{self.colors['menu']}Set your feet and begin…{self.colors['reset']}")
     
     def start_combat(self):
         """Start a combat encounter"""
@@ -519,9 +572,12 @@ class GameEngine:
             input(f"{self.colors['menu']}Press Enter to continue...{self.colors['reset']}")
             return
         
-        # Generate enemy: force level 20 boss, then level 15 boss, then level 10 boss, once per run
+        # Generate enemy: force level 25, then 20, then 15, then 10 bosses (once per run)
         player_level = self.player.level if self.player else 1
-        if player_level >= 20 and not self.level_20_boss:
+        if player_level >= 25 and not self.level_25_boss:
+            self.level_25_boss = True
+            self.current_enemy = EnemyFactory.create_rat_king()
+        elif player_level >= 20 and not self.level_20_boss:
             self.level_20_boss = True
             self.current_enemy = EnemyFactory.create_earth_eater_worm()
         elif player_level >= 15 and not self.level_15_boss:
@@ -540,6 +596,8 @@ class GameEngine:
                 self.display_elder_dragon_intro()
             elif getattr(self.current_enemy, 'name', '') == 'Earth Eater Worm' and hasattr(self, 'display_earth_eater_worm_intro'):
                 self.display_earth_eater_worm_intro()
+            elif getattr(self.current_enemy, 'name', '') == 'Rat King' and hasattr(self, 'display_rat_king_intro'):
+                self.display_rat_king_intro()
             else:
                 # Titan or other bosses — add a brief quake for impact
                 self.play_effect("quake", duration=0.5)
@@ -559,6 +617,16 @@ class GameEngine:
         while self.in_combat and self.player.alive and self.current_enemy.alive:
             self.clear_screen()
             self.display_title()
+            # Start-of-round effects
+            pm = self.player.on_turn_start()
+            em = self.current_enemy.on_turn_start() if hasattr(self.current_enemy, 'on_turn_start') else []
+            for msg in (pm + em):
+                if msg:
+                    self.print_centered(msg, 120, self.colors['warning'])
+            if not self.player.alive or not self.current_enemy.alive:
+                # Someone died from start-of-turn effects
+                time.sleep(0.4)
+                break
             
             # Show combat status
             self.print_border("═", 120, self.colors['combat'])
@@ -569,13 +637,26 @@ class GameEngine:
             # Create a side-by-side layout for player and enemy
             # Player status (left side)
             print(f"{self.colors['player']}🛡️ {self.player.name} (Level {self.player.level}){self.colors['reset']}")
-            self.display_health_bar(self.player.health, self.player.max_health, 60, "Player Health")
+            # Shield overlay for player
+            p_shield = 0.0
+            try:
+                p_shield = float(self.player.status_effects.get('shield', {}).get('reduction_pct', 0.0))
+            except Exception:
+                p_shield = 0.0
+            self.display_health_bar(self.player.health, self.player.max_health, 60, "Player Health", shield_pct=p_shield)
+            # Player mana under health
+            self.display_mana_bar(self.player.mana, self.player.max_mana, 60, "Player Mana")
             
             print("\n" * 2)
             
             # Enemy status (right side)
             print(f"{self.colors['enemy']}👹 {self.current_enemy.name}{self.colors['reset']}")
-            self.display_health_bar(self.current_enemy.health, self.current_enemy.max_health, 60, "Enemy Health")
+            e_shield = 0.0
+            try:
+                e_shield = float(getattr(self.current_enemy, 'status_effects', {}).get('shield', {}).get('reduction_pct', 0.0))
+            except Exception:
+                e_shield = 0.0
+            self.display_health_bar(self.current_enemy.health, self.current_enemy.max_health, 60, "Enemy Health", shield_pct=e_shield)
             
             print("\n" * 2)
             self.print_border("─", 100, self.colors['combat'])
@@ -602,6 +683,10 @@ class GameEngine:
     
     def player_turn(self):
         """Handle player's turn in combat"""
+        # Check frozen
+        if self.player.status_effects.get('frozen', {}).get('turns', 0) > 0:
+            print(f"{self.colors['warning']}You are frozen and cannot act this turn!{self.colors['reset']}")
+            return
         print(f"{self.colors['header']}Your turn! Choose an action:{self.colors['reset']}")
 
         combat_options = [
@@ -630,10 +715,42 @@ class GameEngine:
             if self.try_flee():
                 return
         elif choice == "4":
-            result = self.player.cast_magic(self.current_enemy)
-            print(f"\n{self.colors['magic']}{result}{self.colors['reset']}")
+            self.cast_magic_menu()
         else:
             print(f"{self.colors['error']}Invalid choice! You lose your turn.{self.colors['reset']}")
+
+    def cast_magic_menu(self):
+        spells = self.player.inventory.get_magic()
+        if not spells:
+            print(f"{self.colors['warning']}You don't know any spells!{self.colors['reset']}")
+            return
+        self.print_centered(f"{self.colors['magic']}Choose a spell to cast:{self.colors['reset']}")
+        for i, sp in enumerate(spells, 1):
+            st = getattr(sp, 'spell_type', 'damage')
+            extra = f"DMG:{sp.damage}" if st == 'damage' else st
+            self.print_centered(f"{self.colors['menu']}{i}. {self.colors['magic']}{sp.name}{self.colors['reset']} (Mana {sp.mana}, {extra})")
+        self.print_centered(f"{self.colors['menu']}0. Cancel{self.colors['reset']}")
+        sel = input(f"\n{self.colors['menu']}Enter choice: {self.colors['reset']}").strip()
+        try:
+            idx = int(sel)
+            if idx == 0:
+                return
+            if 1 <= idx <= len(spells):
+                spell = spells[idx-1]
+                if self.player.mana < spell.mana:
+                    print(f"{self.colors['error']}Not enough mana! Need {spell.mana}.{self.colors['reset']}")
+                    return
+                self.player.mana -= spell.mana
+                # Determine target for support spells
+                if getattr(spell, 'spell_type', 'damage') in ('heal', 'shield'):
+                    text, _ = spell.cast(self.player, self.current_enemy)
+                else:
+                    text, _ = spell.cast(self.player, self.current_enemy)
+                print(f"\n{self.colors['magic']}{text}{self.colors['reset']}")
+            else:
+                print(f"{self.colors['error']}Invalid choice!{self.colors['reset']}")
+        except ValueError:
+            print(f"{self.colors['error']}Please enter a valid number!{self.colors['reset']}")
 
     def _prompt_with_haunting(self, prompt: str, total_timeout: int = 30):
         """Prompt for input with a timeout. While waiting, print haunting narrative at intervals.
@@ -733,6 +850,9 @@ class GameEngine:
     
     def enemy_turn(self):
         """Handle enemy's turn in combat"""
+        if getattr(self.current_enemy, 'status_effects', {}).get('frozen', {}).get('turns', 0) > 0:
+            print(f"\n{self.colors['warning']}{self.current_enemy.name} is frozen and cannot act!{self.colors['reset']}")
+            return
         print(f"\n{self.colors['enemy']}{self.current_enemy.name}'s turn!{self.colors['reset']}")
         result = self.current_enemy.attack(self.player)
         print(f"{self.colors['enemy']}{result}{self.colors['reset']}")
@@ -936,10 +1056,14 @@ class GameEngine:
             # Chance for loot
             self.give_loot()
 
-            # Special boss reward at level 10
+            # Special boss rewards
             if isinstance(self.current_enemy, Boss):
                 if getattr(self.current_enemy, 'name', '') == 'Elder Dragon':
                     self.grant_elder_dragon_reward()
+                elif getattr(self.current_enemy, 'name', '') == 'Earth Eater Worm':
+                    self.grant_earth_eater_worm_rewards()
+                elif getattr(self.current_enemy, 'name', '') == 'Rat King':
+                    self.grant_rat_king_rewards()
                 else:
                     self.grant_boss_reward()
 
@@ -1061,6 +1185,90 @@ class GameEngine:
                 break
             else:
                 print(f"{self.colors['error']}Invalid choice, please enter 1, 2, or 3.{self.colors['reset']}")
+
+    def grant_earth_eater_worm_rewards(self):
+        """Offer a choice of three Earth Eater Worm rewards (STR/AGI/INT)."""
+        print("\n")
+        self.print_border("═", 100, self.colors['gold'])
+        self.print_centered("Trophies of the Burrowed Depths", 120, self.colors['gold'])
+        self.print_border("═", 100, self.colors['gold'])
+        print()
+
+        earth_maul = Weapon("Earthsplitter Maul", 58, 200, "A maul that remembers fault-lines", 0, "melee")
+        stonebow = Weapon("Stonebore Crossbow", 46, 160, "Bolts punch through armor like shale", 0, "ranged")
+        seismic_rift = Magic("Seismic Rift", "Tear the ground beneath your foe", 62, 38, 0)
+
+        r1n, r1v = earth_maul.get_requirement()
+        r2n, r2v = stonebow.get_requirement()
+        r3n, r3v = seismic_rift.get_requirement()
+
+        options = [
+            ("1", f"{self.colors['weapon']}Earthsplitter Maul{self.colors['reset']} - requires {r1n.capitalize()} {r1v}+"),
+            ("2", f"{self.colors['weapon']}Stonebore Crossbow{self.colors['reset']} - requires {r2n.capitalize()} {r2v}+"),
+            ("3", f"{self.colors['magic']}Seismic Rift{self.colors['reset']} - requires {r3n.capitalize()} {r3v}+"),
+        ]
+        for num, text in options:
+            self.print_centered(f"{num}. {text}", 120, self.colors['menu'])
+
+        print()
+        while True:
+            choice = input(f"{self.colors['menu']}Choose your trophy (1-3): {self.colors['reset']}").strip()
+            if choice == "1":
+                self.player.inventory.add_item(earth_maul)
+                self.print_centered(f"{self.colors['success']}You received Earthsplitter Maul!{self.colors['reset']}")
+                break
+            elif choice == "2":
+                self.player.inventory.add_item(stonebow)
+                self.print_centered(f"{self.colors['success']}You received Stonebore Crossbow!{self.colors['reset']}")
+                break
+            elif choice == "3":
+                self.player.inventory.add_item(seismic_rift)
+                self.print_centered(f"{self.colors['success']}You received Seismic Rift!{self.colors['reset']}")
+                break
+            else:
+                self.print_centered(f"{self.colors['error']}Invalid choice, please enter 1, 2, or 3.{self.colors['reset']}")
+
+    def grant_rat_king_rewards(self):
+        """Offer a choice of three Rat King rewards (STR/AGI/INT)."""
+        print("\n")
+        self.print_border("═", 100, self.colors['gold'])
+        self.print_centered("Spoils of the Skittering Crown", 120, self.colors['gold'])
+        self.print_border("═", 100, self.colors['gold'])
+        print()
+
+        gnawblade = Weapon("Gnawblade", 48, 170, "Edges serrated like hungry teeth", 0, "melee")
+        sewer_bow = Weapon("Sewer Longbow", 42, 150, "A bow that never misses in the dark", 0, "ranged")
+        pestilent_swarm = Magic("Pestilent Swarm", "Unleash a tide of biting filth", 18, 22, 0, spell_type='poison')
+
+        r1n, r1v = gnawblade.get_requirement()
+        r2n, r2v = sewer_bow.get_requirement()
+        r3n, r3v = pestilent_swarm.get_requirement()
+
+        options = [
+            ("1", f"{self.colors['weapon']}Gnawblade{self.colors['reset']} - requires {r1n.capitalize()} {r1v}+"),
+            ("2", f"{self.colors['weapon']}Sewer Longbow{self.colors['reset']} - requires {r2n.capitalize()} {r2v}+"),
+            ("3", f"{self.colors['magic']}Pestilent Swarm{self.colors['reset']} - requires {r3n.capitalize()} {r3v}+"),
+        ]
+        for num, text in options:
+            self.print_centered(f"{num}. {text}", 120, self.colors['menu'])
+
+        print()
+        while True:
+            choice = input(f"{self.colors['menu']}Choose your trophy (1-3): {self.colors['reset']}").strip()
+            if choice == "1":
+                self.player.inventory.add_item(gnawblade)
+                self.print_centered(f"{self.colors['success']}You received Gnawblade!{self.colors['reset']}")
+                break
+            elif choice == "2":
+                self.player.inventory.add_item(sewer_bow)
+                self.print_centered(f"{self.colors['success']}You received Sewer Longbow!{self.colors['reset']}")
+                break
+            elif choice == "3":
+                self.player.inventory.add_item(pestilent_swarm)
+                self.print_centered(f"{self.colors['success']}You received Pestilent Swarm!{self.colors['reset']}")
+                break
+            else:
+                self.print_centered(f"{self.colors['error']}Invalid choice, please enter 1, 2, or 3.{self.colors['reset']}")
     
     def give_loot(self):
         """Give random loot after combat"""
@@ -1184,10 +1392,9 @@ class GameEngine:
             
             inventory_options = [
                 ("1", "⚔️ Equip weapon", self.colors['weapon']),
-                ("2", "🛡️ Equip armor", self.colors['armor']),
-                ("3", "🔮 Equip magic", self.colors['magic']),
-                ("4", "🧪 Use item", self.colors['item']),
-                ("5", "🔙 Back to main menu", self.colors['warning'])
+            ("2", "🛡️ Equip armor", self.colors['armor']),
+            ("3", "🧪 Use item", self.colors['item']),
+            ("4", "🔙 Back to main menu", self.colors['warning'])
             ]
             
             for num, text, color in inventory_options:
@@ -1200,10 +1407,8 @@ class GameEngine:
             elif choice == "2":
                 self.equip_armor_menu()
             elif choice == "3":
-                self.equip_magic_menu()
-            elif choice == "4":
                 self.use_item_menu()
-            elif choice == "5":
+            elif choice == "4":
                 break
             else:
                 print(f"{self.colors['error']}Invalid choice!{self.colors['reset']}")

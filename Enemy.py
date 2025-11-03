@@ -1,4 +1,5 @@
 import random
+from Magic import Magic
 from config import MIN_XP_REWARD, MAX_XP_REWARD, MIN_GOLD_REWARD, MAX_GOLD_REWARD
 
 boss_names = {"Olgath": "The Titan of Fire", "Herix": "The Titan of Ice", "Forgin": "The Titan of Earth", "Vexer": "The Titan of Wind", "Morrg": "The Titan of Shadow", "Gorren": "The Titan of Light", "Zodd": "The Titan of Darkness", "Implex": "The Titan of Chaos"}
@@ -13,6 +14,7 @@ class Enemy:
         self.enemy_type = enemy_type
         self.description = description
         self.alive = True
+        self.status_effects = {}
         
         # Add some stats for variety
         self.stats = {
@@ -41,11 +43,19 @@ class Enemy:
             info += f"Description: {self.description}\n"
         return info
     
-    def take_damage(self, damage):
-        """Take damage with defense consideration"""
-        defense = self.stats['defense']
-        reduced_damage = max(1, damage - defense)  # Minimum 1 damage
-        
+    def take_damage(self, damage, attacker=None, damage_type='physical'):
+        """Take damage with defense consideration, shields, and magic modifier"""
+        defense = int(self.stats.get('defense', 0))
+        if damage_type == 'magic':
+            defense = int(defense * 0.5)
+        reduced_damage = max(1, int(damage - defense))
+
+        # Apply shield reduction if present
+        shield = self.status_effects.get('shield') if hasattr(self, 'status_effects') else None
+        if shield and shield.get('turns', 0) > 0:
+            pct = float(shield.get('reduction_pct', 0.0))
+            reduced_damage = max(1, int(reduced_damage * (1.0 - pct)))
+
         self.health -= reduced_damage
         if self.health <= 0:
             self.health = 0
@@ -58,6 +68,41 @@ class Enemy:
         if not self.alive:
             return f"{self.name} is dead and cannot attack!"
         
+        # Decide to cast a spell if applicable
+        spell_msg = None
+        spellbook = []
+        n = self.name.lower()
+        t = self.enemy_type.lower() if isinstance(self.enemy_type, str) else ""
+        if "archmage" in n:
+            spellbook = [
+                Magic("Blind", "Steal the enemy's surety", 0, 0, 0, spell_type='blind'),
+                Magic("Freeze", "Still the foe's limbs", 0, 0, 0, spell_type='freeze'),
+                Magic("Burn", "A searing brand that lingers", 10, 0, 0, spell_type='burn'),
+                Magic("Ward", "A studied barrier", 0, 0, 0, spell_type='shield'),
+                Magic("Heal", "Restore breath and bone", 0, 0, 0, spell_type='heal'),
+            ]
+        elif "wraith" in n:
+            spellbook = [Magic("Blind", "Chill the eyes", 0, 0, 0, spell_type='blind')]
+        elif "hagraven" in n:
+            spellbook = [Magic("Venom Hex", "Rot that walks", 12, 0, 0, spell_type='poison')]
+        elif "dragon" in n:
+            spellbook = [Magic("Burn", "Dragonfire that sticks", 12, 0, 0, spell_type='burn')]
+        elif "ghost horror" in n:
+            spellbook = [Magic("Freeze", "Terror that stills", 0, 0, 0, spell_type='freeze')]
+
+        if spellbook and random.random() < 0.35:
+            sp = random.choice(spellbook)
+            text, _ = sp.cast(self, target)
+            return f"{self.name} casts {sp.name}! {text}"
+
+        # Accuracy and crits
+        base_accuracy = 0.85 + (self.stats['agility'] * 0.003)
+        # Blind reduces accuracy
+        if self.status_effects.get('blind', {}).get('turns', 0) > 0:
+            base_accuracy -= self.status_effects['blind'].get('accuracy_penalty', 0.25)
+        if random.random() > max(0.05, min(0.98, base_accuracy)):
+            return f"{self.name} swings at {target.name} but misses!"
+
         # Calculate damage with stats
         strength_bonus = self.stats['strength'] * 0.3
         agility_bonus = self.stats['agility'] * 0.2
@@ -65,17 +110,72 @@ class Enemy:
         # Add randomness
         damage_variance = random.uniform(-0.3, 0.3)
         final_damage = int((self.base_damage + strength_bonus + agility_bonus) * (1 + damage_variance))
+        # Crit chance
+        crit_chance = 0.08 + (self.stats['strength'] * 0.0015)
+        crit = random.random() < min(0.4, crit_chance)
+        if crit:
+            final_damage = int(final_damage * 1.5)
         final_damage = max(1, final_damage)  # Minimum 1 damage
         
         # Apply damage to target
         actual_damage = target.take_damage(final_damage, attacker=self, damage_type='physical')
         
-        result = f"{self.name} attacks {target.name} for {actual_damage} damage!"
+        result = f"{self.name} attacks {target.name} for {actual_damage} damage!" + (" (CRIT!)" if crit else "")
         
         if not target.alive:
             result += f"\n💀 {self.name} has killed {target.name}!"
         
         return result
+
+    def add_status(self, name: str, data: dict):
+        if isinstance(data, dict):
+            self.status_effects[name] = data
+
+    def on_turn_start(self):
+        messages = []
+        # Poison damage
+        p = self.status_effects.get('poison')
+        if p and p.get('turns', 0) > 0:
+            dmg = int(p.get('damage', 5))
+            self.health = max(0, self.health - dmg)
+            p['turns'] -= 1
+            messages.append(f"{self.name} suffers {dmg} poison damage!")
+            if p['turns'] <= 0:
+                self.status_effects.pop('poison', None)
+        # Burn damage
+        bdot = self.status_effects.get('burn')
+        if bdot and bdot.get('turns', 0) > 0:
+            dmg = int(bdot.get('damage', 6))
+            self.health = max(0, self.health - dmg)
+            bdot['turns'] -= 1
+            messages.append(f"{self.name} is scorched for {dmg} damage!")
+            if bdot['turns'] <= 0:
+                self.status_effects.pop('burn', None)
+        # Shield decay
+        s = self.status_effects.get('shield')
+        if s and s.get('turns', 0) > 0:
+            s['turns'] -= 1
+            if s['turns'] <= 0:
+                self.status_effects.pop('shield', None)
+        # Blind decay
+        b = self.status_effects.get('blind')
+        if b and b.get('turns', 0) > 0:
+            b['turns'] -= 1
+            if b['turns'] <= 0:
+                self.status_effects.pop('blind', None)
+        # Frozen decay
+        f = self.status_effects.get('frozen')
+        if f and f.get('turns', 0) > 0:
+            f['turns'] -= 1
+            if f['turns'] <= 0:
+                self.status_effects.pop('frozen', None)
+        # Troll regeneration
+        if 'Troll' in self.name:
+            regen = max(5, int(self.max_health * 0.03))
+            if self.alive and self.health > 0 and self.health < self.max_health:
+                self.health = min(self.max_health, self.health + regen)
+                messages.append(f"{self.name} regenerates {regen} HP!")
+        return messages
     
     def heal(self, amount):
         """Heal the enemy (for special abilities)"""
@@ -311,5 +411,10 @@ class EnemyFactory:
         weak_w = [3, 3, 2, 2]  # ~10%
         pick = weighted_choice(tough + weak, tough_w + weak_w)
         return pick()
+
+    @staticmethod
+    def create_rat_king():
+        """Level 25 story boss - Rat King"""
+        return Boss("Rat King", random.randint(1400, 1600), random.randint(70, 85), "Boss", "A crown of tails, sovereign of skitter and rot")
 
 
