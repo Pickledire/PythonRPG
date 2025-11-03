@@ -21,7 +21,7 @@ class Magic(Item):
             return f"Cannot cast magic on {target.name} - target is already dead!"
             
         # Apply damage to target
-        actual_damage = target.take_damage(self.damage)
+        actual_damage = target.take_damage(self.damage, attacker=caster, damage_type='magic')
         
         result = f"{caster.name} casts {self.name} on {target.name} for {actual_damage} damage!"
         

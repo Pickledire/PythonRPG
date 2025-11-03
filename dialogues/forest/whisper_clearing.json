@@ -1,0 +1,19 @@
+{
+  "id": "forest/whisper_clearing",
+  "speaker": "Clearing",
+  "lines": [
+    "Ferns tilt like listeners; their fronds have questions.",
+    "Midges halo a stump that thinks it is a throne.",
+    "A scarf hangs on a branch and flaps in a wind that is not here.",
+    "The air tastes of mint and old fire.",
+    "A circle of stones argues about whether it is a circle.",
+    "Someone has left three berries on a flat rock: two red, one apology.",
+    "A root crosses the dirt like a sentence; it could be a warning or a welcome.",
+    "Your name sounds different when you say it under these leaves."
+  ],
+  "choices": [
+    { "text": "Sit on the stump and listen back.", "next": "forest/hollow_tree" },
+    { "text": "Follow the scarf's wind.", "next": "forest/dark_stream" },
+    { "text": "Take a berry you think is safe.", "effects": [{"stat_change": ["intelligence", 1]}] }
+  ]
+}

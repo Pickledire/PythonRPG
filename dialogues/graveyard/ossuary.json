@@ -1,0 +1,19 @@
+{
+  "id": "graveyard/ossuary",
+  "speaker": "Ossuary",
+  "lines": [
+    "Skulls stack into arches. Jawbones make tidy shelves.",
+    "Every socket contains a shadow that might have been an idea once.",
+    "A braid of rosary beads ties a pillar; the knots are prayers against untying.",
+    "A child-sized femur serves as a candle holder—wax drips like fat tears.",
+    "Your boot knocks a tibia; it rolls back obediently to where it belonged.",
+    "Some skulls grin like hostesses. Some keep their teeth to themselves.",
+    "A single hair ribbon loops a vertebra. The knot is new.",
+    "You are not the only visitor who chooses the quiet rooms."
+  ],
+  "choices": [
+    { "text": "Whisper a litany and move on.", "next": "graveyard/catacomb_fork" },
+    { "text": "Pocket the ribbon and follow a fresh footprint.", "next": "graveyard/chapel_ruin" },
+    { "text": "Sit and let your bones rest with their cousins.", "effects": [{"set_mana": 100}] }
+  ]
+}

@@ -1,0 +1,20 @@
+{
+  "id": "graveyard/chapel_ruin",
+  "speaker": "Chapel Ruin",
+  "lines": [
+    "Roof gone, stars for saints; the chapel keeps its shape anyway.",
+    "Pews rot into the floor like old teeth settling in new gums.",
+    "A cracked font cradles rainwater and moths who think it is a moon.",
+    "Someone has arranged bones into a cross that looks uncomfortable.",
+    "A candle stub waits with the patience of wax.",
+    "You strike flint. The flame remembers its part and enters on cue.",
+    "The air tightens, then lets go, like a sob swallowed on time.",
+    "From the doorway, a shadow decides you have said enough."
+  ],
+  "effects": [ { "visual": "candle", "duration": 1.0 } ],
+  "choices": [
+    { "text": "Hold the candle high and finish the prayer.", "effects": [{"stat_change": ["strength", 1]}] },
+    { "text": "Snuff it and meet the shadow outside.", "effects": [{"start_combat": "Wraith"}] },
+    { "text": "Leave a coin on the font and back away.", "effects": [{"add_gold": -10}], "next": "graveyard/old_stones" }
+  ]
+}

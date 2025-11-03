@@ -1,0 +1,22 @@
+{
+  "id": "fighters/signup_desk",
+  "speaker": "Sign-up Desk",
+  "lines": [
+    "A ledger with bloodstain corners; contracts written in ink and afterthoughts.",
+    "The clerk's quill is a spear for paper.",
+    "'Name?' he asks. 'Or whatever you call yourself when people watch.'",
+    "He slides across a bronze token stamped with a pit and a promise.",
+    "'Lose the token, lose your purse. Lose your purse, lose your friends.'",
+    "He points you toward the tunnel with a thumb that has been broken properly.",
+    "A bell coughs twice; the crowd clears its throat in reply.",
+    "You are ink now. Let's see if you're also steel."
+  ],
+  "effects": [
+    {"set_flag": ["arena_signed", true]}
+  ],
+  "choices": [
+    { "text": "Head to the tunnel.", "next": "fighters/tunnel" },
+    { "text": "Glance at the roster board.", "next": "fighters/roster_board" },
+    { "text": "Get your hands wrapped.", "next": "fighters/locker_room" }
+  ]
+}

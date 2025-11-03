@@ -2,23 +2,18 @@
   "id": "forest/intro",
   "speaker": "Dark Forest",
   "lines": [
-    "The trees whisper. Few listen twice.",
-    "You walk deeper into the forest, the trees are getting thicker and the air is getting darker.",
-    "You hear the sounds of animals in the distance, but you can't see them.",
-    "",
-    "You continue to walk",
-    "There is an odd clearing which streches out in front of you, the trees are thinned out and you can see the sky.",
-    "There is a young woman sitting in the clearing, crying and looking around nervously."
+    "Paths plait and unplait like braids loosened by the wind.",
+    "Leaves speak in a language that prefers you don't understand.",
+    "Birdsong edits itself when you arrive; the chorus forgets your name on purpose.",
+    "Sap runs slower here, thinking long thoughts about knives and spring.",
+    "A waystone leans under moss; someone carved an eye in it and the moss learned to blink.",
+    "Mushrooms litter the trail like coins—white for safe, red for sorry, black for soon.",
+    "The light is not lost. It is hiding to see what you do.",
+    "The forest listens with more ears than you brought."
   ],
   "choices": [
-    {
-      "id": "talk_to_woman",
-      "text": "Talk to the woman",
-      "next": "forest/woman"
-    },
-    {
-      "id": "leave",
-      "text": "Leave"
-    }
+    { "text": "Follow the hunter's trail cut with careful boots.", "next": "forest/trailhead" },
+    { "text": "Step onto the moss path where no one steps twice the same way.", "next": "forest/moss_path" },
+    { "text": "Enter the whispering clearing where ferns lean like eavesdroppers.", "next": "forest/whisper_clearing" }
   ]
 }

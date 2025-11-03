@@ -2,15 +2,22 @@
   "id": "fighters/arena",
   "speaker": "Arena",
   "lines": [
-    "You walk into the bustling arena. Fighters size you up from the ring.",
-    "The sand is stained with old victories and fresh ambitions."
+    "Sand remembers names better than gravestones; it just doesn't write them.",
+    "The sun sits in the cheap seats; clouds heckle.",
+    "A rack of practice weapons leans against a wall that pretends to be stone.",
+    "A water barrel watches you like a friend who knows how fights end.",
+    "Chalk circles stain the ground where 'next time' was invented.",
+    "The tunnel smells of iron and applause.",
+    "A girl sells luck ties; the luck is your knot.",
+    "The bell pulls the day into pieces the crowd can swallow."
   ],
   "choices": [
-    {"id": "fight_Yjurgen", "text": "Fight Yjurgen", "effects": [{"start_combat": "Yjurgen"}]},
-    {"id": "fight_Ziggy", "text": "Fight Ziggy", "effects": [{"start_combat": "Ziggy"}]},
-    {"id": "fight_Jarvask", "text": "Fight Jarvask", "effects": [{"start_combat": "Jarvask"}]},
-    {"id": "fight_Gorren", "text": "Fight Gorren", "effects": [{"start_combat": "Gorren"}]},
-    {"id": "fight_Morrg", "text": "Fight Morrg", "effects": [{"start_combat": "Morrg"}]},
-    {"id": "leave", "text": "Leave"}
+    { "text": "Fight Yjurgen (brute).", "effects": [{"start_combat": "Yjurgen"}] },
+    { "text": "Fight Ziggy (tank).", "effects": [{"start_combat": "Ziggy"}] },
+    { "text": "Fight Jarvask (balanced).", "effects": [{"start_combat": "Jarvask"}] },
+    { "text": "Fight Gorren (berserk).", "effects": [{"start_combat": "Gorren"}] },
+    { "text": "Fight Morrg (twisted).", "effects": [{"start_combat": "Morrg"}] },
+    { "text": "Visit the promoter's office.", "next": "fighters/promoter_office" },
+    { "text": "Visit the medic's tent.", "next": "fighters/medic_tent" }
   ]
 }

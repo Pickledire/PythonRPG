@@ -1,0 +1,21 @@
+{
+  "id": "graveyard/ledger_rite",
+  "speaker": "Ledger",
+  "lines": [
+    "Dust floats up to read with you, each mote a small, attentive eye.",
+    "You speak the names. The vault breathes, then remembers how to sigh.",
+    "Salt lines rewrite themselves into tidier letters.",
+    "The copper portraits look away, grateful to be relieved of their watch.",
+    "In the ledger's gutter lies a charm stitched of thread and phalange.",
+    "Your voice returns to you cleaner than it left.",
+    "The veil in the corner stops quivering. Silence keeps it still.",
+    "The ring on the floor cools. It is only gold again."
+  ],
+  "effects": [
+    {"stat_change": ["intelligence", 1]},
+    {"give_item": {"type": "consumable", "name": "Bone Charm", "value": 0, "description": "A charm that makes names behave"}}
+  ],
+  "choices": [
+    { "text": "Close the ledger and leave.", "next": "graveyard/crypt_steps" }
+  ]
+}

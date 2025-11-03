@@ -1,0 +1,19 @@
+{
+  "id": "blacksmith/midnight_forge",
+  "speaker": "Midnight Forge",
+  "lines": [
+    "The hood drinks the light; sparks look like stars swallowed whole.",
+    "Steel glows the color of memory under heat.",
+    "The quench trough dreams of thunder; the shop holds its breath for the sizzle.",
+    "You hear the quench song the apprentice hummed, but slower.",
+    "The anvil's face is a mirror for fire.",
+    "A shadow stands just where the light gives up and waits to see if you do.",
+    "You lift the hammer and feel the shop lift with you.",
+    "Midnight asks what you want to make of this."
+  ],
+  "choices": [
+    { "text": "Quench courage from the heat (STR).", "effects": [{"stat_change": ["strength", 1]}] },
+    { "text": "Quench patience from the hiss (INT).", "effects": [{"stat_change": ["intelligence", 1]}] },
+    { "text": "Face the shadow that waits.", "effects": [{"start_combat": "Orc"}] }
+  ]
+}

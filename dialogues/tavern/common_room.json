@@ -1,0 +1,19 @@
+{
+  "id": "tavern/common_room",
+  "speaker": "Common Room",
+  "lines": [
+    "Benches complain like elders and then settle for newcomers.",
+    "A stew bowl circles the room under its own power, escorted by ladles.",
+    "Three games happen at once on one table: cards, spoons, and staring.",
+    "A cat owns the hearth; it rents warmth to ankles at a fair rate.",
+    "The rafters remember smoke that had opinions.",
+    "A man with two eyepatches listens perfectly.",
+    "Somebody swears they saw a ghost once. Somebody else swears they married one.",
+    "The door to the alley sticks when the wind is thinking."
+  ],
+  "choices": [
+    { "text": "Sit at the card table.", "next": "tavern/card_table" },
+    { "text": "Drop a coin for the bard and listen.", "next": "tavern/bard_stage" },
+    { "text": "Slip into the alley for air.", "next": "tavern/alley" }
+  ]
+}

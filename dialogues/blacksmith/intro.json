@@ -1,23 +1,19 @@
 {
   "id": "blacksmith/intro",
-  "speaker": "Blacksmith",
+  "speaker": "Forge",
   "lines": [
-    "'Looking for steel or secrets?'",
-    "'I might have both, for a price.'",
-    "'What do you seek?'"
+    "Heat blooms from the mouth of the forge like sunrise with teeth.",
+    "Hammers speak a language of reasons; the anvil answers in periods.",
+    "Hooks hold tools that have names and tempers.",
+    "A quench trough dreams of steam and screams and both are true.",
+    "The smith does not look up; steel tells him who you are.",
+    "On a rack, blades that have not learned yet which fights they belong to.",
+    "On a wall, a child’s drawing of a sword that looks like a river.",
+    "'Looking for steel or secrets?' he asks. 'We can forge either, but not both today.'"
   ],
   "choices": [
-    {
-      "id": "ask_artifact",
-      "text": "Ask about a strange artifact",
-      "next": "blacksmith/artifact",
-      "effects": [
-        { "set_flag": ["artifact_lead", true] }
-      ]
-    },
-    {
-      "id": "leave",
-      "text": "Leave"
-    }
+    { "text": "Step to the counter and speak business.", "next": "blacksmith/counter" },
+    { "text": "Walk the forge floor and watch the work.", "next": "blacksmith/forge_floor" },
+    { "text": "Ask the apprentices what they whisper when the bellows sigh.", "next": "blacksmith/apprentice_corner" }
   ]
 }

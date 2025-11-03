@@ -1,0 +1,22 @@
+{
+  "id": "valoria/plaza",
+  "speaker": "Sun Plaza",
+  "lines": [
+    "Stalls stand like teeth around a smile the city forgot how to wear.",
+    "Coins lie where fingers taught them to wait. Some still wait.",
+    "A fountain holds rainwater and swallows wishes without malice.",
+    "Pigeons argue history on a statue's shoulder.",
+    "Civic pride peeks out from under dust and decides to go back in.",
+    "Footsteps approach from a street that does not reach this square anymore.",
+    "A gate of bronze ribs blocks a path inward. It remembers what it keeps out.",
+    "",
+    "An oath hums here that nobody living can recite correctly.",
+    "A shadow gathers at the gate to make sure."
+  ],
+  "choices": [
+    { "text": "Attempt the oath and pass the gate.", "conditions": [{"flag_not_set": "valoria_restored"}], "effects": [{"start_combat": "Valorian Warden"}] },
+    { "text": "Pay the gate with your token.", "conditions": [{"flag_set": "has_gate_token"}], "effects": [{"set_flag": ["gate_paid", true]}], "next": "valoria/market_ruins" },
+    { "text": "Search the stalls for a token of passage.", "next": "valoria/market_ruins" },
+    { "text": "Return toward the aqueduct.", "next": "valoria/aqueduct" }
+  ]
+}

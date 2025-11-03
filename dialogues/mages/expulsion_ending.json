@@ -1,0 +1,20 @@
+{
+  "id": "mages/expulsion_ending",
+  "speaker": "Expulsion",
+  "lines": [
+    "The Archmage's staff does not tap. The kettle does not boil.",
+    "Paperwork rustles itself into a shape that isn't your shape anymore.",
+    "A clerk coughs an apology into a sleeve and files it.",
+    "The door learns your footsteps so it can forget them later.",
+    "A raven cannot find a ribbon that fits this occasion and leaves.",
+    "In the courtyard, a fountain keeps applauding because it doesn't know.",
+    "Your robe hangs differently. It will pass to a friend and fit them.",
+    "",
+    "You step beyond the gate with a key you should bury and won't.",
+    "The wind is very gentle about it."
+  ],
+  "effects": [
+    {"set_flag": ["mage_expelled", true]},
+    {"give_item": {"type": "consumable", "name": "Refusal Sigil", "value": 0, "description": "Protects you from doors that want to like you"}}
+  ]
+}

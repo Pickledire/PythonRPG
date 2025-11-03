@@ -1,0 +1,17 @@
+{
+  "id": "mt_aegis/peak_relic",
+  "speaker": "Heart-stone",
+  "lines": [
+    "Your fingers find seams too fine for sight.",
+    "The heart-stone loosens; something old wishes to be carried again.",
+    "Grains of glittering mica spill out like ground stars.",
+    "You feel the heft of histories: raids turned back, winters turned aside.",
+    "Every relic is a promise made by someone who kept it.",
+    "You decide which promise will ride with you."
+  ],
+  "choices": [
+    { "text": "Take the Aegis Spear (strength).", "effects": [{"give_item": {"type": "weapon", "name": "Aegis Spear", "damage": 36, "value": 260, "description": "A mountain-forged spear weighted against giants", "weapon_type": "melee"}}], "next": "mt_aegis/afterglow" },
+    { "text": "Take the Windcloak (agility).", "effects": [{"give_item": {"type": "armor", "name": "Windcloak", "defense": 20, "value": 240, "description": "A cloak that sheds arrows like sleet"}}], "next": "mt_aegis/afterglow" },
+    { "text": "Take the Avalanche Sigil (intelligence).", "effects": [{"give_item": {"type": "magic", "name": "Avalanche Sigil", "damage": 38, "mana": 20, "value": 260, "description": "Call white thunder from the slopes"}}], "next": "mt_aegis/afterglow" }
+  ]
+}

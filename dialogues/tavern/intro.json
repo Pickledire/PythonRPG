@@ -1,38 +1,19 @@
 {
   "id": "tavern/intro",
-  "speaker": "Tavern Keeper",
+  "speaker": "The Broken Mug",
   "lines": [
-    "'Welcome, traveler. Looking for trouble or coin?'",
-    "",
-    "The Broken Mug is loud tonight; dice clatter and songs stumble.",
-    "A barmaid weaves through the crowd with a tray of frothing mugs.",
-    "Old maps and dented shields hang crooked on the walls.",
-    "The keeper wipes a glass with a threadbare cloth, eyeing you.",
-    "He leans closer, voice low enough to cut beneath the noise."
+    "Ale steam and hearth-smoke braid in the rafters like old arguments.",
+    "The sign outside still swings from one chain; the other snapped in a storm and stayed snapped.",
+    "Dice sit like teeth in a wooden bowl; the bowl knows how to laugh without spilling.",
+    "Someone has nailed an antler over the bar; the other antler is a tap handle.",
+    "The floor remembers fights the wall does not—scars where chairs changed their minds.",
+    "A bard tunes a string that refuses to be a G.",
+    "The keeper polishes a glass and finds a map in its reflection.",
+    "You step in and every story here takes a breath to make room."
   ],
   "choices": [
-    {
-      "id": "ask_rumors",
-      "text": "Ask for rumors",
-      "next": "tavern/rumors",
-      "effects": [
-        {"set_flag": ["heard_dark_mage_rumor", true]}
-      ]
-    },
-    {
-      "id": "ask_work",
-      "text": "Ask for paying work",
-      "effects": [
-        {"set_flag": ["got_caravan_job", true]}
-      ],
-      "next": "tavern/work"
-    },
-    {
-      "id": "leave",
-      "text": "Leave",
-      "effects": [
-        {"set_flag": ["met_tavern_keeper", true]}
-      ]
-    }
+    { "text": "Find a seat in the common room.", "next": "tavern/common_room" },
+    { "text": "Lean on the bar and order something that burns.", "next": "tavern/bar" },
+    { "text": "Read the rumor leafs pinned to the post.", "next": "tavern/rumor_board" }
   ]
 }

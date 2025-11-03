@@ -1,0 +1,21 @@
+{
+  "id": "valoria/aqueduct",
+  "speaker": "High Aqueduct",
+  "lines": [
+    "Stone ribs stride the valley; water once walked here like a king.",
+    "Below, streets knot around courtyards like prayers around altars.",
+    "Tiles glitter in sun-patches where roofs gave up dignity for honesty.",
+    "A brass pipe sings in the wind, a thin music for engineers and ghosts.",
+    "The view rearranges your sense of important.",
+    "A ladder drops to a balcony where ivy keeps a library from leaving.",
+    "A cracked conduit leads toward a hall that hums like a clock.",
+    "",
+    "Your hands itch to take the ladder. Your heart wants to hear the hum.",
+    "The city wonders which you are—reader or repairman."
+  ],
+  "choices": [
+    { "text": "Climb to the Ivy Library.", "next": "valoria/library" },
+    { "text": "Follow the hum to the Clockwork Hall.", "next": "valoria/clockwork_hall" },
+    { "text": "Back to the plaza.", "next": "valoria/plaza" }
+  ]
+}

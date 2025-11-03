@@ -1,0 +1,22 @@
+{
+  "id": "blacksmith/slag_heap",
+  "speaker": "Slag Heap",
+  "lines": [
+    "Mountains of failures steam in the rain; they are beautiful in an honest way.",
+    "Blue glass nodules wink from the ash like promises that kept trying.",
+    "A bent nail straightens when you look away and sulks when you don't.",
+    "Someone dumped a bucket of water that now holds the sky upside down.",
+    "A strip of runed steel lies where no one can see it unless they can.",
+    "A lizard sunbaths on a rivet big as a knuckle.",
+    "The heap shifts with small avalanches of almost.",
+    "Even the trash here has edges."
+  ],
+  "effects": [
+    {"give_item": {"type": "armor", "name": "Slag Mantle", "defense": 16, "value": 160, "description": "A cloak pinned with cooled mistakes"}},
+    {"set_flag": ["has_slag_mantle", true]}
+  ],
+  "choices": [
+    { "text": "Pocket the runed strip for later.", "effects": [{"set_flag": ["found_runed_strip", true]}], "next": "blacksmith/secret_anvil" },
+    { "text": "Head back inside.", "next": "blacksmith/forge_floor" }
+  ]
+}

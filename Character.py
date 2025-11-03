@@ -210,13 +210,36 @@ class Character:
         mana_restored = self.restore_mana(self.max_mana // 2)  # Restore 50% mana
         return f"You rest and recover {health_restored} HP and {mana_restored} mana."
     
-    def take_damage(self, damage):
+    def take_damage(self, damage, attacker=None, damage_type='physical'):
         armor = self.inventory.equipped_armor
         defense = armor.defense if armor else 0
-        
-        # Calculate damage reduction
-        reduced_damage = max(1, damage - defense)  # Minimum 1 damage
-        
+
+        # Armor penetration for strong attackers / bosses
+        penetration = 0.0
+        if attacker is not None:
+            try:
+                # Base on attacker base damage and strength
+                if hasattr(attacker, 'base_damage') and attacker.base_damage >= 40:
+                    penetration += 0.25
+                if hasattr(attacker, 'stats'):
+                    penetration += min(0.15, attacker.stats.get('strength', 0) * 0.01)
+                # Bosses get a bit more penetration
+                from Enemy import Boss
+                if isinstance(attacker, Boss):
+                    penetration += 0.10
+            except Exception:
+                pass
+        penetration = min(0.5, max(0.0, penetration))
+
+        effective_defense = defense * (1.0 - penetration)
+        # Magic damage bypasses some armor
+        if damage_type == 'magic':
+            effective_defense *= 0.5
+
+        # Diminishing returns formula for mitigation
+        mitigation_multiplier = 100.0 / (100.0 + (effective_defense * 1.5))
+        reduced_damage = int(max(1, round(damage * mitigation_multiplier)))
+
         self.health -= reduced_damage
         if self.health <= 0:
             self.health = 0

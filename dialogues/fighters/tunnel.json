@@ -1,0 +1,19 @@
+{
+  "id": "fighters/tunnel",
+  "speaker": "Tunnel",
+  "lines": [
+    "Stone sweats in a way that makes torches whisper.",
+    "The roar of the crowd becomes a heartbeat you can aim at.",
+    "Footprints overlap—some came back, some are still out there.",
+    "A chalk mark: two lines and a circle; someone else's ritual.",
+    "You touch it and promise nothing.",
+    "Sand drifts inward, testing how the day will end.",
+    "The bell pulls the rope and you with it.",
+    "Time becomes shorter and taller at once."
+  ],
+  "choices": [
+    { "text": "Enter the arena.", "next": "fighters/arena" },
+    { "text": "Slip back to the locker room.", "next": "fighters/locker_room" },
+    { "text": "Detour to the promoter for last words.", "next": "fighters/promoter_office" }
+  ]
+}

@@ -1,0 +1,19 @@
+{
+  "id": "tavern/rumor_board",
+  "speaker": "Rumor Post",
+  "lines": [
+    "Leafs of paper overlap like shingles: 'Missing pig (answers to Lordship)'.",
+    "'Wizard seeks hat (pointier the better)'.",
+    "'Caravan guard needed: east road; will pay less than deserved'.",
+    "A charcoal map of the alley shows an X that moves when you blink.",
+    "Someone has drawn horns on a drawing of someone who does not look upset about it.",
+    "The ink is fresh where someone added 'Don't.' to a poster that said 'Please.'",
+    "A tack holds down two notes that were not written by the same hand to the same person.",
+    "You smell oranges. There are no oranges."
+  ],
+  "choices": [
+    { "text": "Follow the alley map X.", "next": "tavern/alley" },
+    { "text": "Take a guard notice and seek the back room.", "next": "tavern/back_room" },
+    { "text": "Return to the common room.", "next": "tavern/common_room" }
+  ]
+}

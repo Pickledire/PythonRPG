@@ -1,0 +1,11 @@
+{
+  "id": "random/bad/cultist_chant",
+  "speaker": "Cultists",
+  "lines": [
+    "Low voices coil beyond the treeline.",
+    "Symbols burn in ash. Something answers."
+  ],
+  "effects": [
+    {"start_combat": "Hagraven"}
+  ]
+}

@@ -1,0 +1,20 @@
+{
+  "id": "mages/graduation_ending",
+  "speaker": "Commencement",
+  "lines": [
+    "Robes whisper like tides around the dais.",
+    "Names are spoken correctly on the first try; a miracle of administration.",
+    "The Archmage's staff taps stone; the sound writes your name where it belongs.",
+    "Bells agree in several towers; the sky signs the diploma in light.",
+    "Friends clap the way only people who carried the same nights can clap.",
+    "A raven tucks a ribbon into your collar and pretends it was already there.",
+    "The courtyard fountain applauds in droplets.",
+    "",
+    "The Dean hands you a focus and a future that is larger than the campus.",
+    "You do not drop either."
+  ],
+  "effects": [
+    {"set_flag": ["mage_graduated", true]},
+    {"give_item": {"type": "magic", "name": "Valediction", "damage": 52, "mana": 24, "value": 340, "description": "A disciplined farewell that carries forward"}}
+  ]
+}

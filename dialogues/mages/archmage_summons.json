@@ -1,0 +1,20 @@
+{
+  "id": "mages/archmage_summons",
+  "speaker": "Archmage",
+  "lines": [
+    "The Archmage's chamber is smaller than rumors and larger than most rooms.",
+    "Shelves stagger under objects that may be trophies or warnings.",
+    "The window shows weather being edited.",
+    "A kettle refuses to boil until the lecture ends.",
+    "'Apprentice,' the Archmage says, even if you are not.",
+    "'You've been in rooms you shouldn't and out of rooms you should.'",
+    "The kettle boils just enough to punctuate.",
+    "",
+    "'Make your case. The college prefers to be proud of you.'"
+  ],
+  "choices": [
+    { "text": "Present your permits and what you didn't take.", "conditions": [{"flag_set": "restricted_permit"}, {"flag_set": "vault_resisted"}], "next": "mages/graduation_ending" },
+    { "text": "Hide the ampoule and change the subject.", "conditions": [{"flag_set": "forbidden_opened"}], "next": "mages/expulsion_ending" },
+    { "text": "Ask for more time and go train.", "next": "mages/training_chamber" }
+  ]
+}

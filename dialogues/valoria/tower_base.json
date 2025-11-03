@@ -1,0 +1,20 @@
+{
+  "id": "valoria/tower_base",
+  "speaker": "Tower Base",
+  "lines": [
+    "The tower’s stones lean in to hear secrets told at the door.",
+    "Steps spiral up in a language your knees can read.",
+    "A rope dangles from a bell above; it twitches when you think of lying.",
+    "A plaque names the architect and thanks no kings.",
+    "A draft smells of paper, pollen, and lightning.",
+    "A fallen spear rests against the wall; someone carried it to the top and back.",
+    "The door opens if you say nothing for the right amount of time.",
+    "",
+    "Your silence is almost perfect. The door decides to be kind."
+  ],
+  "choices": [
+    { "text": "Climb toward the throne room.", "next": "valoria/tower_ascent" },
+    { "text": "Ring the bell and brace.", "effects": [{"start_combat": "Valorian Warden"}] },
+    { "text": "Return through the mirror hall.", "next": "valoria/mirror_hall" }
+  ]
+}

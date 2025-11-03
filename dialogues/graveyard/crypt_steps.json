@@ -1,0 +1,19 @@
+{
+  "id": "graveyard/crypt_steps",
+  "speaker": "Crypt Steps",
+  "lines": [
+    "Stone sweats in beaded lines; each bead holds a shivering candle flame inside.",
+    "The steps count you—one, two, three—then lose interest and start over.",
+    "Names carved into the rail wear thin where rings worried them for decades.",
+    "A breeze climbs from below that smells of pepper and old paper.",
+    "Your lantern's light folds against a corner and refuses to go any farther.",
+    "The deeper you go, the more the silence sounds like rehearsal.",
+    "You hear the faintest chime: metal touching bone, politely.",
+    "The family vault waits with a door that knows how to close well."
+  ],
+  "choices": [
+    { "text": "Enter the family vault.", "next": "graveyard/family_vault" },
+    { "text": "Veer into the narrow stairs toward the ossuary.", "next": "graveyard/ossuary" },
+    { "text": "Go back while the count is still in your favor.", "next": "graveyard/intro" }
+  ]
+}

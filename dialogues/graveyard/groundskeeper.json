@@ -1,0 +1,22 @@
+{
+  "id": "graveyard/groundskeeper",
+  "speaker": "Groundskeeper",
+  "lines": [
+    "A lantern rocks on a nail; its flame holds its breath between gusts.",
+    "The groundskeeper's coat is patched with the same cloth as his shroud-sacks.",
+    "'Salt the thresholds, sing the names, don't look back,' he recites without looking up.",
+    "He pours tea the color of old coins and hands you a cup that remembers other hands.",
+    "'If a bell rings twice, run. If it rings once, listen. If it doesn't ring, worry.'",
+    "He points his hook toward the crypts. 'Family debts live longer than family pride.'",
+    "'If a shadow asks your name, ask it why it needs to know.'",
+    "He smiles like a trench and returns to trimming the yew."
+  ],
+  "effects": [
+    {"set_flag": ["graveyard_rules", true]}
+  ],
+  "choices": [
+    { "text": "Pocket a measure of salt from his bench.", "effects": [{"give_item": {"type": "consumable", "name": "Grave Salt", "value": 0, "description": "A pinch of stubborn salt"}}], "next": "graveyard/old_stones" },
+    { "text": "Thank him and descend to the crypts.", "next": "graveyard/crypt_steps" },
+    { "text": "Wander toward the chapel ruin.", "next": "graveyard/chapel_ruin" }
+  ]
+}

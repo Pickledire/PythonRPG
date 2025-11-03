@@ -1,0 +1,18 @@
+{
+  "id": "graveyard/name_given",
+  "speaker": "Tomb of Names",
+  "lines": [
+    "Your hand writes more steadily than you expected.",
+    "The milk paint dries the moment it meets the stone; the letters look older than you are.",
+    "When you place the name, a draft passes through you like a key finding a lock.",
+    "Somewhere above, the bell you didn't hear ring stops not ringing.",
+    "You feel lighter where a weight used to sit and heavier where a light used to hide.",
+    "Footsteps approach that make no sound because they have earned the right to be quiet.",
+    "When they stop, something like a hand rests on your shoulder and chooses not to press.",
+    "A voice that is not sound asks if you are finished being only yourself."
+  ],
+  "choices": [
+    { "text": "Say yes and step where the draft is going.", "conditions": [{"flag_set": "graveyard_rules"}], "next": "graveyard/requiem_ending" },
+    { "text": "Say no and take your name back down.", "effects": [{"set_flag": ["name_reclaimed", true]}], "next": "graveyard/catacomb_fork" }
+  ]
+}

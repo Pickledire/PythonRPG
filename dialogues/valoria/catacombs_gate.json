@@ -1,0 +1,21 @@
+{
+  "id": "valoria/catacombs_gate",
+  "speaker": "Catacombs Gate",
+  "lines": [
+    "Steps sweat old cold; torches wag their tongues and say nothing helpful.",
+    "A gate of bone kisses sits ajar in a way that feels deliberate.",
+    "On the lintel, names braided with dates: births that learned to end politely.",
+    "Air moves like a careful hand over a child's fever.",
+    "A trail of dust prints shows bare feet that forgot to stop printing.",
+    "Salt crusts the threshold; someone remembered a rule.",
+    "A bell pull hangs, unconnected to anything you can see.",
+    "",
+    "The city above speaks loud; the city below expects whispers.",
+    "Your breath volunteers."
+  ],
+  "choices": [
+    { "text": "Pull the bell and announce yourself.", "next": "valoria/catacombs_depth" },
+    { "text": "Step over the salt without scuffing it.", "next": "valoria/archive_of_names" },
+    { "text": "Go back toward the plaza light.", "next": "valoria/plaza" }
+  ]
+}

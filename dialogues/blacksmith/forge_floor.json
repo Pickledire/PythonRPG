@@ -1,0 +1,19 @@
+{
+  "id": "blacksmith/forge_floor",
+  "speaker": "Forge Floor",
+  "lines": [
+    "Sparks rise and vanish with opinions about gravity.",
+    "Tongs hold a billet like a throat holds a vow.",
+    "Bellows heave; the fire exhales and remembers summer.",
+    "A dog sleeps under the anvil because it knows when not to argue.",
+    "A bucket of quenchant smells like stories you don't tell at weddings.",
+    "A bar flexes on the horn and decides to be a blade instead.",
+    "The rhythm of the shop pulls your breath into time.",
+    "Someone writes in chalk on the floor: 'Hot means don't.'"
+  ],
+  "choices": [
+    { "text": "Work the bellows.", "next": "blacksmith/bellows_room" },
+    { "text": "Try a practice heat under a watchful eye.", "next": "blacksmith/anvil_trial" },
+    { "text": "Step out back to the slag heap.", "next": "blacksmith/slag_heap" }
+  ]
+}

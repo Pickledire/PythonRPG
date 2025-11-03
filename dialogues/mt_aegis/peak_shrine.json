@@ -1,0 +1,17 @@
+{
+  "id": "mt_aegis/peak_shrine",
+  "speaker": "Summit Shrine",
+  "lines": [
+    "Stone teeth form a ring around a flat of wind-smoothed basalt.",
+    "In the center rises a plinth of blue granite webbed with sigils—the Aegis heart-stone.",
+    "Charred offerings, wolf-pelts, a child's toy carved from bone: the mountain remembers its petitioners.",
+    "The wind is thin here; it whispers at a pitch that lives behind your teeth.",
+    "Ancient boot-holes pock the stone—ritual steps worn by knees and hope.",
+    "Something heavy sleeps in the plinth's shadow, warm despite the cold."
+  ],
+  "choices": [
+    { "text": "Kneel and swear the old oath to Aegis.", "next": "mt_aegis/peak_oath" },
+    { "text": "Claim a relic from the heart-stone.", "next": "mt_aegis/peak_relic" },
+    { "text": "Strike the plinth and defy the old powers.", "next": "mt_aegis/peak_defile" }
+  ]
+}

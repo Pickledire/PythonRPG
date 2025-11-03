@@ -1,0 +1,19 @@
+{
+  "id": "tavern/owner_office",
+  "speaker": "Owner's Office",
+  "lines": [
+    "Ledgers line the wall like well-behaved bricks.",
+    "A small crown sits in a drawer that is only locked when watched.",
+    "A map of the city uses spills and burned rings for landmarks.",
+    "On a shelf, a stein sweats without being filled.",
+    "The owner is nowhere. His chair keeps his shape out of loyalty.",
+    "Under the desk, a trapdoor memorizes your weight.",
+    "On the desk, three coins; one real, one wood, one that insists on being a moon.",
+    "On the door, a hook for a sign that can only read 'Closed' no matter the ink."
+  ],
+  "choices": [
+    { "text": "Lift the sweating stein.", "next": "tavern/last_toast_ending" },
+    { "text": "Pocket the wood coin and leave.", "effects": [{"give_item": {"type": "consumable", "name": "Wood Coin", "value": 0, "description": "Buys luck in places that need it"}}], "next": "tavern/common_room" },
+    { "text": "Open the trapdoor and trust your ankles.", "next": "tavern/cellar" }
+  ]
+}

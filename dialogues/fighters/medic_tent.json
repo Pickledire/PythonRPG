@@ -1,0 +1,21 @@
+{
+  "id": "fighters/medic_tent",
+  "speaker": "Medic",
+  "lines": [
+    "Canvas smells of herbs and arguments won late.",
+    "A cot sags with the memory of someone else's pain.",
+    "'Sit,' the medic says, and you do, because the verb is practiced.",
+    "They bind your wrist with linen that once was a shirt worth keeping.",
+    "A jar of tincture winks; it knows hurt when it sees it.",
+    "'You don't have to be brave. Just be here.'",
+    "The bell asks a question; your ribs answer honestly.",
+    "You leave with new lines drawn where you need them."
+  ],
+  "effects": [
+    {"set_health": 100}
+  ],
+  "choices": [
+    { "text": "Back to the sand.", "next": "fighters/arena" },
+    { "text": "Back to the promoter.", "next": "fighters/promoter_office" }
+  ]
+}

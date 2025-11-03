@@ -1,0 +1,22 @@
+{
+  "id": "forest/hunter_camp",
+  "speaker": "Hunter",
+  "lines": [
+    "A tarp leans on a wishbone of saplings; smoke goes straight up as if climbing home.",
+    "The hunter sharpens in circles; the knife is an excuse to think in arcs.",
+    "He does not stand, but his eyes arrive first and bring his face after.",
+    "'Trail's busy today,' he says. 'Wolves testing the weave. Witch-sign on the west side.'",
+    "He flips a charm in his hand—a tooth wrapped in thread—swallows a thought instead of a drink.",
+    "'If you go streamward, carry hush. If you go hillward, carry hurry.'",
+    "He sees the set of your shoulders and measures you like weather.",
+    "'Take one of these or return it to the tree later.'"
+  ],
+  "effects": [
+    {"give_item": {"type": "consumable", "name": "Hunter's Charm", "value": 0, "description": "A tooth that doesn't mind being bitten"}}
+  ],
+  "choices": [
+    { "text": "Head toward the witch-sign west.", "next": "forest/witch_waystone" },
+    { "text": "Go streamward with hush.", "next": "forest/dark_stream" },
+    { "text": "Climb hillward with hurry.", "next": "forest/hollow_tree" }
+  ]
+}

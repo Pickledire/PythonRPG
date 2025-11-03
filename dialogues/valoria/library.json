@@ -1,0 +1,21 @@
+{
+  "id": "valoria/library",
+  "speaker": "Ivy Library",
+  "lines": [
+    "Shelves bow under books that learned to breathe damp.",
+    "Vines leaf through pages and stop at pictures they like.",
+    "A lectern wears a chain like a necklace that bites thieves.",
+    "A globe spins when you pass; it stops with your finger on the sea you haven't seen yet.",
+    "Marginalia argue with authors; a pressed flower wins every debate.",
+    "Ladders lean in, nosy as old friends.",
+    "A librarian-shaped absence makes a shushing gesture anyway.",
+    "",
+    "A codex on a dais hums; its lock is a riddle with three answers.",
+    "You know one of them because the wind told you earlier."
+  ],
+  "choices": [
+    { "text": "Unlock the codex and read the city's true name.", "next": "valoria/archive_of_names" },
+    { "text": "Pocket a map of the underways.", "effects": [{"give_item": {"type": "consumable", "name": "Underway Map", "value": 0, "description": "Shortcuts the city approves"}}], "next": "valoria/catacombs_gate" },
+    { "text": "Close the book and hear the hum fade.", "next": "valoria/aqueduct" }
+  ]
+}

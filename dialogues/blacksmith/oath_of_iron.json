@@ -1,0 +1,19 @@
+{
+  "id": "blacksmith/oath_of_iron",
+  "speaker": "Oath of Iron",
+  "lines": [
+    "You heat the strip until the rune goes from secret to obvious and back again.",
+    "The small anvil holds your promise without complaint.",
+    "You strike the rune into your name and your name into the rune.",
+    "Steam rises from the quench like a ghost that remembers its body fondly.",
+    "The shop outside keeps time; in here the hammer makes a clock of its own.",
+    "When you lift the piece, it weighs exactly as much as the truth.",
+    "You did not make a weapon. You made a sentence that ends well.",
+    "The smith will know. The iron already does."
+  ],
+  "choices": [
+    { "text": "Accept the Dragonsteel Maul (strength).", "effects": [{"give_item": {"type": "weapon", "name": "Dragonsteel Maul", "damage": 58, "value": 320, "description": "A maul that makes arguments short", "weapon_type": "melee"}}] },
+    { "text": "Accept the Filigree Rapier (agility).", "effects": [{"give_item": {"type": "weapon", "name": "Filigree Rapier", "damage": 42, "value": 300, "description": "A needle for sewing exits", "weapon_type": "melee"}}] },
+    { "text": "Accept the Sigil Brand (intelligence).", "effects": [{"give_item": {"type": "magic", "name": "Sigil Brand", "damage": 46, "mana": 24, "value": 320, "description": "Mark and unmake with heat that remembers"}}] }
+  ]
+}

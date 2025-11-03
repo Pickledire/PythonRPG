@@ -1,0 +1,19 @@
+{
+  "id": "blacksmith/anvil_trial",
+  "speaker": "Anvil Trial",
+  "lines": [
+    "You draw heat and lose nerve; you draw nerve and lose heat. This is how it goes.",
+    "The bar's red fades to orange while the hammer learns your wrist.",
+    "A bevel appears because you ask politely.",
+    "Scale flakes like black snow and tells you not to rush.",
+    "A straight thing bends until you convince it, then pretends it chose to.",
+    "The anvil gives back exactly what you give it, except heavier.",
+    "You can stop now and call it a lesson.",
+    "Or you can hit once more and call it yours."
+  ],
+  "choices": [
+    { "text": "Stop and breathe.", "effects": [{"stat_change": ["intelligence", 1]}], "next": "blacksmith/forge_floor" },
+    { "text": "Strike once more.", "effects": [{"stat_change": ["strength", 1]}], "next": "blacksmith/forge_floor" },
+    { "text": "Drop it and pick a fight with your impatience.", "effects": [{"start_combat": "Orc"}] }
+  ]
+}

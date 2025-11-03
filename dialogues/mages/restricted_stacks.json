@@ -1,0 +1,22 @@
+{
+  "id": "mages/restricted_stacks",
+  "speaker": "Restricted Stacks",
+  "lines": [
+    "Shelves lean together in conspiracies; pages whisper.",
+    "Locks ask for passwords you remember from dreams.",
+    "A lantern refuses to smoke, as if ashamed to be seen here.",
+    "A chain across a desk rattles when you think about rule-bending.",
+    "Footprints made of dust turn a corner and end politely.",
+    "A clerk shaped like a shadow stamps a permit on air.",
+    "A sigil chalked on the floor dampens accidents and doubles intentions.",
+    "",
+    "Somewhere below, a vault door listens for this room's decisions."
+  ],
+  "effects": [
+    {"set_flag": ["restricted_permit", true]}
+  ],
+  "choices": [
+    { "text": "Carry your permit toward the Forbidden Vault.", "next": "mages/forbidden_vault" },
+    { "text": "Back to the colonnade.", "next": "mages/archives_colonnade" }
+  ]
+}

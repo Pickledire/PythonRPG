@@ -38,8 +38,10 @@ class GameEngine:
         self.shop = Shop()
         self.level_10_boss = False
         self.level_15_boss = False
+        self.level_20_boss = False
         self.ghost_horror = False
         self.quest_flags = {}
+        self.world_bells = 8  # simple world time, 0-23
         
         # Color scheme
         self.colors = {
@@ -105,6 +107,79 @@ class GameEngine:
         """Center-print a multi-line block of text line-by-line."""
         for line in block_text.splitlines():
             self.print_centered(line, color=color)
+    
+    # ====== Visual Effects ======
+    def play_effect(self, name: str, duration: float = 1.6):
+        name = (name or "").lower()
+        try:
+            if name in ("quake", "tremor"):
+                self._effect_quake(duration)
+            elif name in ("shadow_sweep", "wings"):
+                self._effect_shadow_sweep(duration)
+            elif name in ("glyphs", "arcane"):
+                self._effect_glyphs(duration)
+            elif name in ("candle", "flicker"):
+                self._effect_candle_flicker(duration)
+            elif name in ("gears", "clockwork"):
+                self._effect_gears(duration)
+            elif name in ("banner", "coin_shimmer"):
+                self._effect_banner(duration)
+            elif name in ("cold_breath", "mist"):
+                self._effect_cold_breath(duration)
+        except Exception:
+            pass
+
+    def _effect_quake(self, duration: float):
+        end = time.time() + duration
+        frames = ["▓ ▓▓▓  ▓▓ ▓", " ▓▓  ▓▓▓  ▓", "▓  ▓▓  ▓▓▓", "  ▓▓▓ ▓  ▓"]
+        while time.time() < end:
+            self.print_centered(random.choice(frames), 120, self.colors['warning'])
+            time.sleep(0.06)
+
+    def _effect_shadow_sweep(self, duration: float):
+        end = time.time() + duration
+        width = 48
+        while time.time() < end:
+            pad = random.randint(0, 16)
+            self.print_centered(" " * pad + "█" * width, 120, Fore.BLACK + Style.BRIGHT)
+            time.sleep(0.08)
+
+    def _effect_glyphs(self, duration: float):
+        end = time.time() + duration
+        runes = ["∆", "∴", "∵", "✧", "✦", "✩", "✪"]
+        cols = [self.colors['magic'], self.colors['info']]
+        while time.time() < end:
+            line = " ".join(random.choice(runes) for _ in range(random.randint(8, 14)))
+            self.print_centered(line, 120, random.choice(cols))
+            time.sleep(0.1)
+
+    def _effect_candle_flicker(self, duration: float):
+        end = time.time() + duration
+        frames = ["  |", "  )", "  (", "  )", "  |"]
+        while time.time() < end:
+            self.print_centered(random.choice(frames) + "  🕯", 120, self.colors['warning'])
+            time.sleep(0.08)
+
+    def _effect_gears(self, duration: float):
+        end = time.time() + duration
+        frames = ["[|] ⚙ ", "[/] ⚙ ", "[-] ⚙ ", "[\\] ⚙ "]
+        while time.time() < end:
+            self.print_centered(random.choice(frames) * 3, 120, self.colors['info'])
+            time.sleep(0.08)
+
+    def _effect_banner(self, duration: float):
+        end = time.time() + duration
+        strips = ["≈≈≈≈≈≈≈", "~~~~~~~~", "≋≋≋≋≋≋≋", "-~-~-~-~"]
+        while time.time() < end:
+            self.print_centered(random.choice(strips), 120, self.colors['gold'])
+            time.sleep(0.07)
+
+    def _effect_cold_breath(self, duration: float):
+        end = time.time() + duration
+        puffs = ["· · ·", "···", "·  ·", "   ·", " ·  "]
+        while time.time() < end:
+            self.print_centered(random.choice(puffs), 120, self.colors['info'])
+            time.sleep(0.08)
     
     def display_title(self):
         """Display the game title with enhanced styling"""
@@ -340,6 +415,8 @@ class GameEngine:
                 self.print_centered(line, 120, Fore.WHITE)
             else:
                 print()  # Empty line for spacing
+            # Subtle quake between lines
+            self.play_effect("quake", duration=0.12)
         
         print("\n" * 2)
         
@@ -392,9 +469,48 @@ class GameEngine:
         self.print_centered(f"{name}", 120, Fore.RED + Style.BRIGHT)
         self.print_border("═", 100, Fore.RED + Style.BRIGHT)
         print("\n")
+        # Shadow sweep (wings) and ember shimmer
+        self.play_effect("shadow_sweep", duration=0.6)
+        self.play_effect("glyphs", duration=0.4)
         self.print_centered("🔥 The elder flame will test your mettle. 🔥", 120, Fore.YELLOW + Style.BRIGHT)
         print("\n")
         input(f"{self.colors['menu']}Press Enter to face the Elder Dragon...{self.colors['reset']}")
+
+    def display_earth_eater_worm_intro(self):
+        """Cinematic intro for the level 20 Earth Eater Worm."""
+        self.clear_screen()
+        print("\n" * 1)
+        # Persistent quake as the worm approaches
+        self.play_effect("quake", duration=0.8)
+        self.print_border("═", 120, self.colors['border'])
+        self.print_centered("THE EARTH SPLITS OPEN", 120, self.colors['header'])
+        self.print_border("═", 120, self.colors['border'])
+        print()
+
+        name = self.current_enemy.name
+        title = self.current_enemy.description if self.current_enemy.description else "a burrowing leviathan"
+        story = [
+            "Pebbles skitter. Cracks race like lightning underfoot...",
+            "The ground heaves as if the world is changing its mind.",
+            f"Soil domes, shatters — and the maw of {name}, {title.lower()}, blooms like a pit.",
+            "Ribs of stone snap between its rings. The air tastes of iron and old dark.",
+            "It listens with its whole body. It answers with hunger.",
+        ]
+        for line in story:
+            if line:
+                self.print_centered(line, 120, Fore.WHITE)
+            else:
+                print()
+            self.play_effect("quake", duration=0.12)
+
+        print("\n")
+        self.print_border("═", 100, Fore.YELLOW)
+        self.print_centered(f"{name}", 120, Fore.YELLOW + Style.BRIGHT)
+        self.print_border("═", 100, Fore.YELLOW)
+        print("\n")
+        self.print_centered("The tunnel-king comes. Stand, or be unmade.", 120, self.colors['warning'])
+        print("\n")
+        input(f"{self.colors['menu']}Grip the earth and begin...{self.colors['reset']}")
     
     def start_combat(self):
         """Start a combat encounter"""
@@ -403,9 +519,12 @@ class GameEngine:
             input(f"{self.colors['menu']}Press Enter to continue...{self.colors['reset']}")
             return
         
-        # Generate enemy: force level 15 boss, then level 10 boss, once per run
+        # Generate enemy: force level 20 boss, then level 15 boss, then level 10 boss, once per run
         player_level = self.player.level if self.player else 1
-        if player_level >= 15 and not self.level_15_boss:
+        if player_level >= 20 and not self.level_20_boss:
+            self.level_20_boss = True
+            self.current_enemy = EnemyFactory.create_earth_eater_worm()
+        elif player_level >= 15 and not self.level_15_boss:
             self.level_15_boss = True
             self.current_enemy = EnemyFactory.create_elder_dragon()
         elif player_level >= 10 and not self.level_10_boss:
@@ -419,7 +538,11 @@ class GameEngine:
         if isinstance(self.current_enemy, Boss):
             if getattr(self.current_enemy, 'name', '') == 'Elder Dragon' and hasattr(self, 'display_elder_dragon_intro'):
                 self.display_elder_dragon_intro()
+            elif getattr(self.current_enemy, 'name', '') == 'Earth Eater Worm' and hasattr(self, 'display_earth_eater_worm_intro'):
+                self.display_earth_eater_worm_intro()
             else:
+                # Titan or other bosses — add a brief quake for impact
+                self.play_effect("quake", duration=0.5)
                 self.display_boss_intro()
         else:
             print()
@@ -596,6 +719,7 @@ class GameEngine:
         for line in lines:
             self.print_centered(line, 120, self.colors['info'])
             time.sleep(0.3)
+            self.play_effect("cold_breath", duration=0.1)
 
         print("\n")
         self.print_border("─", 100, self.colors['warning'])
@@ -1236,6 +1360,12 @@ class GameEngine:
             self.display_title()
             
             self.print_centered(f"{self.colors['gold']}🏪 Welcome to Merchant's Emporium!{self.colors['reset']}")
+            self.play_effect("banner", duration=0.6)
+            # Rotate inventory each visit based on world time
+            try:
+                self.shop.refresh_inventory(seed=self.world_bells)
+            except Exception:
+                pass
             self.print_centered(f"{self.colors['gold']}Your gold: {self.player.gold} 💰{self.colors['reset']}")
             print()
             
@@ -1386,6 +1516,68 @@ class GameEngine:
         """Load game functionality"""
         print(f"\n{self.colors['warning']}📁 Load game functionality coming soon!{self.colors['reset']}")
         input(f"{self.colors['menu']}Press Enter to continue...{self.colors['reset']}")
+    
+    def visit_magic_shop(self):
+        """College Magic Shop with better spells and rotation."""
+        from Shop import Shop
+        magic_shop = Shop(mode='magic')
+        while True:
+            self.clear_screen()
+            self.display_title()
+            self.print_centered(f"{self.colors['magic']}🏪 Collegium Arcana — Spellwright's Stall{self.colors['reset']}")
+            self.play_effect("glyphs", duration=0.5)
+            self.print_centered(f"{self.colors['gold']}Your gold: {self.player.gold} 💰{self.colors['reset']}")
+            print()
+            try:
+                magic_shop.refresh_inventory(seed=(self.world_bells + self.player.level))
+            except Exception:
+                pass
+            self.print_border("─", 50, self.colors['magic'])
+            print(f"{self.colors['magic']}What would you like to do?{self.colors['reset']}")
+            self.print_border("─", 50, self.colors['magic'])
+
+            self.print_centered(f"{self.colors['menu']}1. {self.colors['magic']}🔮 Browse spells{self.colors['reset']}")
+            self.print_centered(f"{self.colors['menu']}2. {self.colors['item']}🧪 Browse consumables{self.colors['reset']}")
+            self.print_centered(f"{self.colors['menu']}3. {self.colors['error']}🚪 Leave stall{self.colors['reset']}")
+
+            choice = input(f"\n{self.colors['menu']}Enter your choice: {self.colors['reset']}").strip()
+            if choice == "1":
+                available = magic_shop.display_items('magic')
+                if not available:
+                    input(f"{self.colors['menu']}Press Enter to continue...{self.colors['reset']}")
+                    continue
+                sel = input(f"\n{self.colors['menu']}Enter spell number to buy (0 to cancel): {self.colors['reset']}").strip()
+                try:
+                    idx = int(sel)
+                    if idx == 0:
+                        continue
+                    success, message = magic_shop.buy_item(idx, available, self.player)
+                    print((self.colors['success'] if success else self.colors['error']) + message + self.colors['reset'])
+                    input(f"{self.colors['menu']}Press Enter to continue...{self.colors['reset']}")
+                except ValueError:
+                    print(f"{self.colors['error']}Please enter a valid number!{self.colors['reset']}")
+                    input(f"{self.colors['menu']}Press Enter to continue...{self.colors['reset']}")
+            elif choice == "2":
+                available = magic_shop.display_items('consumable')
+                if not available:
+                    input(f"{self.colors['menu']}Press Enter to continue...{self.colors['reset']}")
+                    continue
+                sel = input(f"\n{self.colors['menu']}Enter item number to buy (0 to cancel): {self.colors['reset']}").strip()
+                try:
+                    idx = int(sel)
+                    if idx == 0:
+                        continue
+                    success, message = magic_shop.buy_item(idx, available, self.player)
+                    print((self.colors['success'] if success else self.colors['error']) + message + self.colors['reset'])
+                    input(f"{self.colors['menu']}Press Enter to continue...{self.colors['reset']}")
+                except ValueError:
+                    print(f"{self.colors['error']}Please enter a valid number!{self.colors['reset']}")
+                    input(f"{self.colors['menu']}Press Enter to continue...{self.colors['reset']}")
+            elif choice == "3":
+                break
+            else:
+                print(f"{self.colors['error']}Invalid choice!{self.colors['reset']}")
+                input(f"{self.colors['menu']}Press Enter to continue...{self.colors['reset']}")
     
     def quit_game(self):
         """Quit the game"""

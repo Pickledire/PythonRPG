@@ -1,0 +1,12 @@
+{
+  "id": "random/good/enchanted_spring",
+  "speaker": "Forest Glade",
+  "lines": [
+    "Under the roots, a spring glows faintly.",
+    "You cup your hands and drink; cool clarity settles behind your eyes."
+  ],
+  "effects": [
+    {"stat_change": ["intelligence", 1]},
+    {"give_item": {"type": "melee", "name": "Glimmer Ward", "damage": 30, "value": 80, "description": "A soft ward against creeping harm"}}
+  ]
+}

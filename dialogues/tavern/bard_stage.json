@@ -1,0 +1,21 @@
+{
+  "id": "tavern/bard_stage",
+  "speaker": "Bard",
+  "lines": [
+    "The song starts in the throat and ends under the floorboards.",
+    "A story about a king who lost his crown and kept his head.",
+    "A chorus that fits like a bench after a long road.",
+    "Between verses, the bard tunes the room more than the lute.",
+    "You hear a line that sounds like a direction in a city that doesn't exist.",
+    "Someone weeps as quietly as a nap.",
+    "The last chord lands like a coin with two heads.",
+    "The bard nods at the bookcase that isn't always a bookcase."
+  ],
+  "effects": [
+    {"stat_change": ["intelligence", 1]}
+  ],
+  "choices": [
+    { "text": "Follow the nod to the bookcase.", "next": "tavern/secret_passage" },
+    { "text": "Return to the common room.", "next": "tavern/common_room" }
+  ]
+}

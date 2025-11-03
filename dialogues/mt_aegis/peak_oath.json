@@ -1,0 +1,21 @@
+{
+  "id": "mt_aegis/peak_oath",
+  "speaker": "Aegis",
+  "lines": [
+    "You press your brow to stone. Breath plumes like incense.",
+    "The world narrows to heartbeat and frost. Then the mountain answers.",
+    "It does not speak in words so much as weight—your bones feel correctly arranged.",
+    "The ache in your knees becomes a kind of music you know how to dance.",
+    "You remember the names of snow you have never seen, and how each melts differently.",
+    "When you stand, your shadow fits the shrine's outline as if meant."
+  ],
+  "effects": [
+    {"set_flag": ["aegis_oath", true]},
+    {"stat_change": ["strength", 1]},
+    {"stat_change": ["agility", 1]},
+    {"stat_change": ["intelligence", 1]}
+  ],
+  "choices": [
+    { "text": "Rise and descend the mountain.", "next": "mt_aegis/afterglow" }
+  ]
+}

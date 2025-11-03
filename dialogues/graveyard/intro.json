@@ -2,9 +2,18 @@
   "id": "graveyard/intro",
   "speaker": "Graveyard",
   "lines": [
+    "Iron gates sigh as they swing inward of their own accord.",
+    "Yew trees lean like black flames, pointing where the light is thinnest.",
+    "Names on stones unspool into the fog; some you think you almost recognize.",
+    "A bell that hasn't rung in years thuds once in the ear, then pretends it didn't.",
+    "Some graves are dressed in flowers. Some are dressed in snow. Some are dressed in attention.",
+    "A path of broken shells crunches underfoot—salt, old and stubborn.",
     "The dead do not rest when the living will not let them.",
-    "",
-    "You see a grave with a name on it, 'John Doe'.",
-    "It is the bigest "
+    "The dead do not rest when the living will not learn."
+  ],
+  "choices": [
+    { "text": "Seek the groundskeeper's cottage by the wall.", "next": "graveyard/groundskeeper" },
+    { "text": "Walk the oldest stones where the dates have rubbed away.", "next": "graveyard/old_stones" },
+    { "text": "Descend the steps toward the family crypts.", "next": "graveyard/crypt_steps" }
   ]
 }

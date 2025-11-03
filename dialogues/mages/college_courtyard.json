@@ -1,0 +1,21 @@
+{
+  "id": "mages/college_courtyard",
+  "speaker": "College Courtyard",
+  "lines": [
+    "Stone cloisters hold the wind like a cup holds steam.",
+    "Students cross in patterns that look like spells from the tower.",
+    "A notice board advertises lectures on ethics, physics, and lunch.",
+    "The fountain repeats itself patiently; coins gleam like small suns.",
+    "An Archon statue points at the library no matter where you stand.",
+    "A raven wears a ribbon from some ceremony you missed.",
+    "Apprentices argue whether wards should sing in minor or major.",
+    "",
+    "Paths lead to the Arcanum Hall, the Training Chamber, and the Archives.",
+    "Your feet choose if your mind doesn't."
+  ],
+  "choices": [
+    { "text": "Enter the Arcanum Hall.", "next": "mages/arcanum_hall" },
+    { "text": "Step into the Training Chamber.", "next": "mages/training_chamber" },
+    { "text": "Walk the Archives colonnade.", "next": "mages/archives_colonnade" }
+  ]
+}

@@ -1,0 +1,17 @@
+{
+  "id": "mt_aegis/echo_caverns",
+  "speaker": "Echo Caverns",
+  "lines": [
+    "Moist air smells of iron and old fires.",
+    "Your footfalls double and triple; echoes argue about which one is true.",
+    "Scratch-marks wander at knee height along the limestone—something small and quick.",
+    "Calcite curtains hang in sheets; water ticks in patient metronomes.",
+    "Charcoal hands once painted antlers here; frost adds its own white antlers over time.",
+    "A draft moves against you as if the mountain were breathing out a warning."
+  ],
+  "choices": [
+    { "text": "Follow the scratch-marks into a narrow runnel.", "effects": [{"start_combat": "Spriggan"}] },
+    { "text": "Take the painted passage where sigils bloom with frost.", "next": "mt_aegis/sigil_door" },
+    { "text": "Return to base camp.", "next": "mt_aegis/base_camp" }
+  ]
+}

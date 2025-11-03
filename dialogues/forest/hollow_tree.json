@@ -1,0 +1,19 @@
+{
+  "id": "forest/hollow_tree",
+  "speaker": "Hollow Tree",
+  "lines": [
+    "A cedar split by lightning holds a room inside itself.",
+    "Char streaks climb the bark like writing the fire left for later.",
+    "Resin beads glimmer like thoughts you meant to finish.",
+    "Inside, someone carved a bed and slept small.",
+    "A ribbon of cloth binds a branch that did not break.",
+    "The scent is sweet and medicinal; it wants to fix something.",
+    "You find a twig bundle tucked where eyes would be.",
+    "It is not eyes. It is a promise in a knot."
+  ],
+  "choices": [
+    { "text": "Untie the twig bundle gently.", "effects": [{"give_item": {"type": "consumable", "name": "Resin Knot", "value": 0, "description": "Tie once. Untie twice."}}] },
+    { "text": "Burn the resin and watch the smoke.", "next": "forest/fae_ring" },
+    { "text": "Carve your own mark and keep walking.", "next": "forest/trailhead" }
+  ]
+}

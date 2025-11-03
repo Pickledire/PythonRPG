@@ -41,6 +41,25 @@ def _check_conditions(engine, node: dict) -> bool:
             current = getattr(getattr(engine, 'player', None), 'kills', 0)
             if current < needed:
                 return False
+        if "time_at" in cond:
+            if getattr(engine, 'world_bells', 0) != int(cond["time_at"]):
+                return False
+        if "time_gte" in cond:
+            if getattr(engine, 'world_bells', 0) < int(cond["time_gte"]):
+                return False
+        if "time_between" in cond:
+            try:
+                a, b = cond["time_between"][0], cond["time_between"][1]
+                t = getattr(engine, 'world_bells', 0)
+                if a <= b:
+                    if not (a <= t <= b):
+                        return False
+                else:
+                    # wraps midnight
+                    if not (t >= a or t <= b):
+                        return False
+            except Exception:
+                return False
     return True
 
 
@@ -95,11 +114,35 @@ def _apply_effects(engine, effects: list):
         elif "add_gold" in eff:
             amount = eff["add_gold"]
             engine.print_centered(engine.player.add_gold(amount))
+        elif "advance_time" in eff:
+            try:
+                engine.world_bells = (engine.world_bells + int(eff["advance_time"])) % 24
+            except Exception:
+                pass
+        elif "set_time" in eff:
+            try:
+                engine.world_bells = int(eff["set_time"]) % 24
+            except Exception:
+                pass
         elif "unlock_shop" in eff:
             item = eff["unlock_shop"]
             engine.quest_flags.setdefault("shop_unlocks", set())
             engine.quest_flags["shop_unlocks"].add(item)
             engine.print_centered(f"{engine.colors['gold']}[Shop] Unlocked: {item}{engine.colors['reset']}")
+        elif "open_shop" in eff:
+            mode = eff["open_shop"]
+            try:
+                if mode == "magic" and hasattr(engine, 'visit_magic_shop'):
+                    engine.visit_magic_shop()
+                elif hasattr(engine, 'visit_shop'):
+                    engine.visit_shop()
+            except Exception:
+                pass
+        elif "visual" in eff:
+            try:
+                engine.play_effect(eff["visual"], duration=eff.get("duration", 1.2))
+            except Exception:
+                pass
         elif "start_combat" in eff:
             enemy_id = eff["start_combat"]
             from Enemy import EnemyFactory, Boss
@@ -123,6 +166,20 @@ def _apply_effects(engine, effects: list):
                 engine.current_enemy = EnemyFactory.create_Hagraven()
             elif enemy_id == "Archmage":
                 engine.current_enemy = EnemyFactory.create_Archmage()
+            elif enemy_id == "Bandit":
+                engine.current_enemy = EnemyFactory.create_bandit()
+            elif enemy_id == "Skeleton":
+                engine.current_enemy = EnemyFactory.create_skeleton()
+            elif enemy_id == "Wraith":
+                engine.current_enemy = EnemyFactory.create_wraith()
+            elif enemy_id == "Valorian Warden":
+                engine.current_enemy = EnemyFactory.create_valorian_warden()
+            elif enemy_id == "Lich Regent":
+                engine.current_enemy = EnemyFactory.create_lich_regent()
+            elif enemy_id == "Clockwork Colossus":
+                engine.current_enemy = EnemyFactory.create_clockwork_colossus()
+            elif enemy_id in ("Earth Eater Worm", "Earth_Eater_Worm"):
+                engine.current_enemy = EnemyFactory.create_earth_eater_worm()
             else:
                 engine.current_enemy = EnemyFactory.create_goblin()
             engine.in_combat = True
@@ -130,6 +187,8 @@ def _apply_effects(engine, effects: list):
             if isinstance(engine.current_enemy, Boss) and hasattr(engine, 'display_boss_intro'):
                 if getattr(engine.current_enemy, 'name', '') == 'Elder Dragon' and hasattr(engine, 'display_elder_dragon_intro'):
                     engine.display_elder_dragon_intro()
+                elif getattr(engine.current_enemy, 'name', '') == 'Earth Eater Worm' and hasattr(engine, 'display_earth_eater_worm_intro'):
+                    engine.display_earth_eater_worm_intro()
                 else:
                     engine.display_boss_intro()
             else:
@@ -160,6 +219,11 @@ def _apply_effects(engine, effects: list):
             elif isinstance(payload, dict):
                 name = payload.get("name", "Unknown Item")
                 typ = payload.get("type", "consumable")
+                # Graceful fallback for common mistakes: treat 'melee'/'ranged' as weapon type
+                if typ in ("melee", "ranged"):
+                    payload = dict(payload)
+                    payload["weapon_type"] = typ
+                    typ = "weapon"
                 if typ == "weapon":
                     dmg = int(payload.get("damage", 10))
                     item = Weapon(name, dmg, 100, payload.get("description", ""), int(payload.get("value", 0)), payload.get("weapon_type", "melee"))
@@ -199,6 +263,12 @@ def show_dialogue(engine, dialogue_id: str):
 
 
         engine.clear_screen()
+
+        # Advance simple world time by 1 bell per node
+        try:
+            engine.world_bells = (engine.world_bells + 1) % 24
+        except Exception:
+            pass
 
         speaker = node.get("speaker")
         if speaker:

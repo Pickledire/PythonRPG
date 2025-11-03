@@ -1,0 +1,21 @@
+{
+  "id": "valoria/catacombs_depth",
+  "speaker": "Deep Catacombs",
+  "lines": [
+    "Nichés hold clay jars labeled in a script that never learned to die.",
+    "Footfalls count in pairs until they remember you are odd.",
+    "An alcove houses a saint made of opinions; its smile forgives and forgets.",
+    "A tide of cool air pushes at your knees like a cat that won't be seen.",
+    "Bone dust takes prints like snow and erases as it pleases.",
+    "Somewhere a gear turns once in a century and you catch it in the act.",
+    "A voice behind you asks if you kept the salt. It is your voice. It is not behind you.",
+    "",
+    "A shadow separates from the wall to see if it prefers being yours.",
+    "It doesn't."
+  ],
+  "choices": [
+    { "text": "Stand and let it move first.", "effects": [{"start_combat": "Wraith"}] },
+    { "text": "Speak a name you learned in the library.", "next": "valoria/archive_of_names" },
+    { "text": "Retreat upslope to the gate.", "next": "valoria/catacombs_gate" }
+  ]
+}

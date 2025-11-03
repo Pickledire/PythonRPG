@@ -1,0 +1,19 @@
+{
+  "id": "forest/heartwood_ending",
+  "speaker": "Heartwood",
+  "lines": [
+    "The market folds itself back into the trees; only the stump remains and even it is more suggestion than wood.",
+    "You set the twig bundle on the scale. The other pan fills with birdsong and stops just shy of even.",
+    "A hand like bark and a voice like rain offer you what the forest thinks you meant to ask.",
+    "Roots rise just enough to trip your doubt and then settle, satisfied.",
+    "The air tastes of sap and the first cut of spring.",
+    "You feel the path arrange itself under you for the walk back you haven't started.",
+    "The forest keeps your name the way a pocket keeps a stone.",
+    "It returns something that fits your hand like a memory finally behaving."
+  ],
+  "choices": [
+    { "text": "Accept the Thornbow (agility).", "effects": [{"give_item": {"type": "weapon", "name": "Thornbow", "damage": 40, "value": 260, "description": "A bow grown, not carved; it remembers which way to bend", "weapon_type": "ranged"}}] },
+    { "text": "Accept the Heart-Root Blade (strength).", "effects": [{"give_item": {"type": "weapon", "name": "Heart-Root Blade", "damage": 46, "value": 280, "description": "A blade with grain; it favors the patient", "weapon_type": "melee"}}] },
+    { "text": "Accept the Verdant Word (intelligence).", "effects": [{"give_item": {"type": "magic", "name": "Verdant Word", "damage": 44, "mana": 22, "value": 300, "description": "Speak and the green leans to listen"}}] }
+  ]
+}

@@ -68,7 +68,7 @@ class Enemy:
         final_damage = max(1, final_damage)  # Minimum 1 damage
         
         # Apply damage to target
-        actual_damage = target.take_damage(final_damage)
+        actual_damage = target.take_damage(final_damage, attacker=self, damage_type='physical')
         
         result = f"{self.name} attacks {target.name} for {actual_damage} damage!"
         
@@ -213,9 +213,25 @@ class EnemyFactory:
         return Boss(f"Titan: {boss_name}", random.randint(400, 600), random.randint(25, 45), "Boss", boss_title)
     
     @staticmethod
+    def create_valorian_warden():
+        return Boss("Valorian Warden", 650, 50, "Boss", "A sentinel bound to the gates by oath and old steel")
+
+    @staticmethod
+    def create_lich_regent():
+        return Boss("Lich Regent", 700, 55, "Boss", "A sovereign of silence wearing a crown of names")
+
+    @staticmethod
+    def create_clockwork_colossus():
+        return Boss("Clockwork Colossus", 800, 60, "Boss", "A titan of gears and grief, wound to outlast the sun")
+    @staticmethod
     def create_elder_dragon():
         """Level 15 story boss - Elder Dragon"""
         return Boss("Elder Dragon", random.randint(800, 1000), random.randint(45, 60), "Boss", "An ancient wyrm wreathed in ruinous flame")
+
+    @staticmethod
+    def create_earth_eater_worm():
+        """Level 20 story boss - Earth Eater Worm"""
+        return Boss("Earth Eater Worm", random.randint(1100, 1300), random.randint(60, 70), "Boss", "A burrowing leviathan whose maw devours stone and light")
 
     @staticmethod
     def create_ghost_horror(game_engine=None):

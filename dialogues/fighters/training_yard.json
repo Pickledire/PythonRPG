@@ -1,0 +1,19 @@
+{
+  "id": "fighters/training_yard",
+  "speaker": "Training Yard",
+  "lines": [
+    "Dummies bleed straw like honest men.",
+    "A rack of shields remembers other grips.",
+    "A coach barks the alphabet and the letters duck.",
+    "Chalk lines mark the steps for a dance nobody teaches on purpose.",
+    "Footwork beats bladework; the yard repeats it until it is true.",
+    "A bucket of sand eats dropped knives politely.",
+    "You catch yourself smiling because you forgot to be scared.",
+    "Someone claps just once. It's enough."
+  ],
+  "choices": [
+    { "text": "Drill footwork (AGI).", "effects": [{"stat_change": ["agility", 1]}], "next": "fighters/arena" },
+    { "text": "Heavy bag rounds (STR).", "effects": [{"stat_change": ["strength", 1]}], "next": "fighters/arena" },
+    { "text": "Study an opponent (INT).", "effects": [{"stat_change": ["intelligence", 1]}], "next": "fighters/arena" }
+  ]
+}

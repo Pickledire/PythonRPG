@@ -1,0 +1,21 @@
+{
+  "id": "valoria/good_ending",
+  "speaker": "Valoria, Remembered",
+  "lines": [
+    "You speak the name the city wanted to hear and not be owned by.",
+    "Walls relax; arches drop their shoulders.",
+    "Banners find their colors and keep them this time.",
+    "The fountain laughs without swallowing anyone's wish.",
+    "Stalls settle into patient lines as if the market had just agreed to open again.",
+    "In the tower, the bell rings once to mark a debt paid in full.",
+    "A door opens where no door has been since maps grew tired.",
+    "",
+    "From within, a chest carries itself politely into the square and waits for you to notice.",
+    "You do."
+  ],
+  "effects": [
+    {"set_flag": ["valoria_restored", true]},
+    {"give_item": {"type": "weapon", "name": "Sunline Saber", "damage": 60, "value": 340, "description": "A blade that keeps its edge and its word", "weapon_type": "melee"}},
+    {"give_item": {"type": "armor", "name": "Civic Aegis", "defense": 40, "value": 320, "description": "A breastplate embossed with the old seal"}}
+  ]
+}

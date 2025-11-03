@@ -1,0 +1,19 @@
+{
+  "id": "fighters/locker_room",
+  "speaker": "Locker Room",
+  "lines": [
+    "Benches scarred by buckles and victories.",
+    "Hooks hold coats that remember better summers.",
+    "A bucket with cold water tolerates courage and spit equally.",
+    "Handwraps hang to dry and drip old stories.",
+    "Someone carved 'Breathe' into the door; someone else added 'Now'.",
+    "A friend you haven't met wishes you luck and means it.",
+    "The bell sounds closer in here.",
+    "Your hands harden. Your heart doesn't need to."
+  ],
+  "choices": [
+    { "text": "Wrap your hands and go.", "next": "fighters/tunnel" },
+    { "text": "Borrow a charm left on a hook.", "effects": [{"give_item": {"type": "consumable", "name": "Luck Tie", "value": 0, "description": "A knot that holds when you do"}}], "next": "fighters/arena" },
+    { "text": "Sit a minute and learn the room's breath (mana).", "effects": [{"set_mana": 100}], "next": "fighters/arena" }
+  ]
+}

@@ -1,0 +1,20 @@
+{
+  "id": "mt_aegis/pilgrim_lore",
+  "speaker": "Weathered Pilgrim",
+  "lines": [
+    "The pilgrim's beard is white frost. His eyes are wet coals.",
+    "'The Aegis does not test the strong. It weighs the stubborn,' he says.",
+    "'Glacier remembers, cavern forgives. Choose what you can live with.'",
+    "He taps the cairn stones; a soft ringing answers from somewhere deeper in the rock.",
+    "'Leave bread for the wind and it leaves you standing. Leave blood and it leaves you alone.'",
+    "He smiles without joy, as if repeating rules that once saved him, once failed him."
+  ],
+  "effects": [
+    {"set_flag": ["heard_aegis_lore", true]}
+  ],
+  "choices": [
+    { "text": "Thank him and head to the Glacier Pass.", "next": "mt_aegis/glacier_pass" },
+    { "text": "Thank him and enter the Echo Caverns.", "next": "mt_aegis/echo_caverns" },
+    { "text": "Return to base camp.", "next": "mt_aegis/base_camp" }
+  ]
+}

@@ -1,0 +1,12 @@
+{
+  "id": "random/good/wayfarer_feast",
+  "speaker": "Wayfarer",
+  "lines": [
+    "A cloaked traveler warms their hands by your fire.",
+    "'Share bread, share luck,' they say, passing you a wrapped loaf."
+  ],
+  "effects": [
+    {"add_gold": 25},
+    {"give_item": "Health Potion"}
+  ]
+}

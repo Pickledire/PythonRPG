@@ -1,0 +1,25 @@
+{
+  "id": "valoria/market_ruins",
+  "speaker": "Market Ruins",
+  "lines": [
+    "Stalls wear moss aprons; awnings drape like old flags.",
+    "A jar of spice puffs when you lift the lid and forgets to stop.",
+    "A scale with one pan gone still balances fairly.",
+    "Footprints cross and uncross—pilgrims of a market that refuses to end.",
+    "A coin purse sags from a nail, tired of hope.",
+    "A vendor’s bell sleeps under a cloth; if you ring it, the city might wake.",
+    "A bronze token stamped with the gate's ribs glints in dust.",
+    "",
+    "You find a note scratched on the counter: 'Pay the gate what it paid you.'",
+    "The ink is fresh. The hand is older than ink."
+  ],
+  "effects": [
+    {"give_item": {"type": "consumable", "name": "Gate Token", "value": 0, "description": "Bronze ribs, warm to the touch"}},
+    {"set_flag": ["has_gate_token", true]}
+  ],
+  "choices": [
+    { "text": "Return to the Sun Plaza gate.", "next": "valoria/plaza" },
+    { "text": "Follow a side street toward a mirror-lit hall.", "next": "valoria/mirror_hall" },
+    { "text": "Pocket the vendor's bell and leave.", "effects": [{"give_item": {"type": "consumable", "name": "Vendor's Bell", "value": 0, "description": "Rings only when uncalled for"}}], "next": "valoria/plaza" }
+  ]
+}

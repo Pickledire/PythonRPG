@@ -1,0 +1,22 @@
+{
+  "id": "valoria/clockwork_hall",
+  "speaker": "Clockwork Hall",
+  "lines": [
+    "Gears taller than houses nest in walls like patient animals.",
+    "A pendulum sweeps a room clear of everything but time.",
+    "Cogs click lullabies; axles hum hymns.",
+    "Oil smells like yesterday being kind to today.",
+    "A control dais waits for hands that remember a sequence no one taught you.",
+    "A bronze door at the far end pretends it is asleep.",
+    "The hum sharpens; the floor trembles; bolts consider protests and withdraw them.",
+    "",
+    "Something enormous uncurls from stillness and learns it again as it rises.",
+    "The hall claps its teeth shut to keep the noise in."
+  ],
+  "effects": [ { "visual": "gears", "duration": 1.0 } ],
+  "choices": [
+    { "text": "Face the Clockwork Colossus.", "effects": [{"start_combat": "Clockwork Colossus"}] },
+    { "text": "Throw the lever the way the pendulum suggests.", "next": "valoria/market_ruins" },
+    { "text": "Retreat toward the aqueduct arch.", "next": "valoria/aqueduct" }
+  ]
+}

@@ -1,0 +1,11 @@
+{
+  "id": "random/bad/pickpocket_night",
+  "speaker": "Night Air",
+  "lines": [
+    "A footfall. A shadow. A hand too light to feel.",
+    "By dawn, your purse weighs less."
+  ],
+  "effects": [
+    {"add_gold": -30}
+  ]
+}

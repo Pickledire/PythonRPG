@@ -1,7 +1,21 @@
 {
   "id": "valoria/intro",
-  "speaker": "Valoria Ruins",
+  "speaker": "Ruins of Valoria",
   "lines": [
-    "Stones remember what men forget."
+    "Wind threads banners that forgot their colors and kept their pride.",
+    "Streets mosaic the sun in shards; glass remembers when it was sand and not yet a promise.",
+    "Arches wear ivy like armor. Statues wear names that rain washed into rumors.",
+    "A clocktower with no hands keeps perfect time with a broken heart.",
+    "Doorways breathe out cool air and the faintest spice of memory.",
+    "Somewhere a market calls for buyers that never stop coming. Somewhere a bell rings for no one.",
+    "You stand at a gate that was meant to open only once and never again.",
+    "",
+    "The stones underfoot tilt the world a degree toward stories and away from sleep.",
+    "A crow plucks a thread from a banner and stitches the sky back together."
+  ],
+  "choices": [
+    { "text": "Enter the Sun Plaza where the market used to sing.", "next": "valoria/plaza" },
+    { "text": "Cross the aqueduct's spine into the high quarter.", "next": "valoria/aqueduct" },
+    { "text": "Descend through a cracked gate toward the catacombs.", "next": "valoria/catacombs_gate" }
   ]
 }

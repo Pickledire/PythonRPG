@@ -1,0 +1,19 @@
+{
+  "id": "forest/moss_path",
+  "speaker": "Moss Path",
+  "lines": [
+    "Moss remembers every step and forgives most of them.",
+    "Your footprints fill behind you with green that is not new and not old.",
+    "A ring of mushrooms considers being a circle and decides against it at the last moment.",
+    "A beetle carries a leaf like a flag that means 'later'.",
+    "The light is thinner here, as if strained through silk and kept for winter.",
+    "You pass a stump that smells like bread.",
+    "Something laughs the way water does when it chooses a rock on purpose.",
+    "A neat braid of grass crosses the path—the forest's hair pinned for a ceremony."
+  ],
+  "choices": [
+    { "text": "Step over the braid without touching it.", "next": "forest/fae_ring" },
+    { "text": "Unpin the braid to see what changes.", "effects": [{"start_combat": "Spriggan"}] },
+    { "text": "Follow the laughter toward a clearing.", "next": "forest/whisper_clearing" }
+  ]
+}

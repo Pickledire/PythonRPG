@@ -1,7 +1,19 @@
 {
   "id": "mt_aegis/intro",
-  "speaker": "Mount Aegis",
+  "speaker": "Mt. Aegis",
   "lines": [
-    "Winds howl. The peak tests all who climb."
+    "Wind combs the snowfields at the mountain's foot.",
+    "Icicles hang like teeth from the ruined waystones of a forgotten road.",
+    "Somewhere above, the path splits through glacier and cavern before it finds the crown.",
+    "Your breath smokes in steady offerings; even sound seems to move slower here.",
+    "Pilgrims once came for omens. Raiders came later for shelter. The mountain outlasted both.",
+    "A raven watches from a broken cairn, head tilting as if counting your heartbeats.",
+    "Snow muffles the world until only choice remains: up, or away.",
+    "You tighten your cloak. The mountain waits."
+  ],
+  "choices": [
+    { "text": "Establish a base camp and survey the approaches.", "next": "mt_aegis/base_camp" },
+    { "text": "Push into the Glacier Pass by nightfall.", "next": "mt_aegis/glacier_pass" },
+    { "text": "Speak with a weathered pilgrim lingering near the cairns.", "next": "mt_aegis/pilgrim_lore" }
   ]
 }

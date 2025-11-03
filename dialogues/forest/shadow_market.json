@@ -1,0 +1,19 @@
+{
+  "id": "forest/shadow_market",
+  "speaker": "Shadow Market",
+  "lines": [
+    "Stalls set up where no road leads; lanterns hang from hooks that don't cast shadows.",
+    "Vendors drape their wares in sighs: a jar of rain kept from falling, a smile borrowed from winter.",
+    "A hound asleep on a rug dreams with its eyes open and its nose closed.",
+    "Coins here are stories; they clink in your pocket when you remember them.",
+    "A seller of glimmers offers one that looks like your reflection finally agreeing.",
+    "At the market's center, a stump serves as a scale: heart on one side, twig on the other.",
+    "The crier rings a bell with no clapper; the sound arrives from your childhood.",
+    "You realize the market opens for those who don't look for it and closes for those who stay."
+  ],
+  "choices": [
+    { "text": "Trade your twig bundle for something that fits your hand.", "next": "forest/heartwood_ending" },
+    { "text": "Buy a glimmer with a story you haven't told yet.", "effects": [{"give_item": {"type": "consumable", "name": "Glimmer", "value": 0, "description": "A small agreement with light"}}], "next": "forest/trailhead" },
+    { "text": "Leave before prices remember to rise.", "next": "forest/intro" }
+  ]
+}

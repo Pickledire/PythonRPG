@@ -1,0 +1,18 @@
+{
+  "id": "fighters/sand_oath_ending",
+  "speaker": "Oath on the Sand",
+  "lines": [
+    "After the bell, the crowd exhales; the day puts itself away.",
+    "You kneel and press your hand into the sand; it keeps your print and your promise.",
+    "You swear to fight only what deserves it, and to be what the cheering thinks you are when it is kind.",
+    "The arena listens. It has heard worse. It chooses to believe you.",
+    "A runner brings a bundle wrapped in old banners.",
+    "Inside: a weapon with the grit of glass and the grace of rain.",
+    "The promoter nods once, like a man who lost a bet and doesn't mind.",
+    "The medic smiles twice, like a person who knows stories that end later."
+  ],
+  "effects": [
+    {"set_flag": ["sand_oath", true]},
+    {"give_item": {"type": "weapon", "name": "Arena Edge", "damage": 52, "value": 310, "description": "A blade tempered by cheers and stubbornness", "weapon_type": "melee"}}
+  ]
+}

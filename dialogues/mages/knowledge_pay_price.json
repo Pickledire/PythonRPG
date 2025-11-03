@@ -32,4 +32,9 @@
         {"set_mana": 300},
         {"set_intelligence": 40}
     ]
+    ,
+    "choices": [
+        { "text": "\"...Compose yourself.\" Walk to the Arcanum Hall.", "next": "mages/arcanum_hall" },
+        { "text": "Steady your steps in the college courtyard.", "next": "mages/college_courtyard" }
+    ]
 }

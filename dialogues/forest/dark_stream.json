@@ -1,0 +1,19 @@
+{
+  "id": "forest/dark_stream",
+  "speaker": "Dark Stream",
+  "lines": [
+    "Water runs black as polished stone; it shows the sky where sky can't go.",
+    "Fish with lantern eyes hold their breath when you kneel.",
+    "A bridge of roots pretends it is not a bridge so you will step wrong.",
+    "Coins wink from the silt; each wishes to be the one you take.",
+    "A feather floats upstream to see if anyone is watching.",
+    "The current speaks in threes and expects you to answer in twos.",
+    "A pale woman stands across the water until you blink.",
+    "Where she stood is only fog that remembers her outline."
+  ],
+  "choices": [
+    { "text": "Cross on the not-bridge.", "effects": [{"start_combat": "Dire Wolf"}] },
+    { "text": "Toss a coin and make no wish.", "effects": [{"add_gold": -5}], "next": "forest/hollow_tree" },
+    { "text": "Walk upstream where the fog thins.", "next": "forest/witch_waystone" }
+  ]
+}

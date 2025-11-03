@@ -1,0 +1,19 @@
+{
+  "id": "tavern/alley",
+  "speaker": "Alley",
+  "lines": [
+    "The alley is a throat the city clears quietly.",
+    "Rain remembers the route; it takes it again tonight just in case.",
+    "Crates lean like eavesdroppers deciding to be helpful.",
+    "A chalk X that moved earlier pretends to be where you expected.",
+    "A bottle rolls uphill two inches, then remembers itself and stops.",
+    "Someone coughs without wanting to; someone else stops breathing on purpose.",
+    "A hand extends from shadow palm-up as if it has nothing to hide.",
+    "A second hand extends, knife-down, as if to agree."
+  ],
+  "choices": [
+    { "text": "Take the palm-up hand.", "effects": [{"add_gold": -15}, {"set_flag": ["tavern_mugged", true]}], "next": "tavern/common_room" },
+    { "text": "Meet the knife with your own.", "effects": [{"start_combat": "Bandit"}] },
+    { "text": "Back away and find the bookcase door.", "next": "tavern/secret_passage" }
+  ]
+}

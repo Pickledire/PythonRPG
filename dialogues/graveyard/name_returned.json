@@ -1,0 +1,21 @@
+{
+  "id": "graveyard/name_returned",
+  "speaker": "Tomb of Names",
+  "lines": [
+    "The name you paint tastes like rain in winter.",
+    "It belongs to someone who taught you a word for mercy you could carry alone.",
+    "The stone warms in your palm as if it remembers a forehead.",
+    "When you set it in its gap, the shelf becomes entirely itself again.",
+    "A moth leaves the brush and flies in a circle that can't quite close.",
+    "You hear a thank-you where a draft used to be.",
+    "Your own name fits more comfortable in your mouth afterward.",
+    "The stairs up look less like a distance and more like a direction."
+  ],
+  "effects": [
+    {"stat_change": ["agility", 1]},
+    {"give_item": {"type": "consumable", "name": "Token of Thanks", "value": 0, "description": "A pebble that feels like permission"}}
+  ],
+  "choices": [
+    { "text": "Leave quietly.", "next": "graveyard/catacomb_fork" }
+  ]
+}

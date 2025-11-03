@@ -1,0 +1,21 @@
+{
+  "id": "valoria/tower_ascent",
+  "speaker": "Tower Ascent",
+  "lines": [
+    "Steps count themselves; you count something else to stay even.",
+    "Windows blink out over rooftops that pretend they weren't watching.",
+    "A landing hosts a painting of a door that has opened for better people.",
+    "A chain rattles against a hook that forgot its job.",
+    "Breath finds a rhythm where each exhale is a small surrender and each inhale a truce.",
+    "Lightning thinks better of it and chooses the bell instead.",
+    "Your hand trails the wall; dust writes a map on your fingertips.",
+    "",
+    "At the top, a doorway waits with exactly enough room for your courage.",
+    "Something on the other side adjusts its crown."
+  ],
+  "choices": [
+    { "text": "Enter the throne room.", "next": "valoria/throne_room" },
+    { "text": "Go back while the steps still remember you kindly.", "next": "valoria/tower_base" },
+    { "text": "Pause and catch the breath the tower offers (mana).", "effects": [{"set_mana": 100}] }
+  ]
+}

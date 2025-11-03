@@ -1,0 +1,12 @@
+{
+  "id": "random/bad/cursed_totem",
+  "speaker": "Cursed Totem",
+  "lines": [
+    "A carved face peers from the dark, mouth full of nails.",
+    "You look back too long. Your limbs feel heavier."
+  ],
+  "effects": [
+    {"stat_change": ["strength", -1]},
+    {"stat_change": ["intelligence", -1]}
+  ]
+}

@@ -4,14 +4,17 @@ from Item import Consumable, Armor
 from Magic import Magic
 
 class Shop:
-    """Shop class for buying and selling items"""
+    """Shop class for buying and selling items with rotation support"""
     
-    def __init__(self):
-        self.inventory = self._create_shop_inventory()
+    def __init__(self, mode: str = 'general'):
+        self.mode = mode  # 'general' or 'magic'
+        self.inventory = []
+        self._pools = self._build_pools()
+        self.refresh_inventory()
     
-    def _create_shop_inventory(self):
-        """Create the shop's inventory with various items"""
-        shop_items = []
+    def _build_pools(self):
+        """Build item pools for rotation"""
+        pools = { 'weapon': [], 'armor': [], 'consumable': [], 'magic': [] }
         
         # Weapons
         weapons = [
@@ -70,15 +73,50 @@ class Shop:
             Magic("Ice Bolt", "A sharp ice bolt", 25, 10, 100),
             Magic("Lightning Bolt", "A powerful lightning bolt", 23, 10, 150),
         ]
-        # Add all items to shop inventory
-        for item in weapons + armors + consumables + magic:
-            shop_items.append({
-                'item': item,
-                'stock': 99 if item.item_type == 'consumable' else 1,
-                'price': item.value
-            })
-        
-        return shop_items
+        for w in weapons:
+            pools['weapon'].append(w)
+        for a in armors:
+            pools['armor'].append(a)
+        for c in consumables:
+            pools['consumable'].append(c)
+        for m in magic:
+            pools['magic'].append(m)
+        return pools
+
+    def refresh_inventory(self, seed: int | None = None):
+        """Rotate inventory selection. Use optional seed for deterministic rotation."""
+        import random
+        rnd = random.Random()
+        if seed is not None:
+            rnd.seed(int(seed))
+        else:
+            rnd.seed()
+        self.inventory = []
+        if self.mode == 'general':
+            # Sample a subset
+            for item in rnd.sample(self._pools['weapon'], k=min(5, len(self._pools['weapon']))):
+                self.inventory.append({'item': item, 'stock': 1, 'price': item.value})
+            for item in rnd.sample(self._pools['armor'], k=min(4, len(self._pools['armor']))):
+                self.inventory.append({'item': item, 'stock': 1, 'price': item.value})
+            for item in rnd.sample(self._pools['consumable'], k=min(5, len(self._pools['consumable']))):
+                self.inventory.append({'item': item, 'stock': 99, 'price': item.value})
+            for item in rnd.sample(self._pools['magic'], k=min(3, len(self._pools['magic']))):
+                self.inventory.append({'item': item, 'stock': 1, 'price': item.value})
+        elif self.mode == 'magic':
+            # Curate stronger spells only
+            better_spells = [
+                Magic("Meteor Lance", "A spear of falling starfire", 72, 26, 320),
+                Magic("Frozen Crown", "A ring of razors made of winter", 68, 24, 300),
+                Magic("Thunder Chorus", "A chorus of bolts that rarely agree", 80, 30, 360),
+                Magic("Aegis Ward", "A disciplined barrier spell", 0, 14, 180),
+                Magic("Sun Flare", "A bright unmaking for stubborn shadows", 76, 28, 340),
+            ]
+            pool = self._pools['magic'] + better_spells
+            for item in rnd.sample(pool, k=min(6, len(pool))):
+                self.inventory.append({'item': item, 'stock': 1, 'price': item.value})
+            # Mana/health potions
+            for item in rnd.sample(self._pools['consumable'], k=min(3, len(self._pools['consumable']))):
+                self.inventory.append({'item': item, 'stock': 99, 'price': item.value})
     
     def display_items(self, item_type=None):
         """Display shop items, optionally filtered by type"""

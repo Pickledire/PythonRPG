@@ -6,6 +6,6 @@
     "'No hard feelings.'"
   ],
   "effects": [
-    {"start_combat": "Gorren"}
+    {"start_combat": "Bandit"}
   ]
 }

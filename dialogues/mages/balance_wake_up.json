@@ -15,7 +15,8 @@
         "'Reach out your hand... and grasp the balance.'"
     ],
     "choices": [
-        { "id": "reach_out", "text": "Reach out your hand... and grasp the balance.", "next": "mages/balance_reach_out" }
+        { "id": "reach_out", "text": "Reach out your hand... and grasp the balance.", "next": "mages/balance_reach_out" },
+        { "id": "rise", "text": "\"...Rise.\" Walk to the college courtyard.", "next": "mages/college_courtyard" }
     ],
     "effects": [
         {"set_flag": ["mage_path", "balance"]},

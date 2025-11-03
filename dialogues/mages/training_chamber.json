@@ -1,0 +1,23 @@
+{
+  "id": "mages/training_chamber",
+  "speaker": "Training Chamber",
+  "lines": [
+    "Circles are chalked on stone; some are arguments, some are apologies.",
+    "Targets float just high enough to annoy.",
+    "A practice ward hums and occasionally says 'no' out loud.",
+    "Scorch marks overlap into maps of optimism.",
+    "Books sit open to diagrams that will forgive your handwriting later.",
+    "A tutor claps once; the room arranges itself into attention.",
+    "\"Power. Knowledge. Balance.\" the tutor intones, and the chalk nods.",
+    "",
+    "Choose a discipline today. Tomorrow you can choose again if you remember these answers."
+  ],
+  "effects": [ { "visual": "glyphs", "duration": 0.8 } ],
+  "choices": [
+    { "text": "Practice Offensive Forms (Power).", "effects": [{"stat_change": ["intelligence", 1]}, {"give_item": {"type": "magic", "name": "Arcane Burst", "damage": 24, "mana": 10, "value": 140, "description": "A disciplined explosion"}}] },
+    { "text": "Practice Defensive Forms (Balance).", "effects": [{"give_item": {"type": "magic", "name": "Ward", "damage": 0, "mana": 8, "value": 120, "description": "Interpose intention between harm and home"}}] },
+    { "text": "Practice Focus and Reserves (Knowledge).", "effects": [{"set_mana": 120}] },
+    { "text": "Dueling practice.", "effects": [{"start_combat": "Orc"}] },
+    { "text": "Return to the courtyard.", "next": "mages/college_courtyard" }
+  ]
+}

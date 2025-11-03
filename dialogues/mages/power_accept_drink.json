@@ -29,4 +29,8 @@
         {"set_intelligence": 10},
         {"set_flag": ["mage_path", "power"]}
     ]
+    ,
+    "choices": [
+        { "text": "\"...Stand. Breathe.\" Find your footing in the college courtyard.", "next": "mages/college_courtyard" }
+    ]
 }

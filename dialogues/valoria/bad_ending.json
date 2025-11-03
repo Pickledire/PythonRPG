@@ -1,0 +1,20 @@
+{
+  "id": "valoria/bad_ending",
+  "speaker": "Valoria, Bound",
+  "lines": [
+    "You kneel and the city learns the wrong lesson.",
+    "Walls draw breath and hold it.",
+    "Banners bleach themselves to avoid being recognized when history looks back.",
+    "The fountain goes still enough to become a mirror no one likes.",
+    "Stalls stand at attention like soldiers who would rather be bread.",
+    "In the tower, the bell rings twice and forgets why.",
+    "A key grows out of your shadow and feels heavy without weight.",
+    "",
+    "The Regent gifts you a token that opens doors you would be better for bypassing.",
+    "You do not throw it away."
+  ],
+  "effects": [
+    {"set_flag": ["valoria_bound", true]},
+    {"give_item": {"type": "consumable", "name": "Regent's Key", "value": 0, "description": "Opens doors and closes options"}}
+  ]
+}

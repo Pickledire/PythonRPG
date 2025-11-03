@@ -1,0 +1,21 @@
+{
+  "id": "valoria/throne_room",
+  "speaker": "Throne Room",
+  "lines": [
+    "A throne of interlocked names sits under a window that refuses to light tyrants.",
+    "Banners hang like verdicts reconsidered.",
+    "The floor is a mirror for choices; it shows only what you keep.",
+    "A crown rests on a cushion that looks relieved.",
+    "The air smells of cedar, ink, and endings.",
+    "Footsteps approach from behind the throne; they are careful with their echoes.",
+    "A figure arrives wearing a body like a borrowed robe and a smile like a signature.",
+    "",
+    "The Regent inclines the head it uses today and invites you to negotiate.",
+    "The negotiation has rules you will not like."
+  ],
+  "choices": [
+    { "text": "Challenge the Lich Regent.", "effects": [{"start_combat": "Lich Regent"}] },
+    { "text": "Name the debt you erased below.", "next": "valoria/good_ending" },
+    { "text": "Bow and learn a worse lesson.", "next": "valoria/bad_ending" }
+  ]
+}

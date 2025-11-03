@@ -1,0 +1,19 @@
+{
+  "id": "graveyard/old_stones",
+  "speaker": "Old Stones",
+  "lines": [
+    "The oldest graves squat low, their names made of lichen and stubbornness.",
+    "Coins fused by time glitter in a cracked saucer: promises nobody will call in.",
+    "A jawbone peeks from a sinkhole, teeth in a smile that means weather, not joy.",
+    "You trace a groove you think was once a letter and your finger comes away colder.",
+    "A ribbon tied to a twig tells a story the stone doesn't remember.",
+    "A rook scolds you for not knowing how to read the ground.",
+    "Somewhere a spade bites earth twice in quick succession, then stops.",
+    "You realize your breath sounds like someone else's."
+  ],
+  "choices": [
+    { "text": "Hear the bone rattle—stand your ground.", "effects": [{"start_combat": "Skeleton"}] },
+    { "text": "Follow the rook toward the chapel ruin.", "next": "graveyard/chapel_ruin" },
+    { "text": "Return to the gate and rethink.", "next": "graveyard/intro" }
+  ]
+}

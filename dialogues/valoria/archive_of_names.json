@@ -1,0 +1,21 @@
+{
+  "id": "valoria/archive_of_names",
+  "speaker": "Archive of Names",
+  "lines": [
+    "Stone tablets stacked like chorus risers hold the city’s many voices.",
+    "Each name hums at a pitch that fits the person who wore it.",
+    "Some were sung out. Some were said once and put away tenderly.",
+    "A scribe's skeleton sits with quill raised; ink still argues in the well.",
+    "On the far wall a single blank tablet waits like a mouth closed politely.",
+    "The room tastes of salt and broom; good work lasted here.",
+    "A thread ties three tablets: a king, a gate, a debt.",
+    "",
+    "You could add a name, or erase a debt, or learn how to do neither.",
+    "Your hand itches to weigh something."
+  ],
+  "choices": [
+    { "text": "Add your name to the archive.", "next": "valoria/good_ending" },
+    { "text": "Erase the king's debt with the gate.", "next": "valoria/throne_room" },
+    { "text": "Close the ink and leave as you found it.", "next": "valoria/plaza" }
+  ]
+}

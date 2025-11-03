@@ -1,0 +1,12 @@
+{
+  "id": "random/good/traveling_enchanter",
+  "speaker": "Traveling Enchanter",
+  "lines": [
+    "A lacquered wagon creaks to a halt.",
+    "'A small charm for a kind fire,' they whisper, tracing a rune in the air." 
+  ],
+  "effects": [
+    {"stat_change": ["agility", 1]},
+    {"give_item": {"type": "weapon", "name": "Tempest Knife", "damage": 22, "value": 140, "description": "A knife that hums before it strikes", "weapon_type": "melee"}}
+  ]
+}

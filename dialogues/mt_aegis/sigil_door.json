@@ -1,0 +1,19 @@
+{
+  "id": "mt_aegis/sigil_door",
+  "speaker": "Sigil Door",
+  "lines": [
+    "A stone door blooms with frost-flowers, each a rune of protection.",
+    "Your breath lifts the smallest petals. They ring like crystal.",
+    "With a steady hand you trace the counter-mark taught in an old tavern rhyme.",
+    "The frost recedes in spirals, revealing chisel-strokes as neat as scripture.",
+    "A soft blue light travels the seam, hesitant, then certain.",
+    "Stone sighs like a sleeper turning and the way opens just enough for the stubborn."
+  ],
+  "effects": [
+    {"give_item": {"type": "armor", "name": "Aegis Cloak", "defense": 24, "value": 220, "description": "A cloak stitched with mountain sigils"}}
+  ],
+  "choices": [
+    { "text": "Slip through the opened seam toward the upper slopes.", "next": "mt_aegis/upper_slopes" },
+    { "text": "Go back to the caverns.", "next": "mt_aegis/echo_caverns" }
+  ]
+}

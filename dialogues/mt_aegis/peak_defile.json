@@ -1,0 +1,17 @@
+{
+  "id": "mt_aegis/peak_defile",
+  "speaker": "Summit Shrine",
+  "lines": [
+    "Your strike rings like a bell. The wind stops to listen.",
+    "Something old and patient decides you must be taught manners.",
+    "Frost leaps from the plinth like startled birds, vanishing mid-flight.",
+    "A crack travels the stone and then returns, as if reconsidering.",
+    "The air warms by a breath and then withdraws it.",
+    "The lesson arrives with footsteps you feel first in your teeth."
+  ],
+  "choices": [
+    { "text": "Meet the lesson head-on.", "conditions": [{"flag_not_set": "sand_oath"}], "effects": [{"start_combat": "Giant"}] },
+    { "text": "If it must be taught, I will learn.", "conditions": [{"flag_not_set": "sand_oath"}], "effects": [{"start_combat": "Wraith"}] },
+    { "text": "Bow and leave the peak unprovoked.", "conditions": [{"flag_set": "sand_oath"}], "effects": [{"stat_change": ["intelligence", 1]}], "next": "mt_aegis/afterglow" }
+  ]
+}

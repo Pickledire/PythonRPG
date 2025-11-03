@@ -1,0 +1,19 @@
+{
+  "id": "forest/trailhead",
+  "speaker": "Hunter's Trail",
+  "lines": [
+    "Boot treads stitch the mud into a pattern that holds in the rain.",
+    "Feather tufts snag on thorn like commas left by a careful sentence.",
+    "A snare sits un-sprung and embarrassed under a fern.",
+    "You pass a marker: three notches in bark, one fresh, two patient.",
+    "A flask cork dangles from a string, smelling of apple and apology.",
+    "Your shadow walks thin under the canopy; it does not step on roots.",
+    "A low growl knots the air and waits to see if you tug.",
+    "Something clever watches from the blind where the trail goes quiet."
+  ],
+  "choices": [
+    { "text": "Call out to the hunter you cannot see.", "next": "forest/hunter_camp" },
+    { "text": "Stand your ground and draw steel.", "effects": [{"start_combat": "Dire Wolf"}] },
+    { "text": "Turn off the trail toward a darker stream.", "next": "forest/dark_stream" }
+  ]
+}

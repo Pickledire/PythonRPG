@@ -1,0 +1,19 @@
+{
+  "id": "tavern/bar",
+  "speaker": "Barkeep",
+  "lines": [
+    "The keep's rag moves in circles like it knows the clock better than he does.",
+    "He sets down a glass that has seen wars and weddings and calls both 'busy nights.'",
+    "'You look like a question,' he says. 'I'm a man with three answers.'",
+    "He holds up three fingers, then a fourth. 'And a cellar.'",
+    "The mirror behind the bar keeps everyone younger by one lie.",
+    "A ledger blinks in the dim—debts page down when you don't look.",
+    "Barrels whisper about their rivers.",
+    "The tap sings a note that could be a key if you were smaller."
+  ],
+  "choices": [
+    { "text": "Ask for rumors.", "next": "tavern/rumor_board" },
+    { "text": "Ask for paid work.", "next": "tavern/back_room" },
+    { "text": "Ask to see the cellar.", "next": "tavern/cellar" }
+  ]
+}

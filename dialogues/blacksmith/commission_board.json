@@ -1,0 +1,19 @@
+{
+  "id": "blacksmith/commission_board",
+  "speaker": "Commission Board",
+  "lines": [
+    "Notices nailed over notices; the oldest hold best.",
+    "'Wheel rim—urgent before rain', 'Gate hinge—stubborn', 'Nails—always'.",
+    "A sketch of a dragon looks like a chicken with opinions.",
+    "A scribble reads 'pay in stew' and someone added 'worth it'.",
+    "The smith's stamp marks the jobs that won't get you killed.",
+    "Someone else's stamp marks the ones that might and calls them 'opportunities'.",
+    "You could earn favor or scars here. Perhaps both.",
+    "Your hand reaches for a task before your head decides."
+  ],
+  "choices": [
+    { "text": "Take the east road guard brace (fight).", "effects": [{"start_combat": "Bandit"}] },
+    { "text": "Tune a temple gate hinge (patience).", "effects": [{"stat_change": ["intelligence", 1]}], "next": "blacksmith/counter" },
+    { "text": "Forge nails until the slate smiles (grit).", "effects": [{"stat_change": ["strength", 1]}], "next": "blacksmith/forge_floor" }
+  ]
+}

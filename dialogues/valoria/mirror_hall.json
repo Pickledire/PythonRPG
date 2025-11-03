@@ -1,0 +1,21 @@
+{
+  "id": "valoria/mirror_hall",
+  "speaker": "Hall of Mirrors",
+  "lines": [
+    "Mirrors hang where windows were; they open to rooms with no furniture but you.",
+    "Each pane shows a city that is almost Valoria and a you that is almost you.",
+    "A crack travels across a reflection and stops at your eye.",
+    "A drape moves though no mirror shows wind.",
+    "On a pedestal, a mask stares out; behind its eyes something kind and something hungry share a seat.",
+    "Footfalls arrive late; echoes compare notes and pick a favorite.",
+    "A string tied to your wrist in glass leads to a door that isn't here.",
+    "",
+    "You could put on the mask and learn a shortcut.",
+    "You could break a mirror and make an honest window."
+  ],
+  "choices": [
+    { "text": "Wear the mask.", "effects": [{"stat_change": ["agility", 1]}], "next": "valoria/tower_base" },
+    { "text": "Break a mirror and climb through.", "next": "valoria/tower_base" },
+    { "text": "Back to the market ruins.", "next": "valoria/market_ruins" }
+  ]
+}

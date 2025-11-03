@@ -1,0 +1,19 @@
+{
+  "id": "tavern/cellar",
+  "speaker": "Cellar",
+  "lines": [
+    "Barrels dream of rivers; bottles dream of becoming stories.",
+    "A chalk line marks where rats agreed not to cross and sometimes remember.",
+    "A trapdoor remembers being a door more than a trap.",
+    "Footprints in flour loop once around a crate and become confused.",
+    "A small door in the stone wall pretends it is not a door.",
+    "You hear a cough with no lungs behind it.",
+    "The air smells like spilled secrets and dill.",
+    "A ladder leads up to a bookcase and then also doesn't."
+  ],
+  "choices": [
+    { "text": "Open the small stone door.", "next": "tavern/secret_passage" },
+    { "text": "Kick a crate and see who complains.", "effects": [{"start_combat": "Goblin"}] },
+    { "text": "Go back upstairs.", "next": "tavern/bar" }
+  ]
+}
