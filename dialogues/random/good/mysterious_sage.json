@@ -1,0 +1,12 @@
+{
+  "id": "random/good/mysterious_sage",
+  "speaker": "Mysterious Sage",
+  "lines": [
+    "A figure speaks softly of forgotten paths.",
+    "You understand more than you remember."
+  ],
+  "effects": [
+    {"stat_change": ["strength", 1]},
+    {"stat_change": ["agility", 1]}
+  ]
+}

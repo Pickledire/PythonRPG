@@ -1,0 +1,12 @@
+{
+  "id": "random/good/wandering_healer",
+  "speaker": "Wandering Healer",
+  "lines": [
+    "You share your fire. The traveler unwraps a bundle of herbs.",
+    "'Rest easy. The road takes less than it gives, if tended.'"
+  ],
+  "effects": [
+    {"give_item": "Health Potion"},
+    {"stat_change": ["intelligence", 1]}
+  ]
+}

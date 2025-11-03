@@ -171,9 +171,18 @@ class EnemyFactory:
     def create_dragon():
         return Enemy("Young Dragon", 200, 35, "dragon", "A fearsome winged beast with fiery breath")
     @staticmethod
+    def create_wolf():
+        return Enemy("Wolf", 50, 10, "beast", "A wild wolf, with sharp teeth and claws")
+    @staticmethod
+    def create_giant():
+        return Enemy("Giant", 100, 20, "giant", "A massive creature with a huge club made of wood")
+    @staticmethod
     def create_horrid_monster():
         """Special encounter used by dialogue-driven events."""
         return Enemy("Horrid Monster", 160, 26, "aberration", "A grotesque being stitched from nightmare and shadow")
+    @staticmethod
+    def create_Hagraven():
+        return Enemy("Hagraven", 95, 22, "witch", "A corrupted hag who weaves dark magic and preys on wanderers")
     @staticmethod
     def create_boss():
         boss_name = random.choice(list(boss_names.keys()))

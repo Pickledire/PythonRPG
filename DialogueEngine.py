@@ -85,6 +85,8 @@ def _apply_effects(engine, effects: list):
                 engine.current_enemy = EnemyFactory.create_Gorren()
             elif enemy_id == "Morrg":
                 engine.current_enemy = EnemyFactory.create_Morrg()
+            elif enemy_id == "Hagraven":
+                engine.current_enemy = EnemyFactory.create_Hagraven()
             else:
                 engine.current_enemy = EnemyFactory.create_goblin()
             engine.in_combat = True

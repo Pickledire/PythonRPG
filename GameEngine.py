@@ -159,6 +159,23 @@ class GameEngine:
         
         bar = self.colors['xp'] + "█" * filled + Fore.WHITE + "░" * empty + self.colors['reset']
         print(f"XP: [{bar}] {current}/{required}")
+
+    def display_mana_bar(self, current, maximum, width=50, label="Mana"):
+        """Display a visual Mana bar in blue"""
+        try:
+            term_width = shutil.get_terminal_size(fallback=(120, 40)).columns
+        except Exception:
+            term_width = 120
+        max_bar = max(10, min(80, term_width - 30))
+        width = min(width, max_bar)
+        if maximum == 0:
+            percentage = 0
+        else:
+            percentage = current / maximum
+        filled = int(width * percentage)
+        empty = width - filled
+        bar = self.colors['mana'] + "█" * filled + Fore.WHITE + "░" * empty + self.colors['reset']
+        print(f"{label}: [{bar}] {current}/{maximum}")
     
     def create_character(self):
         """Character creation process"""
@@ -227,7 +244,11 @@ class GameEngine:
                 # Health bar
                 print(f"{self.colors['border']}║ {self.colors['reset']}", end="")
                 self.display_health_bar(self.player.health, self.player.max_health, 40, "Health")
-                
+
+                # Mana bar (blue), between Health and XP
+                print(f"{self.colors['border']}║ {self.colors['reset']}", end="")
+                self.display_mana_bar(self.player.mana, self.player.max_mana, 40, "Mana")
+
                 # XP bar
                 print(f"{self.colors['border']}║ {self.colors['reset']}", end="")
                 self.display_xp_bar(self.player.xp, self.player.xp_required(), 40)
@@ -245,12 +266,11 @@ class GameEngine:
             menu_options = [
                 ("1", "🗡️  Find an enemy to fight", self.colors['combat']),
                 ("2", "🔮  Go on a quest", self.colors['magic']),
-                ("3", "📦 Check inventory", self.colors['item']),
-                ("4", "📊 View character status", self.colors['info']),
-                ("5", "🏪 Visit shop", self.colors['gold']),
-                ("6", "💾 Save game", self.colors['warning']),
-                ("7", "📁 Load game", self.colors['warning']),
-                ("8", "❌ Quit game", self.colors['error'])
+                ("3", "🔥  Rest at a campfire", self.colors['warning']),
+                ("4", "📦 Check inventory", self.colors['item']),
+                ("5", "📊 View character status", self.colors['info']),
+                ("6", "🏪 Visit shop", self.colors['gold']),
+                ("7", "❌ Quit game", self.colors['error'])
             ]
 
             # Center the menu options
@@ -274,16 +294,14 @@ class GameEngine:
             elif choice == "2":
                 self.go_on_quest()
             elif choice == "3":
-                self.show_inventory_menu()
+                self.rest_at_campfire()
             elif choice == "4":
-                self.show_character_status()
+                self.show_inventory_menu()
             elif choice == "5":
-                self.visit_shop()
+                self.show_character_status()
             elif choice == "6":
-                self.save_game()
+                self.visit_shop()
             elif choice == "7":
-                self.load_game()
-            elif choice == "8":
                 self.quit_game()
             else:
                 print(f"{self.colors['error']}Invalid choice! Please try again.{self.colors['reset']}")
@@ -590,6 +608,128 @@ class GameEngine:
         else:
             print(f"{self.colors['error']}You couldn't escape!{self.colors['reset']}")
             return False
+
+    def rest_at_campfire(self):
+        """Rest to restore health and mana with a short campfire animation."""
+        if not self.player:
+            return
+
+        duration_s = 4.0
+        frame_delay = 0.15
+        start = time.time()
+
+        flame_palette = [Fore.RED + Style.BRIGHT, Fore.YELLOW + Style.BRIGHT]
+        flame_chars = ["^", "~", "`", "'", "."]
+
+        while time.time() - start < duration_s:
+            self.clear_screen()
+            self.display_title()
+            self.print_centered("You set up a small camp and rest by the fire...", 120, self.colors['info'])
+            print("\n")
+
+            # Simple moving 'fire' made of characters with color flicker
+            for row in range(8):
+                color = random.choice(flame_palette)
+                width = random.randint(18, 28)
+                wave = "".join(random.choice(flame_chars) for _ in range(width))
+                self.print_centered(wave, 120, color)
+
+            print("\n")
+            self.print_centered("Warmth seeps into your bones...", 120, self.colors['warning'])
+            time.sleep(frame_delay)
+
+        # Restore player resources
+        self.player.health = self.player.max_health
+        self.player.mana = self.player.max_mana
+
+        print("\n")
+        self.print_centered(f"{self.colors['success']}You feel refreshed. Health and Mana restored!{self.colors['reset']}")
+
+        # Chance for random encounters (good or bad) while camping
+        outcome = self._campfire_random_event()
+        if outcome == "combat_started":
+            return
+        input(f"{self.colors['menu']}Press Enter to continue...{self.colors['reset']}")
+
+    def _campfire_random_event(self):
+        """Roll for a random event at camp. Returns 'combat_started' if combat begins, else None."""
+        roll = random.random()
+        # 35% bad, 35% good, 30% nothing
+        if roll < 0.35:
+            # Bad events
+            bad_roll = random.random()
+            if bad_roll < 0.4:
+                # Ambush - start combat
+                print("\n")
+                self.print_centered(f"{self.colors['error']}You are ambushed in the night!{self.colors['reset']}")
+                # Start a normal random fight
+                player_level = self.player.level if self.player else 1
+                self.current_enemy = EnemyFactory.create_random_enemy(player_level, self)
+                self.in_combat = True
+                # Normal non-boss intro
+                print()
+                self.print_border("⚔", 60, self.colors['combat'])
+                self.print_centered(f"{self.colors['combat']}⚔️ A wild {self.colors['enemy']}{self.current_enemy.name}{self.colors['combat']} appears!{self.colors['reset']}")
+                self.print_border("⚔", 60, self.colors['combat'])
+                self.print_centered_block(self.current_enemy.get_info(), self.colors['info'])
+                input(f"{self.colors['menu']}Press Enter to start combat...{self.colors['reset']}")
+                self.combat_loop()
+                return "combat_started"
+            elif bad_roll < 0.7:
+                # Bad character encounter
+                self.print_centered(f"{self.colors['warning']}A shadow steps from the treeline...{self.colors['reset']}")
+                self._run_random_dialogue("bad")
+            elif bad_roll < 0.85:
+                # Stolen gold
+                lost = min(self.player.gold, random.randint(10, 40))
+                self.player.gold -= lost
+                self.print_centered(f"{self.colors['warning']}Thieves slip through the dark — you lose {lost} gold.{self.colors['reset']}")
+            else:
+                # Drained mana
+                drain = max(0, int(self.player.max_mana * 0.25))
+                self.player.mana = max(0, self.player.mana - drain)
+                self.print_centered(f"{self.colors['magic']}A chilling presence saps your mana by {drain}.{self.colors['reset']}")
+        elif roll < 0.70:
+            # Good events
+            good_roll = random.random()
+            if good_roll < 0.35:
+                # Find gold
+                gained = random.randint(20, 60)
+                self.player.gold += gained
+                self.print_centered(f"{self.colors['gold']}You find a hidden pouch: +{gained} gold.{self.colors['reset']}")
+            elif good_roll < 0.7:
+                # Good character encounter
+                self.print_centered(f"{self.colors['success']}A friendly traveler approaches your fire...{self.colors['reset']}")
+                self._run_random_dialogue("good")
+            elif good_roll < 0.85:
+                # Small XP gain
+                gained_xp = random.randint(10, 30)
+                self.player.gain_xp(gained_xp)
+                self.print_centered(f"{self.colors['xp']}A restful insight grants you {gained_xp} XP.{self.colors['reset']}")
+            else:
+                # Free potion
+                potion = Consumable("Health Potion", "heal", 50, "Restores 50 HP", 25)
+                success, message = self.player.inventory.add_item(potion)
+                self.print_centered(f"{self.colors['success']}You discover a forgotten {self.colors['item']}{potion.name}{self.colors['reset']}{self.colors['success']} near the embers.{self.colors['reset']}")
+        else:
+            # Nothing happens
+            self.print_centered(f"{self.colors['info']}The night passes quietly.{self.colors['reset']}")
+        return None
+
+    def _run_random_dialogue(self, category: str):
+        """Run a random dialogue from dialogues/random/<category> if available."""
+        try:
+            base = os.path.join(os.path.dirname(__file__), "dialogues", "random", category)
+            if not os.path.isdir(base):
+                return
+            candidates = [f for f in os.listdir(base) if f.endswith('.json')]
+            if not candidates:
+                return
+            pick = random.choice(candidates)
+            node_id = f"random/{category}/" + pick[:-5]
+            run_dialogue(self, node_id)
+        except Exception:
+            return
     
     def end_combat(self):
         """Handle end of combat"""

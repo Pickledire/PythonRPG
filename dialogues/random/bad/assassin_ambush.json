@@ -1,0 +1,11 @@
+{
+  "id": "random/bad/assassin_ambush",
+  "speaker": "Assassin",
+  "lines": [
+    "A blade reflects your firelight for the briefest instant.",
+    "'No hard feelings.'"
+  ],
+  "effects": [
+    {"start_combat": "Gorren"}
+  ]
+}

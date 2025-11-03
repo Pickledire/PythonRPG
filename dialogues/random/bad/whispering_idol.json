@@ -1,0 +1,12 @@
+{
+  "id": "random/bad/whispering_idol",
+  "speaker": "Whispering Idol",
+  "lines": [
+    "An idol half-buried in ash murmurs in a dead tongue.",
+    "You listen too long. The world goes thin around the edges."
+  ],
+  "effects": [
+    {"stat_change": ["strength", -1]},
+    {"stat_change": ["agility", -1]}
+  ]
+}
