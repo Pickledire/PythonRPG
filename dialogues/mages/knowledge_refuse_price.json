@@ -1,0 +1,27 @@
+{
+    "id": "mages/knowledge_refuse_price",
+    "speaker": "Archmage",
+    "lines": [
+        "'You are weak,' the archmage says.",
+        "",
+        "'Yet that weakness is what makes you strong.'",
+        "",
+        "'You are worthy of the path of knowlege.",
+        "He pulls a lever on the wall, revealing a hidden door.",
+        "'Come with me child, and I will teach you the ways of the mage.'",
+        "",
+        "Following him into the hidden door brings you to a magical room full of plants and herbs you have never seen before.",
+        "Light of different colors are emanating from the plants and herbs, you can feel the energy of the plants and herbs filling the room.",
+        "",
+        "In the middle of the room is a pedastal with a staff floating just above it.",
+        "This is the TRUE path to knowlege.",
+        "Never give up on your soul, it is the only thing that will keep you alive.",
+        "",
+        "The Archmage hands you the staff.",
+        "As he does, he fades away, leaving you alone in the room with the staff."
+    ],
+    "choices": [
+        { "id": "take_staff", "text": "Take the staff.", "effects": [{"give_item": {"type": "weapon", "name": "Staff of Knowledge", "damage": 100, "value": 1000, "description": "A staff that grants the power of knowledge"}}] },
+        { "id": "leave", "text": "Leave the room without taking the staff.", "effects": [{"set_flag": ["knowledge_refuse_price", true]}] }
+    ]
+}

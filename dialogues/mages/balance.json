@@ -1,0 +1,23 @@
+{
+  "id": "mages/balance",
+  "speaker": "Archmage",
+  "lines": [
+    "Balance is not absence—it's a braid of opposites held in the hand.",
+    "Hold steady, and the Weave will meet you halfway.",
+    "",
+    "You have chosen the path of balance. You will be taught the ways of the mage, and the ways of the world.",
+    "Come with me child.",
+    "",
+    "You walk with the archmage into a large room of labrenthd shelves, filled with books and scrolls.",
+    "The archmage stops in front of a large book, the 'Book of Balance'.",
+    "He opens the book, and you see the words 'Balance is not absence—it's a braid of opposites held in the hand.'",
+    "The archmage closes the book, and you see the words 'Hold steady, and the Weave will meet you halfway.'",
+    "",
+    "The archmage turns to you, raises his hands, and a beam of light fills the room.",
+    "",
+    "You fall unconcious under the weight of the knowledge."
+  ],
+  "choices": [
+    { "id": "Wake Up", "text": "Wake up from your slumber.", "next": "mages/balance_wake_up" }
+  ]
+}

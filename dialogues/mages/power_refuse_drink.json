@@ -1,0 +1,28 @@
+{
+    "id": "mages/power_refuse_drink",
+    "speaker": "Archmage",
+    "lines": [
+        "You hesitate for a moment, the pool in the center of the room is something other worldly.",
+        "Not water, thicker, more viscous.",
+        "",
+        "'If you are too weak then you chose the wrong path.'",
+        "", 
+        "He slams his staff on the ground.",
+        "'Your first lesson to power. Be prepared.",
+        "",
+        "An unknown force sends you flying backwards, you hit the wall and fall to the ground.",
+        "'I should have known you would choose the wrong path.'",
+        "'Over the years I have seen many like you, weak and foolish.'",
+        "'You seem to be the most foolish of them all.'",
+        "'You will be punished for your choice.'",
+        "",
+        "He raises his staff, and a beam of energy shoots out from the end of the staff, hitting you in the chest.",
+        "'This is the price of your choice.'",
+        "His laughter echoes through the room.",
+        "",
+        "'Face the ultimate test of power.'"
+    ],
+    "choices": [
+        { "id": "face_test", "text": "Fight the Archmage.", "effects": [{"start_combat": "Archmage"}] }
+    ]
+}

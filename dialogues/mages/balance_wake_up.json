@@ -1,0 +1,25 @@
+{
+    "id": "mages/balance_wake_up",
+    "speaker": "The Weave",
+    "lines": [
+        "You wake up to find yourself in a mystical realm, a place of pure energy and knowledge.",
+        "Before you is a large orb of pure energy, the Weave.",
+        "You feel a connection to the Weave, a sense of belonging, a sense of purpose.",
+        "The Weave draws you closer, and you feel yourself being pulled into it.",
+        "",
+        "As you are beconed into the Weave, you feel a surge of energy coursing through your body.",
+        "A small hint in your mind, a whisper of the Weave's voice.",
+        "",
+        "The Weave says, 'You must be the balance of the Weave, the balance of the world.'",
+        "",
+        "'Reach out your hand... and grasp the balance.'"
+    ],
+    "choices": [
+        { "id": "reach_out", "text": "Reach out your hand... and grasp the balance.", "next": "mages/balance_reach_out" }
+    ],
+    "effects": [
+        {"set_flag": ["mage_path", "balance"]},
+        {"stat_change": ["intelligence", 2]},
+        {"give_item": {"type": "magic", "name": "Revealing Light", "damage": 50, "mana": 30, "value": 140, "description": "A ray that lays secrets bare and sears the false"}}
+    ]
+}

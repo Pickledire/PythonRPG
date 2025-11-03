@@ -58,6 +58,40 @@ def _apply_effects(engine, effects: list):
         if "set_flag" in eff:
             key, value = eff["set_flag"]
             engine.quest_flags[key] = value
+        
+        elif "set_health" in eff:
+            amount = eff["set_health"]
+            engine.player.health = amount
+            engine.print_centered(f"{engine.colors['success']}Your health is now {amount}{engine.colors['reset']}")
+        elif "set_mana" in eff:
+            amount = eff["set_mana"]
+            engine.player.mana = amount
+            engine.print_centered(f"{engine.colors['success']}Your mana is now {amount}{engine.colors['reset']}")
+        elif "set_stamina" in eff:
+            amount = eff["set_stamina"]
+            engine.player.stamina = amount
+            engine.print_centered(f"{engine.colors['success']}Your stamina is now {amount}{engine.colors['reset']}")
+        elif "set_strength" in eff:
+            try:
+                amount = int(eff["set_strength"])
+                engine.player.stats["strength"] = amount
+                engine.print_centered(f"{engine.colors['success']}Your strength is now {amount}{engine.colors['reset']}")
+            except Exception:
+                pass
+        elif "set_agility" in eff:
+            try:
+                amount = int(eff["set_agility"])
+                engine.player.stats["agility"] = amount
+                engine.print_centered(f"{engine.colors['success']}Your agility is now {amount}{engine.colors['reset']}")
+            except Exception:
+                pass
+        elif "set_intelligence" in eff:
+            try:
+                amount = int(eff["set_intelligence"])
+                engine.player.stats["intelligence"] = amount
+                engine.print_centered(f"{engine.colors['success']}Your intelligence is now {amount}{engine.colors['reset']}")
+            except Exception:
+                pass
         elif "add_gold" in eff:
             amount = eff["add_gold"]
             engine.print_centered(engine.player.add_gold(amount))
@@ -87,12 +121,17 @@ def _apply_effects(engine, effects: list):
                 engine.current_enemy = EnemyFactory.create_Morrg()
             elif enemy_id == "Hagraven":
                 engine.current_enemy = EnemyFactory.create_Hagraven()
+            elif enemy_id == "Archmage":
+                engine.current_enemy = EnemyFactory.create_Archmage()
             else:
                 engine.current_enemy = EnemyFactory.create_goblin()
             engine.in_combat = True
             # Mirror normal combat intro with description
             if isinstance(engine.current_enemy, Boss) and hasattr(engine, 'display_boss_intro'):
-                engine.display_boss_intro()
+                if getattr(engine.current_enemy, 'name', '') == 'Elder Dragon' and hasattr(engine, 'display_elder_dragon_intro'):
+                    engine.display_elder_dragon_intro()
+                else:
+                    engine.display_boss_intro()
             else:
                 print()
                 engine.print_border("⚔", 60, engine.colors['combat'])

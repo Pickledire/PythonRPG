@@ -138,6 +138,7 @@ class Boss(Enemy):
 class EnemyFactory:
     """Factory class to create different types of enemies"""
 
+
     @staticmethod
     def create_Hagraven():
         return Enemy("Hagraven", 200, 40, "undead", "A creature of the night, commonly known as the Nightstalkers")
@@ -168,6 +169,9 @@ class EnemyFactory:
     def create_troll():
         return Enemy("Cave Troll", 120, 20, "giant", "A massive creature with regenerative abilities")
     @staticmethod
+    def create_spriggan():
+        return Enemy("Spriggan", 100, 20, "humanoid", "A small, agile creature with a knack for stealth and agility")
+    @staticmethod
     def create_dragon():
         return Enemy("Young Dragon", 200, 35, "dragon", "A fearsome winged beast with fiery breath")
     @staticmethod
@@ -177,6 +181,21 @@ class EnemyFactory:
     def create_giant():
         return Enemy("Giant", 100, 20, "giant", "A massive creature with a huge club made of wood")
     @staticmethod
+    def create_bandit():
+        return Enemy("Bandit", 60, 12, "humanoid", "An opportunistic highwayman looking for an easy score")
+    @staticmethod
+    def create_dire_wolf():
+        return Enemy("Dire Wolf", 80, 16, "beast", "A larger, more vicious wolf with keen instincts")
+    @staticmethod
+    def create_wraith():
+        return Enemy("Wraith", 110, 22, "undead", "A vengeful spirit that drains warmth and hope")
+    @staticmethod
+    def create_ogre():
+        return Enemy("Ogre", 160, 24, "giant", "A brutish hulk with crushing blows and thick hide")
+    @staticmethod
+    def create_minotaur():
+        return Enemy("Minotaur", 180, 28, "beast", "A horned labyrinth-stalker with feral strength")
+    @staticmethod
     def create_horrid_monster():
         """Special encounter used by dialogue-driven events."""
         return Enemy("Horrid Monster", 160, 26, "aberration", "A grotesque being stitched from nightmare and shadow")
@@ -184,11 +203,19 @@ class EnemyFactory:
     def create_Hagraven():
         return Enemy("Hagraven", 95, 22, "witch", "A corrupted hag who weaves dark magic and preys on wanderers")
     @staticmethod
+    def create_Archmage():
+        """Story encounter - tougher than a normal caster."""
+        return Enemy("Archmage", 400, 40, "humanoid", "A master of the arcane arts, relentless and precise")
+    @staticmethod
     def create_boss():
         boss_name = random.choice(list(boss_names.keys()))
         boss_title = boss_names[boss_name]
         return Boss(f"Titan: {boss_name}", random.randint(400, 600), random.randint(25, 45), "Boss", boss_title)
     
+    @staticmethod
+    def create_elder_dragon():
+        """Level 15 story boss - Elder Dragon"""
+        return Boss("Elder Dragon", random.randint(800, 1000), random.randint(45, 60), "Boss", "An ancient wyrm wreathed in ruinous flame")
 
     @staticmethod
     def create_ghost_horror(game_engine=None):
@@ -197,19 +224,76 @@ class EnemyFactory:
 
     @staticmethod
     def create_random_enemy(level, game_engine):
-        """Create a random enemy"""
-        enemy_types = [
-            EnemyFactory.create_goblin,
-            EnemyFactory.create_orc,
-            EnemyFactory.create_skeleton,
-            EnemyFactory.create_troll,
-            EnemyFactory.create_dragon,
-        ]
-
+        """Create a random enemy with level-weighted pools and some variance"""
+        # Force the one-time level 10+ boss
         if level >= 10 and not game_engine.level_10_boss:
             game_engine.level_10_boss = True
             return EnemyFactory.create_boss()
-        else:
-            return random.choice(enemy_types)() 
+
+        def weighted_choice(constructors, weights):
+            total = sum(weights)
+            r = random.uniform(0, total)
+            upto = 0
+            for ctor, w in zip(constructors, weights):
+                if upto + w >= r:
+                    return ctor
+                upto += w
+            return constructors[-1]
+
+        if level < 5:
+            # 90% weak, 10% stronger
+            common = [
+                EnemyFactory.create_skeleton,
+                EnemyFactory.create_goblin,
+                EnemyFactory.create_wolf,
+            ]
+            common_w = [30, 30, 30]
+            rare = [
+                EnemyFactory.create_orc,
+                EnemyFactory.create_troll,
+                EnemyFactory.create_spriggan,
+                EnemyFactory.create_bandit,
+            ]
+            rare_w = [3, 2, 3, 2]
+            pick = weighted_choice(common + rare, common_w + rare_w)
+            return pick()
+
+        if level < 10:
+            # 80% mid-tier, 20% tougher
+            mid = [
+                EnemyFactory.create_orc,
+                EnemyFactory.create_troll,
+                EnemyFactory.create_bandit,
+                EnemyFactory.create_dire_wolf,
+            ]
+            mid_w = [25, 20, 20, 15]
+            tougher = [
+                EnemyFactory.create_giant,
+                EnemyFactory.create_wraith,
+                EnemyFactory.create_Hagraven,
+            ]
+            tough_w = [6, 6, 8]
+            pick = weighted_choice(mid + tougher, mid_w + tough_w)
+            return pick()
+
+        # 10-20
+        tough = [
+            EnemyFactory.create_giant,
+            EnemyFactory.create_wraith,
+            EnemyFactory.create_ogre,
+            EnemyFactory.create_minotaur,
+            EnemyFactory.create_dragon,
+            EnemyFactory.create_Hagraven,
+        ]
+        tough_w = [18, 18, 18, 18, 10, 8]  # ~90%
+        weak = [
+            EnemyFactory.create_skeleton,
+            EnemyFactory.create_goblin,
+            EnemyFactory.create_wolf,
+            EnemyFactory.create_bandit,
+        ]
+        weak_w = [3, 3, 2, 2]  # ~10%
+        pick = weighted_choice(tough + weak, tough_w + weak_w)
+        return pick()
 
 

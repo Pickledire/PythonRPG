@@ -37,6 +37,7 @@ class GameEngine:
         self.in_combat = False
         self.shop = Shop()
         self.level_10_boss = False
+        self.level_15_boss = False
         self.ghost_horror = False
         self.quest_flags = {}
         
@@ -359,6 +360,41 @@ class GameEngine:
         
         print("\n" * 2)
         input(f"{Fore.WHITE}Press Enter to begin the battle...{Style.RESET_ALL}")
+
+    def display_elder_dragon_intro(self):
+        """Cinematic intro for the Elder Dragon boss."""
+        self.clear_screen()
+        print("\n" * 2)
+        self.print_border("═", 120, self.colors['border'])
+        self.print_centered("ANCIENT FIRE STIRS", 120, self.colors['header'])
+        self.print_border("═", 120, self.colors['border'])
+        print()
+
+        name = self.current_enemy.name
+        title = self.current_enemy.description if self.current_enemy.description else "an ancient wyrm"
+        story = [
+            "The mountain groans as a cavern yawns wide...",
+            "Ash swirls. Embers drift like fallen stars...",
+            f"A shadow uncoils, vast and patient — {name}, {title.lower()}.",
+            "",
+            "Its breath sears the air. Scales blaze like forged mail.",
+            "Claws score the stone with idle, ruinous grace...",
+            "This is no mere beast. This is an ending with wings.",
+        ]
+        for line in story:
+            if line:
+                self.print_centered(line, 120, Fore.WHITE)
+            else:
+                print()
+
+        print("\n")
+        self.print_border("═", 100, Fore.RED + Style.BRIGHT)
+        self.print_centered(f"{name}", 120, Fore.RED + Style.BRIGHT)
+        self.print_border("═", 100, Fore.RED + Style.BRIGHT)
+        print("\n")
+        self.print_centered("🔥 The elder flame will test your mettle. 🔥", 120, Fore.YELLOW + Style.BRIGHT)
+        print("\n")
+        input(f"{self.colors['menu']}Press Enter to face the Elder Dragon...{self.colors['reset']}")
     
     def start_combat(self):
         """Start a combat encounter"""
@@ -367,9 +403,12 @@ class GameEngine:
             input(f"{self.colors['menu']}Press Enter to continue...{self.colors['reset']}")
             return
         
-        # Generate enemy: force level 10+ boss once, regardless of prior encounters (like Ghost Horror)
+        # Generate enemy: force level 15 boss, then level 10 boss, once per run
         player_level = self.player.level if self.player else 1
-        if player_level >= 10 and not self.level_10_boss:
+        if player_level >= 15 and not self.level_15_boss:
+            self.level_15_boss = True
+            self.current_enemy = EnemyFactory.create_elder_dragon()
+        elif player_level >= 10 and not self.level_10_boss:
             self.level_10_boss = True
             self.current_enemy = EnemyFactory.create_boss()
         else:
@@ -378,7 +417,10 @@ class GameEngine:
         
         # Check if boss and show epic intro
         if isinstance(self.current_enemy, Boss):
-            self.display_boss_intro()
+            if getattr(self.current_enemy, 'name', '') == 'Elder Dragon' and hasattr(self, 'display_elder_dragon_intro'):
+                self.display_elder_dragon_intro()
+            else:
+                self.display_boss_intro()
         else:
             print()
             self.print_border("⚔", 60, self.colors['combat'])
@@ -745,6 +787,7 @@ class GameEngine:
             input(f"{self.colors['menu']}Press Enter to create a new character...{self.colors['reset']}")
             # Reset run-specific flags
             self.level_10_boss = False
+            self.level_15_boss = False
             self.ghost_horror = False
             self.current_enemy = None
             # Create a new character and return to main menu loop
@@ -771,7 +814,14 @@ class GameEngine:
 
             # Special boss reward at level 10
             if isinstance(self.current_enemy, Boss):
-                self.grant_boss_reward()
+                if getattr(self.current_enemy, 'name', '') == 'Elder Dragon':
+                    self.grant_elder_dragon_reward()
+                else:
+                    self.grant_boss_reward()
+
+            # Guaranteed drops for special story enemies
+            if getattr(self.current_enemy, 'name', '') == "Archmage":
+                self.grant_archmage_rewards()
         
         input(f"{self.colors['menu']}Press Enter to continue...{self.colors['reset']}")
 
@@ -816,6 +866,74 @@ class GameEngine:
             elif choice == "3":
                 self.player.inventory.add_item(titans_curse)
                 print(f"\n{self.colors['success']}You received Titan's Curse!{self.colors['reset']}")
+                break
+            else:
+                print(f"{self.colors['error']}Invalid choice, please enter 1, 2, or 3.{self.colors['reset']}")
+
+    def grant_archmage_rewards(self):
+        """Grant guaranteed drops for defeating the Archmage."""
+        print("\n")
+        self.print_border("═", 100, self.colors['magic'])
+        self.print_centered("Arcane spoils lie at your feet...", 120, self.colors['magic'])
+        self.print_border("═", 100, self.colors['magic'])
+        print()
+
+        # 3 Superior Health Potions
+        superior_potion = Consumable("Superior Health Potion", "heal", 150, "Restores 150 HP", 100)
+        for _ in range(3):
+            self.player.inventory.add_item(superior_potion)
+        self.print_centered(f"{self.colors['success']}Received x3 {self.colors['item']}{superior_potion.name}{self.colors['reset']}")
+
+        # Mage Robes
+        mage_robes = Armor("Mage Robes", 18, 100, "Robes woven with protective sigils", 180)
+        self.player.inventory.add_item(mage_robes)
+        self.print_centered(f"{self.colors['success']}Received {self.colors['armor']}{mage_robes.name}{self.colors['reset']}")
+
+        # Decent Staff
+        staff = Weapon("Runed Staff", 30, 150, "A balanced staff etched with runes", 200, "magic")
+        self.player.inventory.add_item(staff)
+        self.print_centered(f"{self.colors['success']}Received {self.colors['weapon']}{staff.name}{self.colors['reset']}")
+
+    def grant_elder_dragon_reward(self):
+        """Offer a choice of three Elder Dragon rewards (STR/AGI/INT)."""
+        print("\n")
+        self.print_border("═", 100, self.colors['gold'])
+        self.print_centered("Elder Dragon Hoard", 120, self.colors['gold'])
+        self.print_border("═", 100, self.colors['gold'])
+        print()
+
+        dragon_sword = Weapon("Dragon Tooth Greatsword", 60, 180, "A colossal blade hewn from an elder fang", 0, "melee")
+        elder_bow = Weapon("Elder Scale Bow", 44, 140, "A bow strung with sinew, scales hard as steel", 0, "ranged")
+        dragons_breath = Magic("Dragon's Breath", "Exhale searing ancient flame", 70, 45, 0)
+
+        # Requirement hints
+        req_s_name, req_s_val = dragon_sword.get_requirement()
+        req_b_name, req_b_val = elder_bow.get_requirement()
+        req_m_name, req_m_val = dragons_breath.get_requirement()
+
+        options = [
+            ("1", f"{self.colors['weapon']}Dragon Tooth Greatsword{self.colors['reset']} - requires {req_s_name.capitalize()} {req_s_val}+"),
+            ("2", f"{self.colors['weapon']}Elder Scale Bow{self.colors['reset']} - requires {req_b_name.capitalize()} {req_b_val}+"),
+            ("3", f"{self.colors['magic']}Dragon's Breath{self.colors['reset']} - requires {req_m_name.capitalize()} {req_m_val}+"),
+        ]
+
+        for num, text in options:
+            self.print_centered(f"{num}. {text}", 120, self.colors['menu'])
+
+        print()
+        while True:
+            choice = input(f"{self.colors['menu']}Choose your trophy (1-3): {self.colors['reset']}").strip()
+            if choice == "1":
+                self.player.inventory.add_item(dragon_sword)
+                self.print_centered(f"{self.colors['success']}You received the Dragon Tooth Greatsword!{self.colors['reset']}")
+                break
+            elif choice == "2":
+                self.player.inventory.add_item(elder_bow)
+                self.print_centered(f"{self.colors['success']}You received the Elder Scale Bow!{self.colors['reset']}")
+                break
+            elif choice == "3":
+                self.player.inventory.add_item(dragons_breath)
+                self.print_centered(f"{self.colors['success']}You received Dragon's Breath!{self.colors['reset']}")
                 break
             else:
                 print(f"{self.colors['error']}Invalid choice, please enter 1, 2, or 3.{self.colors['reset']}")

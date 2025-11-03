@@ -1,0 +1,21 @@
+{
+    "id": "mages/balance_reach_out",
+    "speaker": "The Archmage",
+    "lines": [
+        "Touching the Weave blinds you again, sending you back into a deep slumber.",
+        "You wake up to find yourself in the archmage's study.",
+        "",
+        "The archmage is standing in front of you, smiling.",
+        "He says you have been chosen to be the next archmage.",
+        "You are the most balanced mage in the world.",
+        "You have the power to bend the storm, the power to see the hidden name beneath all names, and the power to wield without ruin.",
+        "",
+        "Take this as a sign of your mastery of the balance.",
+        "",
+        "The archmage hands you a robe, the 'Archmage Robes'."
+    ],
+    "effects": [
+        {"give_item": {"type": "armor", "name": "Archmage Robes", "defense": 80, "value": 300, "description": "A suit of robes that protects you with the Weave"}},
+        {"stat_change": ["intelligence", 3]}
+    ]
+}

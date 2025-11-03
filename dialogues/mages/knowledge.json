@@ -1,0 +1,25 @@
+{
+  "id": "mages/knowledge",
+  "speaker": "Archmage",
+  "lines": [
+    "The Archmage looks at you with a knowing smile.",
+    "He says you have chosen the path of knowledge. You will be taught the ways of the mage, and the ways of the world.",
+    "Come with me child.",
+    "",
+    "You walk with the archmage into a large room of labrenthd shelves, filled with books and scrolls.",
+    "",
+    "He turns to you, the smile he had before fading away, replaced by a look of concern.",
+    "'Knowlege comes with a price. The price is your soul.'",
+    "",
+    "'Those who seek knowledge must be willing to pay the price.'",
+    "'Are you willing to pay that price?'"
+  ],
+  "choices": [
+    { "id": "pay_price", "text": "I am willing to pay the price.", "next": "mages/knowledge_pay_price" },
+    { "id": "refuse_price", "text": "I am not willing to pay the price.", "next": "mages/knowledge_refuse_price" },
+    { "id": "leave", "text": "You leave the archmage's study." }
+  ],
+  "effects": [
+    {"set_flag": ["mage_path", "knowledge"]}
+  ]
+}

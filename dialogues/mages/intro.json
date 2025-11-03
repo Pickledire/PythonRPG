@@ -2,11 +2,18 @@
   "id": "mages/intro",
   "speaker": "Archmage",
   "lines": [
-    "Knowledge asks its price.",
-    "What do you seek?"
+    "Hearts beat, but knowledge waits.",
+    "Why have you come? In search of power or wisdom?",
+    "The path of the mage is fraught with peril, but the rewards are great.",
+    "",
+    "I see potential in you. But the road ahead is not easy.",
+    "But every wizard who comes to the college must answer a question.",
+    "",
+    "When the world is silent and only the Weave replies, what do you ask of it?"
   ],
   "choices": [
-    {"id": "seek_power", "text": "Seek power", "effects": [{"give_item": {"type": "magic", "name": "Arcane Bolt", "damage": 22, "mana": 10, "value": 120, "description": "A focused projectile of pure mana"}}]},
-    {"id": "leave", "text": "Leave"}
+    { "id": "path_power",    "text": "Grant me power enough to bend the storm.",      "next": "mages/power" },
+    { "id": "path_knowledge", "text": "Show me the hidden name beneath all names.",    "next": "mages/knowledge" },
+    { "id": "path_balance",  "text": "Teach me balance, that I might wield without ruin.", "next": "mages/balance" }
   ]
 }

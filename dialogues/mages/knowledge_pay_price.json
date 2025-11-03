@@ -1,0 +1,35 @@
+{
+    "id": "mages/knowledge_pay_price",
+    "speaker": "Archmage",
+    "lines": [
+        "'This will cost you your soul,' the archmage says.",
+        "",
+        "'But you will be rewarded with the knowledge of the ages.'",
+        "",
+        "He raises both of his hands lifting you off the ground, the weight of your soul pulling you down.",
+        "",
+        "You feel your soul being ripped from your body, the pain is unbearable.",
+        "",
+        "He holds you aloft",
+        "A green beam of what you can only guess is your soul, being pulled into the archmage's body.",
+        "You feel yourself weakening, your vision fading, your body going limp.",
+        "'This is the price of knowledge,' the archmage says.",
+        "His sinsiter laughter echoing through the room.",
+        "You feel yourself falling, falling into the abyss of knowledge.",
+        "Unconciousness takes you.",
+        "",
+        "You wake up with an overwhelming knowlege of all things consuming you.",
+        "Yet your body is weak, your mind is clouded, your soul is empty.",
+        "The archmage is standing in front of you, smiling.",
+        "'Welcome back child, this was the price of knowledge.'"
+    ],
+    "choices": [
+        { "id": "attack_archmage", "text": "Attack the archmage.", "effects": [{"start_combat": "Archmage"}] },
+        { "id": "leave", "text": "You leave the archmage's study with your new found knowledge." }
+    ],
+    "effects": [
+        {"set_health": 40},
+        {"set_mana": 300},
+        {"set_intelligence": 40}
+    ]
+}

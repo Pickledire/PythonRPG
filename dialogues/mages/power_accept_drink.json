@@ -1,0 +1,32 @@
+{
+    "id": "mages/power_accept_drink",
+    "speaker": "Archmage",
+    "lines": [
+        "You hesitate for a moment, the pool in the center of the room is something other worldly.",
+        "Not water, thicker, more viscous.",
+        "",
+        "'If you are too weak then you chose the wrong path.'",
+        "", 
+        "He slams his staff on the ground.",
+        "'Your first lesson to power. Be prepared.",
+        "",
+        "An unknown force pulls you into the pool, you are sucked down into the pool drowning you.",
+        "",
+        "From your gargled screams, you hear the archmage's voice echoing through the room.",
+        "'Power is a river; drink too deep and it drowns you.'",
+        "",
+        "You are pulled under the water further, the weight of the water heavy and fierce.",
+        "",
+        "'Drink my child, or drown, that is your choice.'",
+        "",
+        "Symbols and runes from the walls appear in the blood.",
+        "You can't take it anymore. You drink to save yourself.",
+        ""
+    ],
+    "effects": [
+        {"set_health": 400},
+        {"set_mana": 30},
+        {"set_intelligence": 10},
+        {"set_flag": ["mage_path", "power"]}
+    ]
+}

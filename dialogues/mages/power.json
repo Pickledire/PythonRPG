@@ -1,0 +1,29 @@
+{
+  "id": "mages/power",
+  "speaker": "Archmage",
+  "lines": [
+    "Power is a river; drink too deep and it drowns you.",
+    "Yet the world moves for those who dare.",
+    "",
+    "He looks at you with a keen eye, as if he can see into your soul.",
+    "'The path to power is fraught with peril, but the rewards are great.'",
+    "",
+    "'You are weak, we must prepare you.",
+    "",
+    "'You will be taught the ways of Power.",
+    "",
+    "'Come with me child, and I will teach you.'",
+    "",
+    "He takes you to a domed room, the walls are covered in runes and symbols you have never seen before.",
+    "A large pool of water is in the center of the room, the water is a deep red color, you can feel the energy of the water filling the room.",
+    "The archmage stands in front of the pool, he is wearing a long robe, and a hooded cloak.",
+    "To make you strong, you must drink from the river of power.",
+    "",
+    "'Are you ready to drink from the river of power?' He asks you."
+  ],
+  "choices": [
+    { "id": "drink_from_river", "text": "I am ready to drink from the river of power.", "next": "mages/power_accept_drink" },
+    { "id": "refuse_power", "text": "I am not ready to drink from the river of power.", "next": "mages/power_refuse_drink" },
+    { "id": "leave", "text": "You leave the archmage's study." }
+  ]
+}
