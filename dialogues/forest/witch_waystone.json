@@ -2,14 +2,13 @@
   "id": "forest/witch_waystone",
   "speaker": "Waystone",
   "lines": [
-    "The stone stands with its lichen coat buttoned to the throat.",
-    "Carvings hide under green, patient as seeds under snow.",
-    "Someone pressed a palm here long ago and forgot to take the warmth back.",
-    "A crow feather tucks into a crack like a bookmark.",
-    "A thread of red wraps the base—a ribbon or a vein.",
-    "The air tilts when you speak near it. It prefers listening.",
-    "If you close your eyes, you can hear the ring counting to eleven.",
-    "If you open them, something else closes."
+    "You come to a standing stone covered in lichen.",
+    "Carvings lie shallow under the green.",
+    "A smooth place shows where many hands rested.",
+    "A crow feather sits in a crack.",
+    "A red ribbon is tied around the base.",
+    "The clearing is still when you speak here.",
+    "You decide what to leave and what to take."
   ],
   "choices": [
     { "text": "Lay your hand where warmth waits.", "effects": [{"stat_change": ["intelligence", 1]}] },

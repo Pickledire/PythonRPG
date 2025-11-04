@@ -2,12 +2,12 @@
     "id": "tavern/dark_mage",
     "speaker": "Dark Mage",
     "lines": [
-        "You find the dark mage miles away from the academy",
-        "Seeing you approach, he quickly casts a spell and you are transported to his lair",
-        "The wizard is a tall, thin man with a long white beard and a pointy hat",
-        "He is sitting in a large chair made of stone",
+        "You find the dark mage far from the academy.",
+        "He sees you, snaps a spell, and pulls you into his lair.",
+        "He is tall and thin, with a white beard and pointed hat.",
+        "He sits in a stone chair and studies you.",
         "",
-        "'Why have you come in search of me?' he asks you."
+        "'Why have you come looking for me?' he asks."
     ],
     "choices": [
         {

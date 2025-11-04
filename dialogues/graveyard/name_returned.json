@@ -2,14 +2,14 @@
   "id": "graveyard/name_returned",
   "speaker": "Tomb of Names",
   "lines": [
-    "The name you paint tastes like rain in winter.",
-    "It belongs to someone who taught you a word for mercy you could carry alone.",
-    "The stone warms in your palm as if it remembers a forehead.",
-    "When you set it in its gap, the shelf becomes entirely itself again.",
-    "A moth leaves the brush and flies in a circle that can't quite close.",
-    "You hear a thank-you where a draft used to be.",
-    "Your own name fits more comfortable in your mouth afterward.",
-    "The stairs up look less like a distance and more like a direction."
+    "You paint a lost name and let the letters dry.",
+    "It belongs to someone you remember clearly.",
+    "The stone warms in your palm.",
+    "You set it back into its gap on the shelf.",
+    "A moth lifts from the brush and settles on the wall.",
+    "You hear a quiet thank-you in the still air.",
+    "Your own name feels steady afterward.",
+    "The stairs up look simple enough."
   ],
   "effects": [
     {"stat_change": ["agility", 1]},

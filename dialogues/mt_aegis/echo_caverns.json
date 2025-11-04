@@ -2,12 +2,12 @@
   "id": "mt_aegis/echo_caverns",
   "speaker": "Echo Caverns",
   "lines": [
-    "Moist air smells of iron and old fires.",
-    "Your footfalls double and triple; echoes argue about which one is true.",
-    "Scratch-marks wander at knee height along the limestone—something small and quick.",
-    "Calcite curtains hang in sheets; water ticks in patient metronomes.",
-    "Charcoal hands once painted antlers here; frost adds its own white antlers over time.",
-    "A draft moves against you as if the mountain were breathing out a warning."
+    "You enter damp caverns that smell of iron and old fires.",
+    "Your footfalls echo along the passage.",
+    "Scratch-marks run at knee height along the limestone.",
+    "Calcite curtains hang from the ceiling and drip.",
+    "Charcoal antlers mark a wall where frost blooms.",
+    "A draft pushes back from deeper in."
   ],
   "choices": [
     { "text": "Follow the scratch-marks into a narrow runnel.", "effects": [{"start_combat": "Spriggan"}] },

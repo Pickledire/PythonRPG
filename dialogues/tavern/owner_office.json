@@ -2,14 +2,14 @@
   "id": "tavern/owner_office",
   "speaker": "Owner's Office",
   "lines": [
-    "Ledgers line the wall like well-behaved bricks.",
-    "A small crown sits in a drawer that is only locked when watched.",
-    "A map of the city uses spills and burned rings for landmarks.",
-    "On a shelf, a stein sweats without being filled.",
-    "The owner is nowhere. His chair keeps his shape out of loyalty.",
-    "Under the desk, a trapdoor memorizes your weight.",
-    "On the desk, three coins; one real, one wood, one that insists on being a moon.",
-    "On the door, a hook for a sign that can only read 'Closed' no matter the ink."
+    "Ledgers fill the wall from desk to door.",
+    "A small crown sits in a drawer.",
+    "A city map is marked with stains and rings.",
+    "A stein sweats on a shelf though it is empty.",
+    "The owner is gone; the chair is still warm.",
+    "A trapdoor rests beneath the desk.",
+    "Three coins lie on the blotter: real, wood, and strange.",
+    "A hook on the door holds a 'Closed' sign."
   ],
   "choices": [
     { "text": "Lift the sweating stein.", "next": "tavern/last_toast_ending" },

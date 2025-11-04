@@ -2,14 +2,13 @@
   "id": "mages/intro",
   "speaker": "Archmage",
   "lines": [
-    "Hearts beat, but knowledge waits.",
-    "Why have you come? In search of power or wisdom?",
-    "The path of the mage is fraught with peril, but the rewards are great.",
+    "You stand before the archmage at the college gate.",
+    "He asks why you have come: power, knowledge, or balance?",
+    "He tells you the work is hard and the lessons are earned.",
     "",
-    "I see potential in you. But the road ahead is not easy.",
-    "But every wizard who comes to the college must answer a question.",
+    "He says every new mage answers a question first.",
     "",
-    "When the world is silent and only the Weave replies, what do you ask of it?"
+    "When the hall is quiet and only the Weave answers, what do you ask?"
   ],
   "choices": [
     { "id": "path_power",    "text": "Grant me power enough to bend the storm.",      "next": "mages/power" },

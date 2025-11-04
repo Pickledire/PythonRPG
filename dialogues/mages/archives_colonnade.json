@@ -2,15 +2,15 @@
   "id": "mages/archives_colonnade",
   "speaker": "Archives Colonnade",
   "lines": [
-    "Columns keep the roof from forgetting; ivy keeps the columns from forgetting.",
-    "Niches hold busts of Deans who look like they still grade papers.",
-    "A skylight leaks stars in the daytime.",
-    "A list of banned tomes is posted; it updates itself by sighing.",
-    "Footsteps hush themselves as they pass here.",
-    "A maintenance mage nudges a lantern back to sensible.",
-    "A door to the Restricted stacks is barred by runes and common sense.",
+    "You walk the archive colonnade under stone columns.",
+    "Busts of past Deans line the niches.",
+    "Light falls through the skylight.",
+    "A posted list shows banned tomes.",
+    "Footsteps are quiet in this hall.",
+    "A maintenance mage adjusts a lantern.",
+    "A door to the Restricted stacks is barred by runes.",
     "",
-    "If you already paid a price for knowledge, the runes might be in the mood to listen."
+    "If you have earned access, the runes may allow it."
   ],
   "choices": [
     { "text": "Request access to Restricted.", "conditions": [{"flag_set": "mage_path"}, {"flag_set": "forest_pledge"}], "next": "mages/restricted_stacks" },

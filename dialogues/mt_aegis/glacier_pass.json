@@ -2,12 +2,12 @@
   "id": "mt_aegis/glacier_pass",
   "speaker": "Glacier Pass",
   "lines": [
-    "Blue ice rises in frozen waves. Crevasses breathe cold like wolves.",
-    "Rime crackles beneath your boots; the wind carves knives from the air.",
-    "Sunlight prisms through trapped bubbles, turning the world into broken glass rainbows.",
-    "Your reflection walks beneath you, stretched long and thin by ages of pressure.",
-    "A line of old pitons leads into a snow-choked chute; someone trusted them, once.",
-    "Somewhere ahead, a howl warps into something almost like a word."
+    "You enter the pass where blue ice rises in waves.",
+    "Rime crackles under your boots as wind cuts across the ridge.",
+    "Sunlight scatters through bubbles trapped in the ice.",
+    "A faint reflection moves under your feet.",
+    "Old pitons mark a snow-choked chute.",
+    "A howl carries ahead on the wind."
   ],
   "choices": [
     { "text": "A dire howl answers the wind—stand your ground.", "effects": [{"start_combat": "Dire Wolf"}] },

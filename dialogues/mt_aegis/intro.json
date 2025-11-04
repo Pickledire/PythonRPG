@@ -2,14 +2,12 @@
   "id": "mt_aegis/intro",
   "speaker": "Mt. Aegis",
   "lines": [
-    "Wind combs the snowfields at the mountain's foot.",
-    "Icicles hang like teeth from the ruined waystones of a forgotten road.",
-    "Somewhere above, the path splits through glacier and cavern before it finds the crown.",
-    "Your breath smokes in steady offerings; even sound seems to move slower here.",
-    "Pilgrims once came for omens. Raiders came later for shelter. The mountain outlasted both.",
-    "A raven watches from a broken cairn, head tilting as if counting your heartbeats.",
-    "Snow muffles the world until only choice remains: up, or away.",
-    "You tighten your cloak. The mountain waits."
+    "You arrive at the foot of Mt. Aegis in cutting wind.",
+    "Icicles hang from ruined waystones along an old road.",
+    "Ahead, routes climb through glacier and cavern toward the peak.",
+    "Your breath steams as you tighten your cloak.",
+    "A raven watches from a broken cairn.",
+    "Snow muffles sound. You choose your approach."
   ],
   "choices": [
     { "text": "Establish a base camp and survey the approaches.", "next": "mt_aegis/base_camp" },

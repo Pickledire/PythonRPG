@@ -2,14 +2,13 @@
   "id": "graveyard/catacomb_fork",
   "speaker": "Catacombs",
   "lines": [
-    "The passage divides where a root broke the ceiling and decided to live here.",
-    "Left smells of iron and beeswax. Right smells of paper and time.",
-    "Your lantern smokes a little; the smoke curls into letters that refuse to spell.",
-    "A beetle pushes a pearl of dust uphill with the earnestness of a saint.",
-    "A strand of hair crosses the floor like a line you are meant to draw.",
-    "Somewhere deep, water counts to seven and starts again.",
-    "You count to eight out of spite and feel better.",
-    "There are rules here. They are courteous enough to wait for you to break them."
+    "You reach a fork in the catacombs where a root has broken through.",
+    "The left passage smells of iron and beeswax.",
+    "The right passage smells of old paper.",
+    "Your lantern smokes; you trim the wick and check the air.",
+    "Dust shifts on the floor in a slow draft.",
+    "Water drips somewhere deeper in.",
+    "You choose a direction."
   ],
   "choices": [
     { "text": "Left, toward iron and beeswax.", "next": "graveyard/bone_altar" },

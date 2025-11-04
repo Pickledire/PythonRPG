@@ -2,14 +2,13 @@
   "id": "graveyard/ledger_rite",
   "speaker": "Ledger",
   "lines": [
-    "Dust floats up to read with you, each mote a small, attentive eye.",
-    "You speak the names. The vault breathes, then remembers how to sigh.",
-    "Salt lines rewrite themselves into tidier letters.",
-    "The copper portraits look away, grateful to be relieved of their watch.",
-    "In the ledger's gutter lies a charm stitched of thread and phalange.",
-    "Your voice returns to you cleaner than it left.",
-    "The veil in the corner stops quivering. Silence keeps it still.",
-    "The ring on the floor cools. It is only gold again."
+    "You read the names aloud from the ledger.",
+    "Your breath fogs lightly in the cool air.",
+    "Salt lines sit in neat rows along the page.",
+    "The portraits seem less watchful when you finish.",
+    "You find a small bone charm tucked in the gutter.",
+    "The air settles and the room is still.",
+    "The ring on the floor is cool to the touch."
   ],
   "effects": [
     {"stat_change": ["intelligence", 1]},

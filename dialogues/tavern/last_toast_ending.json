@@ -2,14 +2,14 @@
   "id": "tavern/last_toast_ending",
   "speaker": "Last Toast",
   "lines": [
-    "The stein is heavier than it looks, lighter than it should be.",
-    "Frost rims the lip; heat hums in the handle.",
-    "When you lift it, the room stands—a courtesy offered to old kings and good jokes.",
-    "You drink. It is every first drink that ever made sense and every last drink that ever told the truth.",
-    "The cat meows in a key you have been tuning toward all evening.",
-    "The barkeep bows from wherever he is and the walls clink their glasses.",
-    "You understand why the Broken Mug has never actually broken.",
-    "You leave it as you found it, and leave different than it found you."
+    "The stein is heavier than it looks.",
+    "Frost rims the lip; the handle is warm.",
+    "You lift it. The room goes quiet.",
+    "You drink and feel clear and steady.",
+    "The cat meows by the hearth.",
+    "Somewhere the barkeep nods.",
+    "You set the mug back where it was.",
+    "You leave changed."
   ],
   "effects": [
     {"set_flag": ["tavern_last_toast", true]},

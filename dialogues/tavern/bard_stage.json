@@ -2,14 +2,14 @@
   "id": "tavern/bard_stage",
   "speaker": "Bard",
   "lines": [
-    "The song starts in the throat and ends under the floorboards.",
-    "A story about a king who lost his crown and kept his head.",
-    "A chorus that fits like a bench after a long road.",
-    "Between verses, the bard tunes the room more than the lute.",
-    "You hear a line that sounds like a direction in a city that doesn't exist.",
-    "Someone weeps as quietly as a nap.",
-    "The last chord lands like a coin with two heads.",
-    "The bard nods at the bookcase that isn't always a bookcase."
+    "The bard sings a steady road song.",
+    "He tells of a king who kept his head and lost his crown.",
+    "The chorus eases the room.",
+    "Between verses, he retunes and scans faces.",
+    "One line sounds like a direction to a hidden door.",
+    "Someone wipes a quiet tear.",
+    "The last chord hangs and fades.",
+    "The bard nods toward the bookcase door."
   ],
   "effects": [
     {"stat_change": ["intelligence", 1]}

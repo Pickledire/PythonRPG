@@ -2,14 +2,14 @@
   "id": "tavern/common_room",
   "speaker": "Common Room",
   "lines": [
-    "Benches creak and settle as new faces take their places.",
-    "Serving hands ferry bowls of stew from pot to table.",
-    "Cards slap the wood; dice murmur in a leather cup.",
-    "A gray cat keeps the hearth and naps with one eye open.",
-    "The rafters are black with years of smoke and stories.",
-    "A scarred man listens more than he speaks.",
-    "Someone swears they saw a ghost once; someone else swears they didn't.",
-    "The door to the alley sticks when the damp comes in."
+    "You find a seat as benches creak around you.",
+    "Stew moves from pot to tables in steady rounds.",
+    "Cards slap the wood; dice rattle in a cup.",
+    "A gray cat naps by the hearth with one eye open.",
+    "Smoke-black rafters hold old stories.",
+    "A scarred patron listens and watches.",
+    "Someone argues about a ghost in town.",
+    "The alley door sticks when damp."
   ],
   "choices": [
     { "text": "Sit at the card table.", "next": "tavern/card_table" },

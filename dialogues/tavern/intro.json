@@ -2,14 +2,14 @@
   "id": "tavern/intro",
   "speaker": "The Broken Mug",
   "lines": [
-    "Ale steam and hearth-smoke braid in the rafters like old arguments.",
-    "The sign outside still swings from one chain; the other snapped in a storm and stayed snapped.",
-    "Dice sit like teeth in a wooden bowl; the bowl knows how to laugh without spilling.",
-    "Someone has nailed an antler over the bar; the other antler is a tap handle.",
-    "The floor remembers fights the wall does not—scars where chairs changed their minds.",
-    "A bard tunes a string that refuses to be a G.",
-    "The keeper polishes a glass and finds a map in its reflection.",
-    "You step in and every story here takes a breath to make room."
+    "You step into the Broken Mug and feel the hearth heat.",
+    "A cracked sign outside still hangs from one chain.",
+    "Dice sit in a bowl on a table near the door.",
+    "An antler hangs over the bar; the other is a tap handle.",
+    "Scars mark the floor from old fights.",
+    "A bard tunes a lute by the hearth.",
+    "The keeper polishes a glass and nods at you.",
+    "You decide where to start."
   ],
   "choices": [
     { "text": "Find a seat in the common room.", "next": "tavern/common_room" },

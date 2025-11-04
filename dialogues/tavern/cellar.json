@@ -2,14 +2,14 @@
   "id": "tavern/cellar",
   "speaker": "Cellar",
   "lines": [
-    "Barrels dream of rivers; bottles dream of becoming stories.",
-    "A chalk line marks where rats agreed not to cross and sometimes remember.",
-    "A trapdoor remembers being a door more than a trap.",
-    "Footprints in flour loop once around a crate and become confused.",
-    "A small door in the stone wall pretends it is not a door.",
-    "You hear a cough with no lungs behind it.",
-    "The air smells like spilled secrets and dill.",
-    "A ladder leads up to a bookcase and then also doesn't."
+    "You descend to a cool cellar of barrels and bottles.",
+    "A chalk line marks the floor by the wall.",
+    "A trapdoor sits open to the stair.",
+    "Flour footprints circle a crate.",
+    "A small stone door sits half-hidden.",
+    "You hear a dry cough from the dark.",
+    "The air smells of herbs and spilled drink.",
+    "A ladder rises toward a bookcase door."
   ],
   "choices": [
     { "text": "Open the small stone door.", "next": "tavern/secret_passage" },

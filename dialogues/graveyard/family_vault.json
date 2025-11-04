@@ -2,14 +2,14 @@
   "id": "graveyard/family_vault",
   "speaker": "Family Vault",
   "lines": [
-    "Marble biers shoulder one another like brothers who outlived the will.",
-    "A ledger sits open on a stand; every name is written twice, once in ink, once in salt.",
-    "Portraits painted on copper plates stare from their patina fog.",
-    "A single ring lies on the floor, too warm to be left long.",
-    "In the far corner, a veil of air sags inward as if gravity forgot itself.",
-    "The veil quivers when you breathe. It quivers when you try not to.",
-    "Somewhere between pages, blood once dried with care.",
-    "Between breaths, something remembers it was not finished."
+    "You step into a family vault lined with marble biers.",
+    "A ledger sits open on a stand.",
+    "Portrait plates hang on the walls, faces dulled by patina.",
+    "A ring lies on the floor where someone dropped it.",
+    "In the corner, the air moves strangely.",
+    "The movement quickens when you breathe.",
+    "Dried marks stain a page in the ledger.",
+    "You decide how to proceed."
   ],
   "choices": [
     { "text": "Face what stirs between the pages.", "effects": [{"start_combat": "Wraith"}] },

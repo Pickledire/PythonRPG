@@ -2,14 +2,13 @@
   "id": "fighters/arena",
   "speaker": "Arena",
   "lines": [
-    "Sand remembers names better than gravestones; it just doesn't write them.",
-    "The sun sits in the cheap seats; clouds heckle.",
-    "A rack of practice weapons leans against a wall that pretends to be stone.",
-    "A water barrel watches you like a friend who knows how fights end.",
-    "Chalk circles stain the ground where 'next time' was invented.",
-    "The tunnel smells of iron and applause.",
-    "A girl sells luck ties; the luck is your knot.",
-    "The bell pulls the day into pieces the crowd can swallow."
+    "You walk the edge of the arena and feel the grit under your boots.",
+    "You test the weight of a practice weapon from the rack.",
+    "You drink from the water barrel and wet your mouth.",
+    "Chalk marks show where fighters warmed up.",
+    "The tunnel smells of iron and sweat.",
+    "A girl sells linen ties for luck.",
+    "The bell hangs ready for the next bout."
   ],
   "choices": [
     { "text": "Fight Yjurgen (brute).", "effects": [{"start_combat": "Yjurgen"}] },

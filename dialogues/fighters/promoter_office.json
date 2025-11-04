@@ -2,14 +2,14 @@
   "id": "fighters/promoter_office",
   "speaker": "Promoter",
   "lines": [
-    "Ledger thick as a brick; smile thin as a blade.",
-    "He oils the bell rope between thumb and forefinger.",
-    "'We make stories here,' he says. 'The trick is making them end on time.'",
-    "He weighs your token and decides how heavy your life is today.",
-    "'Throw a round, finish strong, bleed pretty. Pick any two.'",
-    "A drawer shuts on a secret that stays shut.",
-    "He stamps your wrist with ink that knows where the tunnel is.",
-    "'Bell's in five. Be what they paid for.'"
+    "You enter the promoter's office and see a ledger on the desk.",
+    "He oils the bell rope and looks you over.",
+    "'We keep the matches moving,' he says.",
+    "He weighs your token in his hand.",
+    "'There are arrangements if you want them,' he adds.",
+    "He closes a drawer and waits for your answer.",
+    "He stamps your wrist for access to the tunnel.",
+    "'Bell in five. Be ready.'"
   ],
   "choices": [
     { "text": "Agree to a 'certain arrangement'.", "conditions": [{"flag_not_set": "tavern_last_toast"}], "effects": [{"set_flag": ["promoter_fix", true]}], "next": "fighters/tunnel" },

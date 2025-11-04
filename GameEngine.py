@@ -44,6 +44,7 @@ class GameEngine:
         self.ghost_horror = False
         self.quest_flags = {}
         self.world_bells = 8  # simple world time, 0-23
+        self.fight_reward_multiplier = 1.0  # scales rewards for special hunts
         
         # Color scheme
         self.colors = {
@@ -128,6 +129,14 @@ class GameEngine:
                 self._effect_banner(duration)
             elif name in ("cold_breath", "mist"):
                 self._effect_cold_breath(duration)
+            elif name in ("snow", "snowfall"):
+                self._effect_snowfall(duration)
+            elif name in ("torch", "torchlight"):
+                self._effect_torchlight(duration)
+            elif name in ("bridge", "collapse", "bridge_collapse"):
+                self._effect_bridge_collapse(duration)
+            elif name in ("aurora", "lights"):
+                self._effect_aurora(duration)
         except Exception:
             pass
 
@@ -182,6 +191,43 @@ class GameEngine:
         while time.time() < end:
             self.print_centered(random.choice(puffs), 120, self.colors['info'])
             time.sleep(0.08)
+
+    def _effect_snowfall(self, duration: float):
+        end = time.time() + duration
+        flakes = ["·", "*", "✦", "."]
+        while time.time() < end:
+            line = "".join(random.choice([" ", random.choice(flakes)]) for _ in range(48))
+            self.print_centered(line, 120, Fore.WHITE)
+            time.sleep(0.06)
+
+    def _effect_torchlight(self, duration: float):
+        end = time.time() + duration
+        cones = [
+            "  ^",
+            " ^^^",
+            "^^^^^",
+            " ^^^",
+            "  ^",
+        ]
+        colors = [Fore.YELLOW + Style.BRIGHT, Fore.RED + Style.BRIGHT]
+        while time.time() < end:
+            self.print_centered(random.choice(cones), 120, random.choice(colors))
+            time.sleep(0.08)
+
+    def _effect_bridge_collapse(self, duration: float):
+        end = time.time() + duration
+        frames = ["==== ====", "== == ==", "=  ==  =", "_   __  "]
+        while time.time() < end:
+            self.print_centered(random.choice(frames), 120, self.colors['warning'])
+            time.sleep(0.08)
+
+    def _effect_aurora(self, duration: float):
+        end = time.time() + duration
+        waves = ["≈≈≈≈≈≈≈≈", "~~~~~~", "≋≋≋≋≋", "⋰⋱⋰⋱"]
+        cols = [Fore.CYAN + Style.BRIGHT, Fore.MAGENTA + Style.BRIGHT, Fore.GREEN + Style.BRIGHT]
+        while time.time() < end:
+            self.print_centered(random.choice(waves), 120, random.choice(cols))
+            time.sleep(0.09)
     
     def display_title(self):
         """Display the game title with enhanced styling"""
@@ -579,8 +625,30 @@ class GameEngine:
             input(f"{self.colors['menu']}Press Enter to continue...{self.colors['reset']}")
             return
         
-        # Generate enemy: force level 25, then 20, then 15, then 10 bosses (once per run)
+        # Optional hunt mode (only for non-boss encounters)
+        enemy_scale = 1.0
+        self.fight_reward_multiplier = 1.0
+
+        # Predict if a one-time boss will trigger
         player_level = self.player.level if self.player else 1
+        boss_imminent = (
+            (player_level >= 25 and not self.level_25_boss) or
+            (player_level >= 20 and not self.level_20_boss) or
+            (player_level >= 15 and not self.level_15_boss) or
+            (player_level >= 10 and not self.level_10_boss)
+        )
+
+        if not boss_imminent:
+            print()
+            self.print_centered("Choose hunt style:", 120, self.colors['header'])
+            self.print_centered(f"{self.colors['menu']}1. {self.colors['info']}Standard hunt{self.colors['reset']} (normal rewards)", 120)
+            self.print_centered(f"{self.colors['menu']}2. {self.colors['warning']}Risky hunt{self.colors['reset']} (+20% enemy, +50% rewards)", 120)
+            sel = input(f"\n{self.colors['menu']}Enter choice (1-2): {self.colors['reset']}").strip()
+            if sel == "2":
+                enemy_scale = 1.2
+                self.fight_reward_multiplier = 1.5
+
+        # Generate enemy: force level 25, then 20, then 15, then 10 bosses (once per run)
         if player_level >= 25 and not self.level_25_boss:
             self.level_25_boss = True
             self.current_enemy = EnemyFactory.create_rat_king()
@@ -595,6 +663,22 @@ class GameEngine:
             self.current_enemy = EnemyFactory.create_boss()
         else:
             self.current_enemy = EnemyFactory.create_random_enemy(player_level, self)
+            # Apply enemy scaling for risky hunts
+            if enemy_scale > 1.0 and hasattr(self.current_enemy, 'stats'):
+                try:
+                    self.current_enemy.max_health = int(self.current_enemy.max_health * enemy_scale)
+                    self.current_enemy.health = min(self.current_enemy.max_health, int(self.current_enemy.health * enemy_scale))
+                    self.current_enemy.base_damage = int(self.current_enemy.base_damage * enemy_scale)
+                    for k in ('strength', 'agility', 'defense'):
+                        self.current_enemy.stats[k] = int(self.current_enemy.stats.get(k, 0) * enemy_scale)
+                except Exception:
+                    pass
+            # Random affix for flavor (40% chance)
+            try:
+                if random.random() < 0.4:
+                    self._apply_enemy_affix(self.current_enemy)
+            except Exception:
+                pass
         self.in_combat = True
         
         # Check if boss and show epic intro
@@ -614,6 +698,10 @@ class GameEngine:
             self.print_border("⚔", 60, self.colors['combat'])
             self.print_centered(f"{self.colors['combat']}⚔️ A wild {self.colors['enemy']}{self.current_enemy.name}{self.colors['combat']} appears!{self.colors['reset']}")
             self.print_border("⚔", 60, self.colors['combat'])
+            # Show any modifiers
+            if hasattr(self.current_enemy, 'affix_names') and self.current_enemy.affix_names:
+                mods = ", ".join(self.current_enemy.affix_names)
+                self.print_centered(f"{self.colors['warning']}Modifier: {mods}{self.colors['reset']}")
             self.print_centered_block(self.current_enemy.get_info(), self.colors['info'])
             input(f"{self.colors['menu']}Press Enter to start combat...{self.colors['reset']}")
         
@@ -1047,6 +1135,13 @@ class GameEngine:
         elif not self.current_enemy.alive:
             xp_reward = self.current_enemy.get_xp_reward()
             gold_reward = self.current_enemy.get_gold_reward()
+            # Apply hunt reward multiplier
+            try:
+                mult = float(getattr(self, 'fight_reward_multiplier', 1.0))
+            except Exception:
+                mult = 1.0
+            xp_reward = int(xp_reward * mult)
+            gold_reward = int(gold_reward * mult)
             
             print()
             self.print_border("═", 60, self.colors['success'])
@@ -1079,6 +1174,42 @@ class GameEngine:
                 self.grant_archmage_rewards()
         
         input(f"{self.colors['menu']}Press Enter to continue...{self.colors['reset']}")
+
+    def _apply_enemy_affix(self, enemy):
+        """Apply a single random affix to the enemy for variety."""
+        affixes = [
+            ('Enraged', lambda e: self._affix_enraged(e)),
+            ('Armored', lambda e: self._affix_armored(e)),
+            ('Shielded', lambda e: self._affix_shielded(e)),
+            ('Swift', lambda e: self._affix_swift(e)),
+        ]
+        name, fn = random.choice(affixes)
+        try:
+            fn(enemy)
+            if not hasattr(enemy, 'affix_names'):
+                enemy.affix_names = []
+            enemy.affix_names.append(name)
+        except Exception:
+            return
+
+    def _affix_enraged(self, enemy):
+        enemy.base_damage = int(enemy.base_damage * 1.25)
+        if hasattr(enemy, 'stats'):
+            enemy.stats['strength'] = int(enemy.stats.get('strength', 0) + 5)
+
+    def _affix_armored(self, enemy):
+        if hasattr(enemy, 'stats'):
+            enemy.stats['defense'] = int(enemy.stats.get('defense', 0) + 5)
+        enemy.max_health = int(enemy.max_health * 1.15)
+        enemy.health = min(enemy.max_health, int(enemy.health * 1.15))
+
+    def _affix_shielded(self, enemy):
+        if hasattr(enemy, 'add_status'):
+            enemy.add_status('shield', {'reduction_pct': 0.25, 'turns': 3})
+
+    def _affix_swift(self, enemy):
+        if hasattr(enemy, 'stats'):
+            enemy.stats['agility'] = int(enemy.stats.get('agility', 0) + 8)
 
     def grant_boss_reward(self):
         """Offer the player a choice of one of three Titan rewards after defeating the boss."""

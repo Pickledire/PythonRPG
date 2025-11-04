@@ -2,12 +2,13 @@
   "id": "mt_aegis/base_camp",
   "speaker": "Camp",
   "lines": [
-    "You raise a windbreak from old sledge boards and torn canvas.",
-    "A small flame crackles; tea melts the ache from your hands.",
-    "From here the Glacier Pass curves to the east, a river of blue glass.",
-    "West yawns a limestone maw—the Echo Caverns—where breath returns as whispers.",
-    "Bootprints you do not remember making cross and recross the snow, already half-filled.",
-    "Sparks climb the dark like tiny stars seeking their constellations again."
+    "You set a windbreak and light a small fire.",
+    "You warm your hands and study the approaches.",
+    "Glacier Pass curves east as blue ice.",
+    "The Echo Caverns open to the west.
+",
+    "Snow fills older bootprints as the wind shifts.",
+    "You pack and choose your route."
   ],
   "choices": [
     { "text": "Study the slope and steel yourself (rest).", "effects": [{"set_health": 100}, {"set_mana": 100}] },

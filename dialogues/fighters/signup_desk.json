@@ -2,14 +2,13 @@
   "id": "fighters/signup_desk",
   "speaker": "Sign-up Desk",
   "lines": [
-    "A ledger with bloodstain corners; contracts written in ink and afterthoughts.",
-    "The clerk's quill is a spear for paper.",
-    "'Name?' he asks. 'Or whatever you call yourself when people watch.'",
-    "He slides across a bronze token stamped with a pit and a promise.",
-    "'Lose the token, lose your purse. Lose your purse, lose your friends.'",
-    "He points you toward the tunnel with a thumb that has been broken properly.",
-    "A bell coughs twice; the crowd clears its throat in reply.",
-    "You are ink now. Let's see if you're also steel."
+    "You step to the desk and see a ledger waiting for names.",
+    "The clerk asks for your name and writes it down.",
+    "He slides you a bronze token stamped with the arena pit.",
+    "'Keep it safe. You need it to get paid,' he says.",
+    "He points you toward the tunnel and the locker room.",
+    "The bell rings twice somewhere inside.",
+    "You are signed in. Time to work."
   ],
   "effects": [
     {"set_flag": ["arena_signed", true]}

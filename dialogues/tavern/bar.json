@@ -2,13 +2,13 @@
   "id": "tavern/bar",
   "speaker": "Barkeep",
   "lines": [
-    "The barkeep wipes the counter in steady circles.",
-    "He sets down a glass with the care of a man who has seen long nights.",
-    "'You look like a question,' he says. 'I've got a few answers.'",
-    "He holds up three fingers. 'And a cellar.'",
-    "The mirror behind the bar shows the room without its noise.",
-    "A ledger sits open in the dim; debts wait where they were left.",
-    "Barrels line the wall by the back door.",
+    "The barkeep wipes the counter in slow circles.",
+    "He sets down a clean glass.",
+    "'You look like a question,' he says. 'Pick one.'",
+    "He taps the bar and nods toward the cellar door.",
+    "The mirror shows the room over your shoulder.",
+    "A ledger lies open beside a stack of mugs.",
+    "Barrels line the wall by the rear.",
     "The tap hisses; the cask is fresh."
   ],
   "choices": [

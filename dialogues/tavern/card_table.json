@@ -2,14 +2,14 @@
   "id": "tavern/card_table",
   "speaker": "Card Table",
   "lines": [
-    "Cards fan like wings; someone shuffles with one hand and drinks with the other.",
-    "A coin tips, wobbles, and settles with a soft ring.",
-    "'Table stakes are stories or silver,' says a woman with a laugh that knows both.",
-    "The deck smells faintly of smoke and promises.",
-    "A spoon taps a glass and you realize you've been dealt in.",
-    "Three faces look like they know you already; two probably do.",
-    "A dog under the table watches your hands and waits.",
-    "It is not you unless you change that."
+    "You sit at the card table as a fresh hand is dealt.",
+    "A coin wobbles and settles near the pot.",
+    "'Stories or silver,' says a woman, smiling.",
+    "The deck smells faintly of smoke.",
+    "A spoon taps a glass; you are in the next round.",
+    "Three players study you.",
+    "A dog under the table watches your hands.",
+    "You choose how to play it."
   ],
   "choices": [
     { "text": "Play a bold hand.", "effects": [{"add_gold": 30}] },

@@ -2,14 +2,14 @@
   "id": "graveyard/old_stones",
   "speaker": "Old Stones",
   "lines": [
-    "The oldest graves squat low, their names made of lichen and stubbornness.",
-    "Coins fused by time glitter in a cracked saucer: promises nobody will call in.",
-    "A jawbone peeks from a sinkhole, teeth in a smile that means weather, not joy.",
-    "You trace a groove you think was once a letter and your finger comes away colder.",
-    "A ribbon tied to a twig tells a story the stone doesn't remember.",
-    "A rook scolds you for not knowing how to read the ground.",
-    "Somewhere a spade bites earth twice in quick succession, then stops.",
-    "You realize your breath sounds like someone else's."
+    "You walk among low, weathered stones.",
+    "You see old coins fused in a cracked saucer.",
+    "You notice bone in a small sink in the ground.",
+    "You trace a groove where a letter used to be.",
+    "A ribbon tied to a twig marks a family place.",
+    "A rook calls from a branch overhead.",
+    "You hear a spade bite earth twice, then silence.",
+    "You steady your breath and listen."
   ],
   "choices": [
     { "text": "Hear the bone rattle—stand your ground.", "effects": [{"start_combat": "Skeleton"}] },

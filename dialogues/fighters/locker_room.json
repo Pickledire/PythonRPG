@@ -2,14 +2,13 @@
   "id": "fighters/locker_room",
   "speaker": "Locker Room",
   "lines": [
-    "Benches scarred by buckles and victories.",
-    "Hooks hold coats that remember better summers.",
-    "A bucket with cold water tolerates courage and spit equally.",
-    "Handwraps hang to dry and drip old stories.",
-    "Someone carved 'Breathe' into the door; someone else added 'Now'.",
-    "A friend you haven't met wishes you luck and means it.",
-    "The bell sounds closer in here.",
-    "Your hands harden. Your heart doesn't need to."
+    "You find benches and hooks lining the wall.",
+    "You wash your face in a bucket of cold water.",
+    "Handwraps hang drying above the bench.",
+    "'Breathe now' is carved into the door.",
+    "A fighter nods and wishes you luck as he passes.",
+    "The bell sounds close from the tunnel.",
+    "You clench and unclench your hands to warm up."
   ],
   "choices": [
     { "text": "Wrap your hands and go.", "next": "fighters/tunnel" },

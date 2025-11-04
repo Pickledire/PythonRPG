@@ -2,14 +2,14 @@
   "id": "forest/shadow_market",
   "speaker": "Shadow Market",
   "lines": [
-    "Stalls set up where no road leads; lanterns hang from hooks that don't cast shadows.",
-    "Vendors drape their wares in sighs: a jar of rain kept from falling, a smile borrowed from winter.",
-    "A hound asleep on a rug dreams with its eyes open and its nose closed.",
-    "Coins here are stories; they clink in your pocket when you remember them.",
-    "A seller of glimmers offers one that looks like your reflection finally agreeing.",
-    "At the market's center, a stump serves as a scale: heart on one side, twig on the other.",
-    "The crier rings a bell with no clapper; the sound arrives from your childhood.",
-    "You realize the market opens for those who don't look for it and closes for those who stay."
+    "You find stalls set up in a clearing off the trail.",
+    "Lanterns hang from hooks and throw steady light.",
+    "A hound sleeps on a rug beside a seller's feet.",
+    "You trade coin at the tables the same as anywhere.",
+    "A vendor offers a small glimmering charm.",
+    "At the center, a stump serves as a scale for small trades.",
+    "A crier rings a bell and calls the next buyer.",
+    "You look over the items and decide."
   ],
   "choices": [
     { "text": "Trade your twig bundle for something that fits your hand.", "next": "forest/heartwood_ending" },

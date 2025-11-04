@@ -2,11 +2,11 @@
     "id": "tavern/dark_mage_fight",
     "speaker": "Dark Mage",
     "lines": [
-        "You confront the dark mage",
-        "Yet he doesn't seem to move from his chair.",
-        "Except to raise one hand",
+        "You face the dark mage across the chamber.",
+        "He does not rise from his chair.",
+        "He only lifts one hand.",
         "",
-        "Magic fills the room, and a horrid monster appears before you."
+        "Magic swells, and a horrid monster forms between you."
     ],
     "choices": [
         {

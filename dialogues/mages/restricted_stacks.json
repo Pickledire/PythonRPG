@@ -2,15 +2,15 @@
   "id": "mages/restricted_stacks",
   "speaker": "Restricted Stacks",
   "lines": [
-    "Shelves lean together in conspiracies; pages whisper.",
-    "Locks ask for passwords you remember from dreams.",
-    "A lantern refuses to smoke, as if ashamed to be seen here.",
-    "A chain across a desk rattles when you think about rule-bending.",
-    "Footprints made of dust turn a corner and end politely.",
-    "A clerk shaped like a shadow stamps a permit on air.",
-    "A sigil chalked on the floor dampens accidents and doubles intentions.",
+    "You enter the Restricted stacks where shelves narrow the aisle.",
+    "Locks and permits guard the cases.",
+    "A lantern hangs steady over the desk.",
+    "A chain across the desk rattles when you move it.",
+    "Dusty prints turn a corner and fade.",
+    "The clerk stamps your permit and nods.",
+    "A chalk sigil marks the floor for safety.",
     "",
-    "Somewhere below, a vault door listens for this room's decisions."
+    "A vault door below waits for authorized readers."
   ],
   "effects": [
     {"set_flag": ["restricted_permit", true]}

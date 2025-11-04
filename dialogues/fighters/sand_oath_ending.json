@@ -2,14 +2,13 @@
   "id": "fighters/sand_oath_ending",
   "speaker": "Oath on the Sand",
   "lines": [
-    "After the bell, the crowd exhales; the day puts itself away.",
-    "You kneel and press your hand into the sand; it keeps your print and your promise.",
-    "You swear to fight only what deserves it, and to be what the cheering thinks you are when it is kind.",
-    "The arena listens. It has heard worse. It chooses to believe you.",
+    "The bell rings off and the crowd settles.",
+    "You kneel and press your hand into the sand.",
+    "You swear to fight with purpose and keep your word.",
     "A runner brings a bundle wrapped in old banners.",
-    "Inside: a weapon with the grit of glass and the grace of rain.",
-    "The promoter nods once, like a man who lost a bet and doesn't mind.",
-    "The medic smiles twice, like a person who knows stories that end later."
+    "Inside is a weapon earned in the ring.",
+    "The promoter nods once.",
+    "The medic smiles and returns to work."
   ],
   "effects": [
     {"set_flag": ["sand_oath", true]},

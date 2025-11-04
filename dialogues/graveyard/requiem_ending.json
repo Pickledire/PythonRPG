@@ -2,14 +2,14 @@
   "id": "graveyard/requiem_ending",
   "speaker": "Requiem",
   "lines": [
-    "The draft becomes a corridor becomes a choir.",
-    "Not voices—breaths. All the breaths that stopped here, gathered into a single kindness.",
-    "You walk where feet do not go and stand where standing is a kind of listening.",
-    "The graves above rearrange themselves in your memory into the shape of a door.",
-    "When it opens, nothing leaves. When it closes, nothing is trapped.",
-    "A ribbon of un-ink writes across your palm: a sigil for letting endings end.",
-    "A lantern goes out somewhere you will never find, and you are glad for it.",
-    "You turn back toward the world with a song that makes silence feel finished."
+    "You follow the draft down a corridor and stop in a quiet chamber.",
+    "You stand still and let the air settle.",
+    "You hold a silence long enough to hear your own breath.",
+    "You think of the graves above as doors that close well.",
+    "Nothing leaves and nothing is trapped.",
+    "A clean mark appears on your palm and fades.",
+    "A lantern goes out somewhere and the dark is at peace.",
+    "You turn back toward the world with a simple tune in your head."
   ],
   "effects": [
     {"set_flag": ["requiem_bound", true]},

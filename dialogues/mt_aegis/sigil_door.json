@@ -2,12 +2,12 @@
   "id": "mt_aegis/sigil_door",
   "speaker": "Sigil Door",
   "lines": [
-    "A stone door blooms with frost-flowers, each a rune of protection.",
-    "Your breath lifts the smallest petals. They ring like crystal.",
-    "With a steady hand you trace the counter-mark taught in an old tavern rhyme.",
-    "The frost recedes in spirals, revealing chisel-strokes as neat as scripture.",
-    "A soft blue light travels the seam, hesitant, then certain.",
-    "Stone sighs like a sleeper turning and the way opens just enough for the stubborn."
+    "You find a stone door covered in frost runes.",
+    "Your breath fogs the smallest marks.",
+    "You trace a counter-mark you were taught long ago.",
+    "Frost recedes and clean chisel lines appear.",
+    "A blue light runs along the seam of the door.",
+    "The stone shifts and opens a narrow way."
   ],
   "effects": [
     {"give_item": {"type": "armor", "name": "Aegis Cloak", "defense": 24, "value": 220, "description": "A cloak stitched with mountain sigils"}}

@@ -2,12 +2,12 @@
   "id": "mt_aegis/ice_bridge",
   "speaker": "Ice Bridge",
   "lines": [
-    "The bridge sings under your weight; a whale-song of ancient pressure.",
-    "Shapes move beneath the ice like memories trying to surface.",
-    "Hairline fractures web outward, silvering like spider silk in moonlight.",
-    "Air trapped centuries ago blooms from pinpricks, tasting of copper and rain.",
-    "A pale fish drifts below—no gills, no eyes—only a slow heartbeat of light.",
-    "You know, briefly and certainly, that this place knows your name."
+    "You step onto an ice bridge that sings underfoot.",
+    "Shapes slide under the surface in the dim.",
+    "Fine fractures web across the span.",
+    "Old air hisses from pinpricks.",
+    "Something pale drifts beneath the ice.",
+    "You keep your balance and cross or turn back."
   ],
   "choices": [
     { "text": "Cross quickly before the song crescendos.", "effects": [{"add_gold": 40}], "next": "mt_aegis/upper_slopes" },

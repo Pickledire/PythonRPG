@@ -1,0 +1,7 @@
+Exploration mode (ASCII map): fog‑of‑war over zones, hazards, secrets; lightweight movement + discovery loops.
+
+Mini‑games: lockpicking (timed windows)
+
+Card/board interludes: tavern card game with unique NPC decks; rare cards drop from bosses/factions.
+
+Visual set‑pieces: more ASCII effects (mist, snowfall, torchlight cones, collapsing bridges) as gameplay moments.

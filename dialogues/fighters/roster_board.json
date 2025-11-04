@@ -2,14 +2,14 @@
   "id": "fighters/roster_board",
   "speaker": "Roster",
   "lines": [
-    "Chalk names slant with attitude; odds lean harder.",
-    "Yjurgen 3:1, Ziggy 5:1 (to finish the ale), Jarvask even, Gorren 7:2, Morrg ??.",
-    "Someone added 'You' at the bottom and drew a crown or a dunce cap.",
-    "A note: 'No refunds on bets that were bad ideas.'",
-    "Another note: 'See promoter for certain arrangements (bring certain coin)'.",
-    "A smear where someone erased a name, then wrote it back smaller.",
-    "Two kids trace letters with their fingers and learn faster than the adults.",
-    "Your token clicks against the board without meaning to."
+    "You read the names and odds written in chalk.",
+    "Yjurgen 3:1, Ziggy 5:1, Jarvask even, Gorren 7:2, Morrg ??.",
+    "Someone added 'You' at the bottom with a crude crown.",
+    "A note says: 'No refunds on bad bets.'",
+    "Another note: 'See promoter for arrangements (bring coin)'.",
+    "A fresh erasure leaves a chalk smear.",
+    "Two kids trace letters on the board.",
+    "You tap your token and make up your mind."
   ],
   "choices": [
     { "text": "Bet on yourself.", "effects": [{"add_gold": -20}, {"set_flag": ["bet_on_self", true]}], "next": "fighters/arena" },

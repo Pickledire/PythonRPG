@@ -2,12 +2,12 @@
   "id": "mt_aegis/upper_slopes",
   "speaker": "Upper Slopes",
   "lines": [
-    "Snow thins to scree and black ice. Old bones sit where the wind left them.",
-    "A broken cart half-swallowed by drift holds rusted picks and a prayer board.",
-    "The sky is a lid of pewter; even ravens keep low here, riding ground heat.",
-    "Frost feathers grow from iron nails hammered into a stump long ago.",
-    "Your hands remember warmth by memory more than sensation now.",
-    "Somewhere above, a bell rings once without a clapper."
+    "You climb onto upper slopes of scree and black ice.",
+    "A broken cart holds rusted picks and a prayer board.",
+    "Ravens ride the updrafts close to the ground.",
+    "Frost feathers grow from old iron nails in a stump.",
+    "Your hands numb; you flex them and keep moving.",
+    "A single bell rings once above you."
   ],
   "choices": [
     { "text": "A roar from a ledge above—stand fast.", "effects": [{"start_combat": "Ogre"}] },

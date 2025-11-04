@@ -2,14 +2,14 @@
   "id": "forest/fae_ring",
   "speaker": "Fair Ring",
   "lines": [
-    "Mushrooms consider being a circle again and this time commit.",
-    "A hum lives here just to the left of hearing.",
-    "Thistles bow and then pretend they didn't when you notice.",
-    "A brass button lies in the grass; it does not want to be found and fails.",
-    "The air smells like rain that hasn't happened yet.",
-    "A beetle crosses the ring and becomes briefly important.",
-    "If you count to twelve, something counts to eleven with you.",
-    "At thirteen, something else forgets to stop."
+    "You find a ring of mushrooms in the grass.",
+    "You hear a faint hum in the clearing.",
+    "Thistles bend along the edge of the ring.",
+    "A brass button lies near your boot.",
+    "The air smells like rain.",
+    "A beetle crosses the ring and disappears into the grass.",
+    "You count your steps and keep your balance.",
+    "You decide how to cross."
   ],
   "choices": [
     { "text": "Step into the ring on one foot.", "effects": [{"stat_change": ["agility", 1]}], "next": "forest/witch_waystone" },

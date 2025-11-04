@@ -2,14 +2,13 @@
   "id": "graveyard/bone_altar",
   "speaker": "Bone Altar",
   "lines": [
-    "An altar ribbed with femurs waits under wax stalagmites.",
-    "Tallow murals show kings kneeling to farmers and farmers kneeling to nobody.",
-    "A book bound in funeral cloth hums when you do not look directly at it.",
-    "Three teeth sit in a saucer: milk, wisdom, and something else's.",
-    "A string of coins runs along the edge, cut so each can escape alone if needed.",
-    "You feel the weight of a promise you haven't made yet settle on your shoulders.",
-    "It fits better than your cloak.",
-    "Something asks for a word. It doesn't care which, as long as you keep it."
+    "You find an altar set with old bone and hardened wax.",
+    "Melted tallow runs in lines down the stone.",
+    "A book wrapped in dark cloth rests at the back.",
+    "Three teeth sit in a saucer on the corner.",
+    "Coins line the edge of the altar.",
+    "You feel a pull to make a promise and keep it.",
+    "You decide what to leave and what to take."
   ],
   "choices": [
     { "text": "Pledge to carry the names that have no mouths.", "effects": [{"set_flag": ["names_carried", true]}, {"stat_change": ["intelligence", 1]}], "next": "graveyard/catacomb_fork" },

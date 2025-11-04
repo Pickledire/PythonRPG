@@ -2,14 +2,13 @@
   "id": "fighters/medic_tent",
   "speaker": "Medic",
   "lines": [
-    "Canvas smells of herbs and arguments won late.",
-    "A cot sags with the memory of someone else's pain.",
-    "'Sit,' the medic says, and you do, because the verb is practiced.",
-    "They bind your wrist with linen that once was a shirt worth keeping.",
-    "A jar of tincture winks; it knows hurt when it sees it.",
-    "'You don't have to be brave. Just be here.'",
-    "The bell asks a question; your ribs answer honestly.",
-    "You leave with new lines drawn where you need them."
+    "You step into the medic's tent; the air smells of herbs.",
+    "You sit on a cot while the medic checks your ribs and wrists.",
+    "They bind your wrist with clean linen and dab tincture on scrapes.",
+    "'Breathe,' the medic says. 'Again.'",
+    "You nod and stand.",
+    "The bell sounds outside.",
+    "You leave wrapped and ready."
   ],
   "effects": [
     {"set_health": 100}

@@ -2,14 +2,14 @@
   "id": "forest/heartwood_ending",
   "speaker": "Heartwood",
   "lines": [
-    "The market folds itself back into the trees; only the stump remains and even it is more suggestion than wood.",
-    "You set the twig bundle on the scale. The other pan fills with birdsong and stops just shy of even.",
-    "A hand like bark and a voice like rain offer you what the forest thinks you meant to ask.",
-    "Roots rise just enough to trip your doubt and then settle, satisfied.",
-    "The air tastes of sap and the first cut of spring.",
-    "You feel the path arrange itself under you for the walk back you haven't started.",
-    "The forest keeps your name the way a pocket keeps a stone.",
-    "It returns something that fits your hand like a memory finally behaving."
+    "The market closes and the clearing is quiet.",
+    "You set the twig bundle on the stump used as a scale.",
+    "A gloved hand offers you a reward for the trade.",
+    "Roots shift under your boots and settle again.",
+    "The air smells of sap and cut wood.",
+    "You steady your breathing and take what is offered.",
+    "You turn toward the trail ready to leave the grove.",
+    "You receive something that fits your grip."
   ],
   "choices": [
     { "text": "Accept the Thornbow (agility).", "effects": [{"give_item": {"type": "weapon", "name": "Thornbow", "damage": 40, "value": 260, "description": "A bow grown, not carved; it remembers which way to bend", "weapon_type": "ranged"}}] },

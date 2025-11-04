@@ -2,14 +2,14 @@
   "id": "fighters/intro",
   "speaker": "Arena Grounds",
   "lines": [
-    "Canvas banners slap the wind; sand in the seams tastes like old thunder.",
-    "Vendors shout the same three prices until they sound like a prayer.",
-    "The pit's lip is chewed by a thousand boots and twice as many hopes.",
-    "A bell hangs from a beam; it rings when it likes you and when it doesn't.",
-    "A board lists today's roster; chalk dust turns champions into rumors.",
-    "Men and women wrap hands in linen and intention.",
-    "A promoter smiles like a locked door; a medic frowns like the key.",
-    "The crowd is already a storm. Someone decides you'll be lightning."
+    "You arrive at the arena grounds as banners snap in the wind.",
+    "You pass vendors calling prices for water, wraps, and meat pies.",
+    "You look down into the pit where fresh sand covers old stains.",
+    "A bell hangs over the gate where matches start and end.",
+    "You read today's roster on the board.",
+    "Fighters wrap their hands with linen and focus.",
+    "A promoter watches the gate; a medic sorts clean bandages.",
+    "You decide where to go first."
   ],
   "choices": [
     { "text": "Sign up at the desk.", "next": "fighters/signup_desk" },

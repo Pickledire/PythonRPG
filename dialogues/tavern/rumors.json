@@ -2,8 +2,9 @@
   "id": "tavern/rumors",
   "speaker": "Tavern Keeper",
   "lines": [
-    "They say a hooded wizard was seen near the Mages Academy.",
-    "If you seek power, seek him. If you seek peace, avoid him."
+    "The keeper lowers his voice.",
+    "A hooded wizard was seen near the Mages Academy.",
+    "Seek him if you want power. Avoid him if you want peace."
   ],
   "choices": [
     {

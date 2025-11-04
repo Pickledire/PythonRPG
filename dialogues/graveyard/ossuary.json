@@ -2,14 +2,14 @@
   "id": "graveyard/ossuary",
   "speaker": "Ossuary",
   "lines": [
-    "Skulls stack into arches. Jawbones make tidy shelves.",
-    "Every socket contains a shadow that might have been an idea once.",
-    "A braid of rosary beads ties a pillar; the knots are prayers against untying.",
-    "A child-sized femur serves as a candle holder—wax drips like fat tears.",
-    "Your boot knocks a tibia; it rolls back obediently to where it belonged.",
-    "Some skulls grin like hostesses. Some keep their teeth to themselves.",
-    "A single hair ribbon loops a vertebra. The knot is new.",
-    "You are not the only visitor who chooses the quiet rooms."
+    "You enter an ossuary where bones are stacked and sorted.",
+    "Empty sockets look past you from the walls.",
+    "Rosary beads tie to a pillar near the steps.",
+    "A femur holds a candle; wax has pooled and cooled.",
+    "Your boot knocks a tibia and you set it back in place.",
+    "Some skulls are missing teeth; some are not.",
+    "A new ribbon loops a vertebra and trails dust.",
+    "You are not the first to seek the quiet here."
   ],
   "choices": [
     { "text": "Whisper a litany and move on.", "next": "graveyard/catacomb_fork" },

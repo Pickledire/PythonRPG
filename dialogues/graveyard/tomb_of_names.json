@@ -2,14 +2,14 @@
   "id": "graveyard/tomb_of_names",
   "speaker": "Tomb of Names",
   "lines": [
-    "Shelves of slate hold thin stones engraved with one word each: a name.",
-    "Some are chipped. Some are warm. Some are missing as if borrowed for a night.",
-    "A brush and a pot of milk paint sit on a stool. The brush is newly washed.",
-    "When you inhale, dust tastes like someone else's breath.",
-    "A space yawns on the third shelf, polite and expectant.",
-    "On the wall, a message scratched by ring: 'Add nothing you won't carry.'",
-    "A second message in nail: 'Carry nothing you won't add.'",
-    "The room waits to see which you are."
+    "You enter a room of slate shelves holding name-stones.",
+    "Some stones are chipped; some are missing.",
+    "A brush and a pot of milk paint sit on a stool.",
+    "Dust lifts in the light as you breathe.",
+    "A space on the third shelf sits empty.",
+    "On the wall: 'Add nothing you won't carry.'",
+    "Beside it: 'Carry nothing you won't add.'",
+    "You decide what to write."
   ],
   "choices": [
     { "text": "Paint your name and place it on the shelf.", "next": "graveyard/name_given" },

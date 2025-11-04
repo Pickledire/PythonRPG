@@ -2,16 +2,15 @@
   "id": "mages/forbidden_vault",
   "speaker": "Forbidden Vault",
   "lines": [
-    "The door is a circle that practiced until it got it right.",
-    "Three locks agree to disagree at the same time.",
-    "The air is thinner in meaning; you understand less and feel wiser.",
-    "Inside: pedestals that hold ideas until they behave.",
-    "A sigiled coffer hums your pulse back at you.",
-    "A glass ampoule contains night from a specific year.",
-    "A mirror looks at the back of your head; you do not have to turn.",
+    "You unlock the circular vault door and step inside.",
+    "Three locks release in sequence.",
+    "Pedestals hold sealed items and labeled notes.",
+    "A sigiled coffer hums on a stand.",
+    "A glass ampoule holds bottled night.",
+    "A mirror sits turned to the wall.",
     "",
-    "You could take nothing and learn something.",
-    "You could take something and learn nothing."
+    "You can study and leave as you found it.",
+    "Or you can take what is not offered."
   ],
   "choices": [
     { "text": "Study the coffer without opening it (good).", "effects": [{"stat_change": ["intelligence", 1]}, {"set_flag": ["vault_resisted", true]}], "next": "mages/archmage_summons" },

@@ -2,14 +2,13 @@
   "id": "forest/intro",
   "speaker": "Dark Forest",
   "lines": [
-    "Paths plait and unplait like braids loosened by the wind.",
-    "Leaves speak in a language that prefers you don't understand.",
-    "Birdsong edits itself when you arrive; the chorus forgets your name on purpose.",
-    "Sap runs slower here, thinking long thoughts about knives and spring.",
-    "A waystone leans under moss; someone carved an eye in it and the moss learned to blink.",
-    "Mushrooms litter the trail like coins—white for safe, red for sorry, black for soon.",
-    "The light is not lost. It is hiding to see what you do.",
-    "The forest listens with more ears than you brought."
+    "You step under the trees and the path narrows.",
+    "Leaves shift overhead and drop small shadows on the trail.",
+    "Birdsong pauses, then starts again farther off.",
+    "You see a moss-covered waystone leaning beside the path.",
+    "Mushrooms spot the trail—white, red, and dark.",
+    "Light filters through branches in thin bands.",
+    "You listen and choose your way forward."
   ],
   "choices": [
     { "text": "Follow the hunter's trail cut with careful boots.", "next": "forest/trailhead" },

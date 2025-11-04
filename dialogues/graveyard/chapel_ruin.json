@@ -2,14 +2,14 @@
   "id": "graveyard/chapel_ruin",
   "speaker": "Chapel Ruin",
   "lines": [
-    "Roof gone, stars for saints; the chapel keeps its shape anyway.",
-    "Pews rot into the floor like old teeth settling in new gums.",
-    "A cracked font cradles rainwater and moths who think it is a moon.",
-    "Someone has arranged bones into a cross that looks uncomfortable.",
-    "A candle stub waits with the patience of wax.",
-    "You strike flint. The flame remembers its part and enters on cue.",
-    "The air tightens, then lets go, like a sob swallowed on time.",
-    "From the doorway, a shadow decides you have said enough."
+    "You step into a roofless chapel.",
+    "Pews rot into the floor.",
+    "A cracked font holds rainwater and moths.",
+    "Bones are arranged in a rough cross near the altar.",
+    "A candle stub sits on the rail.",
+    "You strike a spark and light it.",
+    "The air tightens and then eases.",
+    "A shadow moves in the doorway."
   ],
   "effects": [ { "visual": "candle", "duration": 1.0 } ],
   "choices": [

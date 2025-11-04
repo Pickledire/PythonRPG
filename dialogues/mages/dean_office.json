@@ -2,15 +2,15 @@
   "id": "mages/dean_office",
   "speaker": "Dean",
   "lines": [
-    "The Dean's office smells of ink and peppermint.",
-    "Scroll tubes stand at attention; a plant attempts photosynthesis by candlelight.",
-    "The Dean peers over lenses that magnify patience.",
-    "'You have the look of a syllabus getting longer,' they say.",
-    "They sign a note without reading; the note reads itself and nods.",
-    "'Arcanum at two bells, Training at four, Archives when you can behave.'",
-    "A paper crane lands on your shoulder and refolds into a permission slip.",
+    "You step into the Dean's office.",
+    "Scrolls and notes are stacked neatly on the shelves.",
+    "The Dean peers over lenses and nods.",
+    "'You look ready for a heavier schedule,' they say.",
+    "They sign a note and hand you study permissions.",
+    "'Arcanum at second bell, Training at fourth, Archives when permitted.'",
+    "They offer one last piece of advice.",
     "",
-    "'If the Archmage asks for you, pretend you were on your way.'"
+    "'If the Archmage calls, go.'"
   ],
   "effects": [
     {"set_flag": ["mage_apprentice", true]}

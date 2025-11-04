@@ -2,8 +2,8 @@
   "id": "tavern/work",
   "speaker": "Tavern Keeper",
   "lines": [
-    "A caravan needs guards on the east road.",
-    "Coin is decent. Bandits are not."
+    "The keeper offers you a caravan guard job on the east road.",
+    "Pay is fair; bandits are likely."
   ],
   "effects": [
     {"add_gold": 50},

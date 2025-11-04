@@ -2,14 +2,14 @@
   "id": "tavern/back_room",
   "speaker": "Back Room",
   "lines": [
-    "A door that sticks for everyone else slides for the barkeep with two fingers.",
-    "The room smells like coin and the jokes money tells when it thinks it's alone.",
-    "A ledger sits open to a page with three names and three blanks.",
-    "One of the names is yours, if you want it to be."
-    ,"A man with a scarf too clean to be honest fingers a dagger like a rosary.",
-    "'Courier job,' he says. 'Light. Heavy if you look at it.'",
-    "He puts a parcel on the table that tries to be heavier when you notice it.",
-    "The wall behind him is a bookcase that is taking a break from being a door."
+    "The barkeep slides open the sticking door with two fingers.",
+    "The room smells of coin and old ledgers.",
+    "A page lists three names and three blanks.",
+    "Yours could be one of them.",
+    "A man in a clean scarf turns a dagger in his hand.",
+    "'Courier job,' he says. 'Light until someone checks.'",
+    "He sets a small parcel on the table.",
+    "A bookcase behind him looks like a hidden door."
   ],
   "choices": [
     { "text": "Accept the courier job.", "effects": [{"set_flag": ["tavern_courier", true]}], "next": "tavern/secret_passage" },

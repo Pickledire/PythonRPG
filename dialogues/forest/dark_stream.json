@@ -2,14 +2,13 @@
   "id": "forest/dark_stream",
   "speaker": "Dark Stream",
   "lines": [
-    "Water runs black as polished stone; it shows the sky where sky can't go.",
-    "Fish with lantern eyes hold their breath when you kneel.",
-    "A bridge of roots pretends it is not a bridge so you will step wrong.",
-    "Coins wink from the silt; each wishes to be the one you take.",
-    "A feather floats upstream to see if anyone is watching.",
-    "The current speaks in threes and expects you to answer in twos.",
-    "A pale woman stands across the water until you blink.",
-    "Where she stood is only fog that remembers her outline."
+    "You reach a narrow stream running dark over stone.",
+    "You see fish flash under the surface.",
+    "Roots knot across the water where you could cross.",
+    "Coins lie in the silt near the bank.",
+    "A feather turns in an eddy.",
+    "Fog gathers along the far shore and thins again.",
+    "You pick a way forward."
   ],
   "choices": [
     { "text": "Cross on the not-bridge.", "effects": [{"start_combat": "Dire Wolf"}] },

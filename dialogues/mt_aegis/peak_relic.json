@@ -2,12 +2,11 @@
   "id": "mt_aegis/peak_relic",
   "speaker": "Heart-stone",
   "lines": [
-    "Your fingers find seams too fine for sight.",
-    "The heart-stone loosens; something old wishes to be carried again.",
-    "Grains of glittering mica spill out like ground stars.",
-    "You feel the heft of histories: raids turned back, winters turned aside.",
-    "Every relic is a promise made by someone who kept it.",
-    "You decide which promise will ride with you."
+    "You feel fine seams in the heart-stone under your fingers.",
+    "The face shifts; a hidden cache comes free.",
+    "Mica grains spill across your palm.",
+    "The relics are heavy and well-balanced.",
+    "You choose one to carry down the mountain."
   ],
   "choices": [
     { "text": "Take the Aegis Spear (strength).", "effects": [{"give_item": {"type": "weapon", "name": "Aegis Spear", "damage": 36, "value": 260, "description": "A mountain-forged spear weighted against giants", "weapon_type": "melee"}}], "next": "mt_aegis/afterglow" },

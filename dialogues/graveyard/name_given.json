@@ -2,14 +2,14 @@
   "id": "graveyard/name_given",
   "speaker": "Tomb of Names",
   "lines": [
-    "Your hand writes more steadily than you expected.",
-    "The milk paint dries the moment it meets the stone; the letters look older than you are.",
-    "When you place the name, a draft passes through you like a key finding a lock.",
-    "Somewhere above, the bell you didn't hear ring stops not ringing.",
-    "You feel lighter where a weight used to sit and heavier where a light used to hide.",
-    "Footsteps approach that make no sound because they have earned the right to be quiet.",
-    "When they stop, something like a hand rests on your shoulder and chooses not to press.",
-    "A voice that is not sound asks if you are finished being only yourself."
+    "You write your name with a steady hand.",
+    "The paint dries quickly on the stone.",
+    "You place the stone on the shelf and a draft moves through the room.",
+    "Somewhere a bell stops and the air settles.",
+    "You feel lighter and focused.",
+    "Soft steps stop behind you.",
+    "A light touch rests on your shoulder and lifts.",
+    "You decide if the rite is finished."
   ],
   "choices": [
     { "text": "Say yes and step where the draft is going.", "conditions": [{"flag_set": "graveyard_rules"}], "next": "graveyard/requiem_ending" },

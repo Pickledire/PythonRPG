@@ -2,14 +2,14 @@
   "id": "forest/moss_path",
   "speaker": "Moss Path",
   "lines": [
-    "Moss remembers every step and forgives most of them.",
-    "Your footprints fill behind you with green that is not new and not old.",
-    "A ring of mushrooms considers being a circle and decides against it at the last moment.",
-    "A beetle carries a leaf like a flag that means 'later'.",
-    "The light is thinner here, as if strained through silk and kept for winter.",
-    "You pass a stump that smells like bread.",
-    "Something laughs the way water does when it chooses a rock on purpose.",
-    "A neat braid of grass crosses the path—the forest's hair pinned for a ceremony."
+    "You walk a soft path covered in moss.",
+    "Your footprints spring back as you pass.",
+    "You step around a ring of mushrooms.",
+    "A beetle drags a leaf across the trail.",
+    "Light thins under the branches and cools the ground.",
+    "You pass a fresh stump with a sweet smell.",
+    "You hear a small laugh like water over stone.",
+    "A neat braid of grass crosses the path."
   ],
   "choices": [
     { "text": "Step over the braid without touching it.", "next": "forest/fae_ring" },
