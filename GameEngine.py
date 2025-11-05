@@ -5,6 +5,9 @@ import time
 import threading
 from queue import Queue, Empty
 import json
+import re
+import sys
+import subprocess
 from colorama import init, Fore, Back, Style
 from Character import Character
 from Enemy import Enemy, EnemyFactory, Boss
@@ -86,7 +89,7 @@ class GameEngine:
             term_width = shutil.get_terminal_size(fallback=(120, 40)).columns
         except Exception:
             term_width = 120
-        ui_width = max(60, min(140, term_width - 0))
+        ui_width = max(60, term_width - 0)
         effective_length = ui_width
         if len(char) == 1:
             print(color + char * effective_length + self.colors['reset'])
@@ -102,9 +105,59 @@ class GameEngine:
             term_width = shutil.get_terminal_size(fallback=(120, 40)).columns
         except Exception:
             term_width = 120
-        ui_width = max(60, min(140, term_width - 0))
-        padding = max(0, (ui_width - len(text)) // 2)
+        ui_width = max(60, term_width - 0)
+        # Strip ANSI color codes for visible length calculation
+        try:
+            visible_text = re.sub(r"\x1b\[[0-9;]*m", "", text)
+        except Exception:
+            visible_text = text
+        padding = max(0, (ui_width - len(visible_text)) // 2)
         print(color + " " * padding + text + self.colors['reset'])
+
+    def print_figlet_centered(self, text: str, preferred_font: str = 'slant', color=None):
+        """Render big ASCII art text using pyfiglet, centered and colored.
+        Falls back gracefully if pyfiglet is unavailable or font is missing.
+        """
+        if color is None:
+            color = self.colors['title']
+        try:
+            term_width = shutil.get_terminal_size(fallback=(120, 40)).columns
+        except Exception:
+            term_width = 120
+        ui_width = max(60, term_width - 0)
+
+        try:
+            import pyfiglet  # Lazy import to avoid hard dependency at module load
+        except Exception:
+            # Attempt a one-time runtime install, then retry
+            try:
+                subprocess.check_call([sys.executable, "-m", "pip", "install", "--user", "pyfiglet"], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+                import pyfiglet  # retry
+            except Exception:
+                # Fallback to simple centered uppercase
+                self.print_centered(text.upper(), ui_width, color)
+                return
+
+        fonts_to_try = [preferred_font, 'slant', 'big', 'doom', 'standard']
+        fig = None
+        for font in fonts_to_try:
+            try:
+                fig = pyfiglet.Figlet(font=font, width=ui_width)
+                break
+            except Exception:
+                fig = None
+        if fig is None:
+            self.print_centered(text.upper(), ui_width, color)
+            return
+
+        try:
+            art = fig.renderText(text)
+        except Exception:
+            self.print_centered(text.upper(), ui_width, color)
+            return
+
+        for line in art.rstrip('\n').splitlines():
+            self.print_centered(line, ui_width, color)
 
     def print_centered_block(self, block_text: str, color=None):
         """Center-print a multi-line block of text line-by-line."""
@@ -243,7 +296,7 @@ class GameEngine:
             term_width = shutil.get_terminal_size(fallback=(120, 40)).columns
         except Exception:
             term_width = 120
-        max_bar = max(10, min(80, term_width - 30))
+        max_bar = max(10, term_width - 16)
         width = min(width, max_bar)
         if maximum == 0:
             percentage = 0
@@ -277,7 +330,7 @@ class GameEngine:
             term_width = shutil.get_terminal_size(fallback=(120, 40)).columns
         except Exception:
             term_width = 120
-        max_bar = max(10, min(80, term_width - 30))
+        max_bar = max(10, term_width - 16)
         width = min(width, max_bar)
         if required == 0:
             percentage = 0
@@ -296,7 +349,7 @@ class GameEngine:
             term_width = shutil.get_terminal_size(fallback=(120, 40)).columns
         except Exception:
             term_width = 120
-        max_bar = max(10, min(80, term_width - 30))
+        max_bar = max(10, term_width - 16)
         width = min(width, max_bar)
         if maximum == 0:
             percentage = 0
@@ -384,15 +437,15 @@ class GameEngine:
                     p_shield = float(self.player.status_effects.get('shield', {}).get('reduction_pct', 0.0))
                 except Exception:
                     p_shield = 0.0
-                self.display_health_bar(self.player.health, self.player.max_health, 40, "Health", shield_pct=p_shield)
+                self.display_health_bar(self.player.health, self.player.max_health, 999, "Health", shield_pct=p_shield)
 
                 # Mana bar (blue), between Health and XP
                 print(f"{self.colors['border']}║ {self.colors['reset']}", end="")
-                self.display_mana_bar(self.player.mana, self.player.max_mana, 40, "Mana")
+                self.display_mana_bar(self.player.mana, self.player.max_mana, 999, "Mana")
 
                 # XP bar
                 print(f"{self.colors['border']}║ {self.colors['reset']}", end="")
-                self.display_xp_bar(self.player.xp, self.player.xp_required(), 40)
+                self.display_xp_bar(self.player.xp, self.player.xp_required(), 999)
                 
                 print(f"{self.colors['border']}║ {self.colors['gold']}Gold: {self.player.gold} 💰{self.colors['reset']}")
                 self.print_border("═", 100, self.colors['border'])
@@ -491,10 +544,10 @@ class GameEngine:
         
         print("\n" * 2)
         
-        # Boss name reveal with accent color
-        self.print_border("═", 100, Fore.YELLOW)
-        self.print_centered(f"{boss_name}", 120, Fore.RED + Style.BRIGHT)
-        self.print_border("═", 100, Fore.YELLOW)
+        # Boss name reveal with figlet title
+        self.print_border("═", 100, self.colors['border'])
+        self.print_figlet_centered(boss_name, preferred_font='standard', color=self.colors.get('gold', Fore.YELLOW + Style.BRIGHT))
+        self.print_border("═", 100, self.colors['border'])
         
         print("\n" * 2)
         
@@ -537,7 +590,8 @@ class GameEngine:
 
         print("\n")
         self.print_border("═", 100, Fore.RED + Style.BRIGHT)
-        self.print_centered(f"{name}", 120, Fore.RED + Style.BRIGHT)
+        # Figlet title for boss name
+        self.print_figlet_centered(name, preferred_font='roman', color=Fore.RED + Style.BRIGHT)
         self.print_border("═", 100, Fore.RED + Style.BRIGHT)
         print("\n")
         # Shadow sweep (wings) and ember shimmer
@@ -575,8 +629,8 @@ class GameEngine:
             self.play_effect("quake", duration=0.12)
 
         print("\n")
-        self.print_border("═", 100, Fore.YELLOW)
-        self.print_centered(f"{name}", 120, Fore.YELLOW + Style.BRIGHT)
+        # Figlet title for boss name
+        self.print_figlet_centered(name, preferred_font='big', color=Fore.YELLOW + Style.BRIGHT)
         self.print_border("═", 100, Fore.YELLOW)
         print("\n")
         self.print_centered("The tunnel-king comes. Stand, or be unmade.", 120, self.colors['warning'])
@@ -610,8 +664,8 @@ class GameEngine:
             self.play_effect("shadow_sweep", duration=0.10)
 
         print("\n")
-        self.print_border("═", 100, Fore.YELLOW)
-        self.print_centered(f"{name}", 120, Fore.YELLOW + Style.BRIGHT)
+        # Figlet title for boss name
+        self.print_figlet_centered(name, preferred_font='doom', color=Fore.YELLOW + Style.BRIGHT)
         self.print_border("═", 100, Fore.YELLOW)
         print("\n")
         self.print_centered("The skittering crown lays claim. Refuse it.", 120, self.colors['warning'])
@@ -738,9 +792,9 @@ class GameEngine:
                 p_shield = float(self.player.status_effects.get('shield', {}).get('reduction_pct', 0.0))
             except Exception:
                 p_shield = 0.0
-            self.display_health_bar(self.player.health, self.player.max_health, 60, "Player Health", shield_pct=p_shield)
+            self.display_health_bar(self.player.health, self.player.max_health, 999, "Player Health", shield_pct=p_shield)
             # Player mana under health
-            self.display_mana_bar(self.player.mana, self.player.max_mana, 60, "Player Mana")
+            self.display_mana_bar(self.player.mana, self.player.max_mana, 999, "Player Mana")
             
             print("\n" * 2)
             
@@ -751,7 +805,7 @@ class GameEngine:
                 e_shield = float(getattr(self.current_enemy, 'status_effects', {}).get('shield', {}).get('reduction_pct', 0.0))
             except Exception:
                 e_shield = 0.0
-            self.display_health_bar(self.current_enemy.health, self.current_enemy.max_health, 60, "Enemy Health", shield_pct=e_shield)
+            self.display_health_bar(self.current_enemy.health, self.current_enemy.max_health, 999, "Enemy Health", shield_pct=e_shield)
             
             print("\n" * 2)
             self.print_border("─", 100, self.colors['combat'])
