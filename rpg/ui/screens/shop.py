@@ -10,6 +10,7 @@ from textual.containers import Horizontal, Vertical
 from textual.screen import Screen
 from textual.widgets import Button, DataTable, Footer, Header, Label, Static, Tab, Tabs
 
+from rpg.core.formulas import buy_price_multiplier, sell_ratio
 from rpg.core.items import Armor, ItemKind, Weapon
 from rpg.core.shop import Shop, ShopError, ShopMode
 from rpg.ui.palette import GOLD_STYLE, MUTED_STYLE
@@ -68,7 +69,12 @@ class ShopScreen(Screen[None]):
         yield Footer()
 
     def on_mount(self) -> None:
-        self.query_one("#shop-title", Label).update(f"◆ {self.shop.name}")
+        cha = self.player.attributes.charisma
+        multiplier = buy_price_multiplier(cha)
+        deal = "no haggling" if multiplier == 1 else (f"{(1 - multiplier) * 100:.0f}% off" if multiplier < 1
+                                                      else f"{(multiplier - 1) * 100:.0f}% markup")
+        self.query_one("#shop-title", Label).update(
+            f"◆ {self.shop.name}   ·   Charisma {cha}: {deal}, sells at {sell_ratio(cha) * 100:.0f}%")
         self.run_worker(self.query_one("#shop-fx", VisualEffect).play("glyphs" if self.mode == ShopMode.MAGIC else "banner",
                                                                       0.6, rows=1))
         self.reload()
@@ -81,13 +87,13 @@ class ShopScreen(Screen[None]):
         if self.tab == "sell":
             for stack in player.inventory:
                 note = "(equipped)" if player.inventory.is_equipped(stack.item) else ""
-                rows.append(ItemRow(stack.item.uid, stack.item, stack.quantity, price=stack.item.sell_price, note=note))
+                rows.append(ItemRow(stack.item.uid, stack.item, stack.quantity, price=Shop.sell_price_for(stack.item, player), note=note))
             action = "Sell"
         elif self.tab == "repair":
             for stack in player.inventory:
                 item = stack.item
                 if isinstance(item, (Weapon, Armor)) and item.missing_durability > 0:
-                    rows.append(ItemRow(item.uid, item, 1, price=Shop.repair_cost(item),
+                    rows.append(ItemRow(item.uid, item, 1, price=Shop.repair_cost(item, player),
                                         note="(broken)" if item.is_broken else ""))
             action = "Repair"
         else:
@@ -96,7 +102,7 @@ class ShopScreen(Screen[None]):
                     continue
                 key = f"offer{index}"
                 self.offer_by_key[key] = offer
-                rows.append(ItemRow(key, offer.item, price=offer.price, stock=offer.stock))
+                rows.append(ItemRow(key, offer.item, price=Shop.price_for(offer, player), stock=offer.stock))
             action = "Buy"
         self.query_one(ItemTable).load(rows, player)
         self.query_one("#transact", Button).label = action

@@ -35,7 +35,22 @@ For the best look use a modern terminal (Windows Terminal, iTerm2, kitty, WezTer
 Mouse clicks work everywhere too.
 
 ### Features
-- **Four races**: Human, Elf, Orc and Dwarf, each with their own attributes and starting kit.
+- **Ten races**: Human, Elf, Orc, Dwarf, Druid, Halfling, Gnome, Dragonkin, Beastkin and Revenant,
+  each with their own attribute spread, HP/mana and starting kit.
+- **Seven attributes** that all matter:
+
+  | Attribute | Effect |
+  |---|---|
+  | Strength | melee damage, heavy weapons and armor |
+  | Dexterity | accuracy, critical hits, bows and finesse weapons (daggers, claws, rapiers) |
+  | Agility | dodge chance, flee chance, light armor |
+  | Vitality | +5 max HP per point, less poison/burn/bleed damage |
+  | Intelligence | spell damage, staves |
+  | Wisdom | +5 max mana per point, healing power, chance to resist harmful effects |
+  | Charisma | shop prices (discounts or markups, better sell prices), persuasion checks in quests |
+
+  Many weapons, armor pieces and spells need **two** attributes, e.g. Mithril Armor needs Strength 14 and
+  Dexterity 13.
 - **Turn-based combat** with accuracy, critical hits, armor mitigation and armor penetration,
   weapon and armor durability, and a turn timer: hesitate and the enemy strikes.
 - **Status effects** that tick each turn: poison, burn and bleed damage over time, regeneration,
@@ -107,16 +122,24 @@ tests/                 Unit tests for every core system + a headless UI test
 **Add an item**: one line in `rpg/core/catalog.py`:
 ```python
 ITEMS.weapon("frost_brand", "Frost Brand", 34, 150, 260, "A blade rimed in frost.",
-             on_hit=EffectSpec(EffectKind.FROZEN, 0, 1, 0.15))
+             on_hit=EffectSpec(EffectKind.FROZEN, 0, 1, 0.15),
+             requirements=req(strength=13, wisdom=11))
 ```
+Leave out `requirements` to use the default rule for the item type (melee → Strength, ranged/finesse →
+Dexterity, staves and attack spells → Intelligence, heal/ward spells → Wisdom, light armor → Agility).
 Then add its id to a shop pool or loot table, or hand it out from dialogue with `{"give_item": "frost_brand"}`.
+
+**Add a race**: one `_race(...)` line in `rpg/config.py` with its seven attributes, base HP, blurb and
+starting item ids.
 
 **Add an enemy**: add an `EnemyTemplate` to `_TEMPLATES` in `rpg/core/enemies.py` (stats, spellbook,
 on-hit effects, regeneration, intro text, trophy choices) and, for random hunts, to `LEVEL_POOLS`.
 Dialogue can start a fight with `{"start_combat": "frost_giant"}` (by id or display name).
 
 **Write a quest**: add JSON nodes under `dialogues/` and a `Quest` entry in `rpg/core/session.py`.
-The schema (conditions and effects) is documented at the top of `rpg/core/dialogue.py`. To check
+The schema (conditions and effects) is documented at the top of `rpg/core/dialogue.py`. Attribute checks
+work in both directions: `{"min_stat": ["charisma", 12]}` as a condition for a persuasion choice, and
+`{"stat_change": ["vitality", 1]}` or `{"set_wisdom": 15}` as effects. To check
 content for broken links and unknown enemies or items:
 
 ```bash
@@ -140,3 +163,8 @@ plus an end-to-end UI run through Textual's headless pilot. It also runs under `
 
 The first version of the game (`Main.py`, `GameEngine.py` and friends at the repository root) is still
 here for reference and runs with `python Main.py`. The new game reads its dialogue files and imports its saves.
+
+## Roadmap
+
+Planned work (Aseprite sprites, combat effects, boss phases, timed events, minigames such as lockpicking,
+Druid companions) is tracked in [TODO.md](TODO.md).

@@ -18,7 +18,7 @@ from rpg.core.attributes import Attribute
 from rpg.core.entities import Player
 from rpg.core.items import Item
 from rpg.core.progression import VictoryReport
-from rpg.ui.palette import GOLD_STYLE, MUTED_STYLE, event_text
+from rpg.ui.palette import GOLD_STYLE, MUTED_STYLE, event_text, requirements_text
 
 T = TypeVar("T")
 
@@ -121,8 +121,8 @@ class MessageModal(ModalScreen[None]):
 class LevelUpModal(ModalScreen[Attribute]):
     """Spend one stat point. The flow re-opens it while points remain."""
 
-    BINDINGS = [Binding("1", "pick('strength')", "Strength"), Binding("2", "pick('agility')", "Agility"),
-                Binding("3", "pick('intelligence')", "Intelligence")]
+    BINDINGS = [Binding(str(i), f"pick('{attr.value}')", attr.label, show=False)
+                for i, attr in enumerate(Attribute, 1)]
 
     def __init__(self, player: Player) -> None:
         super().__init__()
@@ -130,24 +130,29 @@ class LevelUpModal(ModalScreen[Attribute]):
 
     def compose(self) -> ComposeResult:
         p = self.player
+        options = []
+        for i, attr in enumerate(Attribute, 1):
+            value = p.attributes.get(attr)
+            label = Text(f"{i}. ", style=MUTED_STYLE)
+            label.append(f"{attr.label:<13}", style="bold")
+            label.append(f"{value:>3} → {value + 1:<3}", style="bold #F2C46D")
+            label.append(f"  {attr.description}", style=MUTED_STYLE)
+            options.append(Option(label, id=attr.value))
         with Vertical(classes="modal-box -levelup"):
             yield Label(f"★ Level {p.level}!", classes="modal-title")
-            yield Static(f"You have {p.stat_points} stat point{'s' if p.stat_points != 1 else ''} to spend.\n"
+            yield Static(f"You have {p.stat_points} stat point{'s' if p.stat_points != 1 else ''} to spend. "
                          "Choose an attribute to improve:", classes="modal-prompt")
-            with Horizontal(classes="modal-buttons -stats"):
-                for i, attr in enumerate(Attribute, 1):
-                    yield Button(f"{i}. {attr.label}\n{p.attributes.get(attr)} → {p.attributes.get(attr) + 1}",
-                                 id=f"attr-{attr.value}", classes="stat-button")
-            yield Static(Text("Strength: melee damage, crits · Agility: accuracy, ranged damage · "
-                              "Intelligence: spell power, staves, spell requirements", style=MUTED_STYLE),
-                         classes="modal-hint")
+            yield OptionList(*options, id="levelup-options")
+            yield Label("Enter or 1–7 to choose", classes="modal-hint")
 
     def on_mount(self) -> None:
-        self.query_one(Button).focus()
+        options = self.query_one(OptionList)
+        options.highlighted = 0
+        options.focus()
 
-    @on(Button.Pressed, ".stat-button")
-    def pressed(self, event: Button.Pressed) -> None:
-        self.dismiss(Attribute(event.button.id.removeprefix("attr-")))
+    @on(OptionList.OptionSelected, "#levelup-options")
+    def chosen(self, event: OptionList.OptionSelected) -> None:
+        self.dismiss(Attribute(event.option_id))
 
     def action_pick(self, value: str) -> None:
         self.dismiss(Attribute(value))
@@ -182,12 +187,12 @@ class VictoryModal(ModalScreen[None]):
 
 
 def item_choice_label(item: Item, player: Player) -> Text:
-    ok, reason = player.meets_requirement(item)
     text = Text(item.name, style="bold")
     text.append(f"  ({item.kind.label})", style=MUTED_STYLE)
     text.append(f"\n  {item.summary()}", style="")
-    if item.requirement:
-        text.append(f"\n  Requires {item.requirement.describe()}", style="" if ok else "#E8604F")
+    if item.requirements:
+        text.append("\n  Requires ")
+        text.append_text(requirements_text(item, player, long=True))
     if item.description:
         text.append(f"\n  {item.description}", style=MUTED_STYLE)
     return text

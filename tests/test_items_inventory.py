@@ -8,16 +8,46 @@ from tests.helpers import make_player
 
 
 class ItemTests(unittest.TestCase):
-    def test_default_requirements_follow_original_rules(self):
-        self.assertEqual(ITEMS.create("elven_bow").requirement.attribute, Attribute.AGILITY)
-        self.assertEqual(ITEMS.create("battle_axe").requirement.minimum, 15)
-        self.assertEqual(ITEMS.create("titan_claw_dagger").requirement.attribute, Attribute.AGILITY)
-        self.assertEqual(ITEMS.create("leather_armor").requirement.attribute, Attribute.AGILITY)
-        self.assertEqual(ITEMS.create("enchanted_robes").requirement.attribute, Attribute.INTELLIGENCE)
-        self.assertEqual(ITEMS.create("lightning_bolt").requirement.minimum, 14)
+    def test_default_requirement_rules(self):
+        def attrs(template_id):
+            return [r.attribute for r in ITEMS.create(template_id).requirements]
+
+        self.assertEqual(attrs("elven_bow"), [Attribute.DEXTERITY])  # ranged -> Dexterity
+        self.assertEqual(attrs("halfling_dagger"), [Attribute.DEXTERITY])  # finesse -> Dexterity
+        self.assertEqual(attrs("war_hammer"), [Attribute.STRENGTH])
+        self.assertEqual(attrs("crystal_staff"), [Attribute.INTELLIGENCE])
+        self.assertEqual(attrs("leather_armor"), [Attribute.AGILITY])
+        self.assertEqual(attrs("chain_mail"), [Attribute.STRENGTH])
+        self.assertEqual(attrs("heal"), [Attribute.WISDOM])  # support spells -> Wisdom
+        self.assertEqual(attrs("ice_shard"), [Attribute.INTELLIGENCE])
+        self.assertTrue(ITEMS.create("halfling_dagger").finesse)
+
+    def test_multi_attribute_requirements(self):
+        mithril = ITEMS.create("mithril_armor")
+        self.assertEqual({(r.attribute, r.minimum) for r in mithril.requirements},
+                         {(Attribute.STRENGTH, 14), (Attribute.DEXTERITY, 13)})
+        player = make_player("Human")
+        player.inventory.add(mithril)
+        ok, reason = player.meets_requirement(mithril)
+        self.assertFalse(ok)
+        self.assertIn("Strength 14", reason)
+        self.assertIn("Dexterity 13", reason)
+        player.attributes.strength, player.attributes.dexterity = 14, 12
+        ok, reason = player.meets_requirement(mithril)
+        self.assertFalse(ok)
+        self.assertNotIn("Strength", reason)
+        player.attributes.dexterity = 13
+        self.assertTrue(player.meets_requirement(mithril)[0])
+        self.assertEqual(player.equip(mithril), "Equipped Mithril Armor.")
+
+    def test_many_items_need_two_attributes(self):
+        multi = [tid for tid in ITEMS.ids() if len(ITEMS.create(tid).requirements) > 1]
+        self.assertGreaterEqual(len(multi), 25)
 
     def test_every_race_can_use_its_starting_kit(self):
-        for race in ("Human", "Elf", "Orc", "Dwarf"):
+        from rpg import config
+
+        for race in config.RACES:
             player = make_player(race)
             for stack in player.inventory:
                 ok, reason = player.meets_requirement(stack.item)
@@ -43,7 +73,7 @@ class ItemTests(unittest.TestCase):
         self.assertEqual(a.to_dict() | {"uid": b.uid}, b.to_dict())
 
     def test_serialization_round_trip_all_kinds(self):
-        for template_id in ("battle_axe", "plate_armor", "elixir", "fireball", "pestilent_swarm"):
+        for template_id in ("battle_axe", "plate_armor", "elixir", "fireball", "pestilent_swarm", "bone_claws"):
             item = ITEMS.create(template_id)
             restored = item_from_dict(item.to_dict())
             self.assertEqual(type(restored), type(item))

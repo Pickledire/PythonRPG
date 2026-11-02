@@ -44,12 +44,11 @@ class PlayerPanel(Vertical):
         self.query_one("#pp-gold", Static).update(Text(f"◆ {p.gold} gold", style=GOLD_STYLE))
 
         attrs = Text()
-        for i, (short, value) in enumerate((("STR", p.attributes.strength), ("AGI", p.attributes.agility),
-                                            ("INT", p.attributes.intelligence))):
+        for i, (attribute, value) in enumerate(p.attributes.items()):
             if i:
-                attrs.append("   ")
-            attrs.append(f"{short} ", style=MUTED_STYLE)
-            attrs.append(str(value), style="bold")
+                attrs.append("\n" if i == 4 else "  ")
+            attrs.append(f"{attribute.short} ", style=MUTED_STYLE)
+            attrs.append(f"{value:<2}", style="bold")
         self.query_one("#pp-attrs", Static).update(attrs)
 
         gear = Text()

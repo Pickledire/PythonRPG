@@ -123,7 +123,7 @@ class StatusEffectTests(unittest.TestCase):
         axe = ITEMS.create("titan_claw_dagger")
         axe.on_hit = EffectSpec(EffectKind.BLEED, 6, 3, 1.0)
         player.inventory.add(axe)
-        player.attributes.agility = 20
+        player.attributes.agility = player.attributes.dexterity = 20
         player.equip(axe)
         enemy = make_enemy(max_hp=500)
         combat = CombatSession(player, enemy, ScriptedRandom(default=0.5))

@@ -148,8 +148,12 @@ class Inventory:
     @classmethod
     def from_dict(cls, data: dict) -> "Inventory":
         inv = cls(int(data.get("capacity", INVENTORY_SIZE)))
+        from rpg.core.catalog import ITEMS
+
         for entry in data.get("stacks", []):
-            inv.stacks.append(Stack(item_from_dict(entry["item"]), int(entry.get("quantity", 1))))
+            item = item_from_dict(entry["item"])
+            ITEMS.refresh_requirements(item)  # catalog balance changes apply to saved items
+            inv.stacks.append(Stack(item, int(entry.get("quantity", 1))))
         for slot_name, uid in (data.get("equipped") or {}).items():
             if uid:
                 stack = inv.find(uid)

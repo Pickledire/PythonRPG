@@ -75,7 +75,7 @@ TitleScreen {
 
 /* ------------------------------------------------------------------ character creation */
 #create-root {
-    padding: 1 2;
+    padding: 0 2;
 }
 .field-label {
     color: $text-muted;
@@ -86,7 +86,8 @@ TitleScreen {
     width: 50;
 }
 #race-row {
-    height: 18;
+    height: 1fr;
+    min-height: 20;
 }
 #race-list {
     width: 24;
@@ -420,6 +421,13 @@ ModalScreen {
 }
 .modal-box.-small {
     width: 60;
+}
+.modal-box.-levelup {
+    width: 100;
+}
+#levelup-options {
+    height: auto;
+    background: $surface;
 }
 .modal-title {
     text-style: bold;

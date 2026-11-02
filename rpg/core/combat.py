@@ -16,13 +16,14 @@ from dataclasses import dataclass, field
 from enum import Enum
 
 from rpg import config
-from rpg.core.effects import DAMAGE_OVER_TIME, END_OF_TURN_DECAY, EffectKind, EffectSpec
+from rpg.core.effects import DAMAGE_OVER_TIME, EFFECT_INFO, END_OF_TURN_DECAY, EffectKind, EffectSpec
 from rpg.core.enemies import Enemy
 from rpg.core.entities import Combatant, DamageType, Player
 from rpg.core.events import LogEvent, Tone
 from rpg.core.formulas import (
     armor_penetration,
     enemy_crit_chance,
+    flee_chance,
     heal_power,
     hit_chance,
     player_crit_chance,
@@ -162,7 +163,7 @@ class CombatSession:
 
     @property
     def flee_chance(self) -> float:
-        return config.BOSS_FLEE_CHANCE if self.enemy.is_boss else config.FLEE_CHANCE
+        return flee_chance(self.player.attributes.agility, self.enemy.is_boss)
 
     # ------------------------------------------------------------ turn structure
     def _record(self, events: list[LogEvent]) -> list[LogEvent]:
@@ -192,7 +193,7 @@ class CombatSession:
             effect = who.effects.get(kind)
             if not effect:
                 continue
-            dealt = who.lose_hp(int(effect.potency))
+            dealt = who.lose_hp(max(1, int(round(effect.potency * who.dot_multiplier()))))
             effect.turns -= 1
             events.append(LogEvent(f"{who.name} {verbs[kind].format(n=dealt)}.", Tone.STATUS))
             if effect.turns <= 0:
@@ -245,6 +246,9 @@ class CombatSession:
     def _apply(self, target: Combatant, spec: EffectSpec, source: str, roll: bool = True) -> list[LogEvent]:
         if roll and not spec.roll(self.rng):
             return []
+        info = EFFECT_INFO[spec.kind]
+        if info.harmful and target.status_resist() and self.rng.random() < target.status_resist():
+            return [LogEvent(f"{target.name} resists the {info.label.lower()}!", Tone.MISS)]
         if spec.kind == EffectKind.FROZEN and isinstance(target, Enemy) and target.is_boss and self.rng.random() < 0.5:
             return [LogEvent(f"{target.name} shrugs off the frost!", Tone.MISS)]
         effect = target.add_effect(spec.create(source))
@@ -273,14 +277,14 @@ class CombatSession:
             events.append(LogEvent(f"Your {weapon.name} breaks! You'll fight barehanded until it's repaired.",
                                    Tone.WARNING))
 
-        if self.rng.random() > hit_chance(p.attributes.agility, p.blind_penalty(), e.has_effect(EffectKind.BLIND)):
+        if self.rng.random() > hit_chance(p.attributes.dexterity, p.blind_penalty(), e.has_effect(EffectKind.BLIND)):
             events.insert(0, LogEvent(f"You swing at {e.name} with {weapon_name} but miss!", Tone.MISS))
             return ActionResult(events)
 
         weapon_class = weapon.weapon_class if weapon else None
-        raw = (base + weapon_attribute_bonus(p.attributes, weapon_class))
+        raw = base + weapon_attribute_bonus(p.attributes, weapon)
         raw *= 1 + self.rng.uniform(-config.PLAYER_DAMAGE_VARIANCE, config.PLAYER_DAMAGE_VARIANCE)
-        crit = self._crit(player_crit_chance(p.attributes.strength))
+        crit = self._crit(player_crit_chance(p.attributes))
         if crit:
             raw *= config.CRIT_MULTIPLIER
         damage_type = DamageType.MAGIC if weapon_class == WeaponClass.MAGIC else DamageType.PHYSICAL
@@ -304,10 +308,9 @@ class CombatSession:
         if not p.spend_mana(spell.mana_cost):
             return ActionResult([LogEvent(f"Not enough mana for {spell.name} ({spell.mana_cost} needed).",
                                           Tone.WARNING)], accepted=False)
-        return ActionResult(self._resolve_spell(p, e, spell, p.attributes.intelligence, caster_is_player=True))
+        return ActionResult(self._resolve_spell(p, e, spell, caster_is_player=True))
 
-    def _resolve_spell(self, caster: Combatant, target: Combatant, spell: Spell, intelligence: int,
-                       caster_is_player: bool) -> list[LogEvent]:
+    def _resolve_spell(self, caster: Combatant, target: Combatant, spell: Spell, caster_is_player: bool) -> list[LogEvent]:
         tone = Tone.PLAYER if caster_is_player else Tone.ENEMY
         who = "You cast" if caster_is_player else f"{caster.name} casts"
         events: list[LogEvent] = []
@@ -315,13 +318,13 @@ class CombatSession:
             penetration = 0.0
             if isinstance(caster, Enemy):
                 penetration = armor_penetration(caster.base_damage, caster.attributes.strength, caster.is_boss)
-            dealt = target.take_hit(spell_power(spell.power, intelligence), DamageType.MAGIC, penetration)
+            dealt = target.take_hit(spell_power(spell.power, caster.attributes.intelligence), DamageType.MAGIC, penetration)
             events.append(LogEvent(f"{who} {spell.name} on {target.name} for {dealt} damage!",
                                    tone if caster_is_player else Tone.DAMAGE))
             if spell.inflicts and target.alive:
                 events += self._apply(target, spell.inflicts, spell.name)
         elif spell.spell_type == SpellType.HEAL:
-            healed = caster.heal(heal_power(spell.power, intelligence))
+            healed = caster.heal(heal_power(spell.power, caster.attributes.wisdom))
             events.append(LogEvent(f"{who} {spell.name} and recovers {healed} HP.", Tone.HEAL))
         else:
             effect = spell.primary_effect()
@@ -361,10 +364,13 @@ class CombatSession:
         p, e = self.player, self.enemy
         spell = e.choose_spell(p, self.rng)
         if spell:
-            return self._resolve_spell(e, p, spell, 0, caster_is_player=False)
+            return self._resolve_spell(e, p, spell, caster_is_player=False)
 
-        if self.rng.random() > hit_chance(e.attributes.agility, e.blind_penalty()):
+        roll, to_hit = self.rng.random(), hit_chance(e.attributes.agility, e.blind_penalty())
+        if roll > to_hit:
             return [LogEvent(f"{e.name} swings at you but misses!", Tone.MISS)]
+        if roll > to_hit - p.dodge():
+            return [LogEvent(f"You dodge {e.name}'s attack!", Tone.PLAYER)]
         raw = e.base_damage + e.attributes.strength * 0.3 + e.attributes.agility * 0.2
         raw *= 1 + self.rng.uniform(-config.ENEMY_DAMAGE_VARIANCE, config.ENEMY_DAMAGE_VARIANCE)
         crit = self._crit(enemy_crit_chance(e.attributes.strength))

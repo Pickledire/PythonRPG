@@ -9,7 +9,7 @@ from textual.widgets import DataTable
 
 from rpg.core.entities import Player
 from rpg.core.items import Item
-from rpg.ui.palette import BAD_STYLE, GOLD_STYLE, MUTED_STYLE
+from rpg.ui.palette import GOLD_STYLE, MUTED_STYLE, requirements_text
 
 
 @dataclass
@@ -41,10 +41,7 @@ class ItemTable(DataTable):
             item = row.item
             equipped = player.inventory.is_equipped(item)
             marker = Text("E", style="bold #86B57F") if equipped else Text(" ")
-            requirement = Text("—", style=MUTED_STYLE)
-            if item.requirement:
-                ok, _ = player.meets_requirement(item)
-                requirement = Text(item.requirement.describe(), style="" if ok else BAD_STYLE)
+            requirement = requirements_text(item, player)
             qty = str(row.stock if row.stock is not None else row.quantity)
             if row.stock is not None and row.stock >= 99:
                 qty = "∞"

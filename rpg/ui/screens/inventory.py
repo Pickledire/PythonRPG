@@ -11,7 +11,7 @@ from textual.screen import Screen
 from textual.widgets import Button, DataTable, Footer, Header, Label, Static, Tab, Tabs
 
 from rpg.core.items import Consumable, ItemKind
-from rpg.ui.palette import BAD_STYLE, MUTED_STYLE
+from rpg.ui.palette import BAD_STYLE, MUTED_STYLE, requirements_text
 from rpg.ui.screens.modals import ConfirmModal
 from rpg.ui.widgets import ItemTable, PlayerPanel
 from rpg.ui.widgets.item_table import ItemRow
@@ -25,13 +25,15 @@ def item_details(item, player) -> Text:
     text = Text()
     text.append(item.name + "\n", style="bold #E0A458")
     for line in item.details():
-        text.append(line + "\n")
-    if item.requirement:
-        ok, _ = player.meets_requirement(item)
-        if not ok:
-            current = player.attributes.get(item.requirement.attribute)
-            text.append(f"You have {current} {item.requirement.attribute.label} — too weak to use this yet.\n",
-                        style=BAD_STYLE)
+        if line.startswith("Requires ") and item.requirements:
+            text.append("Requires ")
+            text.append_text(requirements_text(item, player, long=True))
+            text.append("\n")
+        else:
+            text.append(line + "\n")
+    ok, reason = player.meets_requirement(item)
+    if not ok:
+        text.append(reason.replace("Requires ", "Not yet usable: ") + "\n", style=BAD_STYLE)
     if player.inventory.is_equipped(item):
         text.append("Equipped\n", style="bold #86B57F")
     return text

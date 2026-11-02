@@ -15,10 +15,16 @@ from rpg import config
 from rpg.core.entities import DamageType
 from rpg.core.formulas import (
     armor_mitigation,
+    buy_price_multiplier,
+    dodge_chance,
+    dot_resistance,
+    flee_chance,
     heal_power,
     hit_chance,
     player_crit_chance,
+    sell_ratio,
     spell_power,
+    status_resist_chance,
     weapon_attribute_bonus,
 )
 from rpg.ui.palette import MUTED_STYLE
@@ -60,7 +66,7 @@ class CharacterScreen(Screen):
 
         weapon = p.weapon if p.weapon and not p.weapon.is_broken else None
         base = weapon.effective_damage if weapon else config.UNARMED_DAMAGE
-        bonus = weapon_attribute_bonus(p.attributes, weapon.weapon_class if weapon else None)
+        bonus = weapon_attribute_bonus(p.attributes, weapon)
         low = int((base + bonus) * (1 - config.PLAYER_DAMAGE_VARIANCE))
         high = int((base + bonus) * (1 + config.PLAYER_DAMAGE_VARIANCE))
 
@@ -71,22 +77,28 @@ class CharacterScreen(Screen):
         table.add_row("Kills", str(p.kills))
         table.add_row("", "")
         section("Attributes")
-        table.add_row("Strength", f"{p.attributes.strength}   melee damage, crit chance")
-        table.add_row("Agility", f"{p.attributes.agility}   accuracy, ranged damage")
-        table.add_row("Intelligence", f"{p.attributes.intelligence}   spell power, staves")
+        for attribute, value in p.attributes.items():
+            table.add_row(attribute.label, Text.assemble((f"{value:<4}", "bold"), (attribute.description, MUTED_STYLE)))
         table.add_row("Unspent points", str(p.stat_points))
         table.add_row("", "")
         section("Combat")
         table.add_row("Attack damage", f"{low}–{high}  ({weapon.name if weapon else 'bare fists'})")
-        table.add_row("Hit chance", f"{hit_chance(p.attributes.agility) * 100:.0f}%")
-        table.add_row("Crit chance", f"{player_crit_chance(p.attributes.strength) * 100:.0f}%  (×{config.CRIT_MULTIPLIER})")
+        a = p.attributes
+        table.add_row("Hit chance", f"{hit_chance(a.dexterity) * 100:.0f}%")
+        table.add_row("Crit chance", f"{player_crit_chance(a) * 100:.0f}%  (×{config.CRIT_MULTIPLIER})")
+        table.add_row("Dodge chance", f"{dodge_chance(a.agility) * 100:.0f}%")
+        table.add_row("Flee chance", f"{flee_chance(a.agility, False) * 100:.0f}% · {flee_chance(a.agility, True) * 100:.0f}% vs bosses")
         mitigation = 1 - armor_mitigation(p.effective_defense(DamageType.PHYSICAL))
         magic_mitigation = 1 - armor_mitigation(p.effective_defense(DamageType.MAGIC))
         table.add_row("Damage blocked", f"{mitigation * 100:.0f}% physical · {magic_mitigation * 100:.0f}% magic")
+        table.add_row("Affliction resist", f"{dot_resistance(a.vitality) * 100:.0f}% less poison/burn/bleed damage")
+        table.add_row("Status resist", f"{status_resist_chance(a.wisdom) * 100:.0f}% chance to shrug off a harmful effect")
         if p.spell:
-            power = (heal_power(p.spell.power, p.attributes.intelligence) if p.spell.spell_type.value == "heal"
-                     else spell_power(p.spell.power, p.attributes.intelligence))
+            power = (heal_power(p.spell.power, a.wisdom) if p.spell.spell_type.value == "heal"
+                     else spell_power(p.spell.power, a.intelligence))
             table.add_row("Equipped spell", f"{p.spell.name}  (power {power}, {p.spell.mana_cost} MP)")
+        multiplier = buy_price_multiplier(a.charisma)
+        table.add_row("Shop prices", f"×{multiplier:.2f} when buying · sell for {sell_ratio(a.charisma) * 100:.0f}% of value")
         table.add_row("", "")
         section("World")
         table.add_row("Time", world.time_label)

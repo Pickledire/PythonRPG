@@ -57,7 +57,10 @@ class Enemy(Combatant):
         if template.title_variants:
             variant_name, variant_title = rng.choice(template.title_variants)
             name, description = f"{template.name}: {variant_name}", variant_title
-        attributes = Attributes(rng.randint(5, 15), rng.randint(5, 15), 0)
+        strength, agility = rng.randint(5, 15), rng.randint(5, 15)
+        # Enemies use Strength (damage, crits) and Agility (accuracy); casters heal for the flat base amount.
+        attributes = Attributes(strength=strength, dexterity=agility, agility=agility, vitality=0, intelligence=0,
+                                wisdom=0, charisma=0)
         super().__init__(name, _roll(template.hp, rng), attributes)
         self.template = template
         self.template_id = template.template_id

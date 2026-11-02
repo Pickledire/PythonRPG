@@ -12,11 +12,17 @@ from textual.widgets import Button, Footer, Header, Input, Label, OptionList, St
 from textual.widgets.option_list import Option
 
 from rpg import config
+from rpg.core.attributes import Attributes
 from rpg.core.catalog import ITEMS
+from rpg.core.formulas import max_hp_for, max_mana_for
 from rpg.core.session import GameSession
 from rpg.ui.palette import MUTED_STYLE
 
-RACE_STYLES = {"Human": "bold #EDE4D3", "Elf": "bold #86B57F", "Orc": "bold #D9574B", "Dwarf": "bold #F2C46D"}
+RACE_STYLES = {
+    "Human": "bold #EDE4D3", "Elf": "bold #86B57F", "Orc": "bold #D9574B", "Dwarf": "bold #F2C46D",
+    "Druid": "bold #7FD1A8", "Halfling": "bold #E3B85C", "Gnome": "bold #C99BE8", "Dragonkin": "bold #FF8C42",
+    "Beastkin": "bold #C98A4B", "Revenant": "bold #9EDCF2",
+}
 
 
 class CreateCharacterScreen(Screen):
@@ -56,17 +62,21 @@ class CreateCharacterScreen(Screen):
         if not race:
             return
         data = config.RACES[race]
+        attributes = Attributes.from_dict(data)
         text = Text()
         text.append(f"{race}\n", style=RACE_STYLES.get(race, "bold"))
         text.append(f"{data['blurb']}\n\n", style="italic")
-        for label, key in (("Health", "health"), ("Strength", "strength"), ("Agility", "agility"),
-                           ("Intelligence", "intelligence")):
-            value = data[key]
-            scale = 150 if key == "health" else 16
-            bar = "█" * round(12 * value / scale)
-            text.append(f"{label:<13}", style=MUTED_STYLE)
+        hp = max_hp_for(data["base_hp"], attributes.vitality)
+        mana = max_mana_for(attributes.wisdom)
+        text.append(f"{'Health':<13}", style=MUTED_STYLE)
+        text.append(f"{hp:>4}   ", style="bold #86B57F")
+        text.append("Mana ", style=MUTED_STYLE)
+        text.append(f"{mana}\n\n", style="bold #7FA8E0")
+        for attribute, value in attributes.items():
+            text.append(f"{attribute.label:<13}", style=MUTED_STYLE)
             text.append(f"{value:>4} ", style="bold")
-            text.append(f"{bar}\n", style="#E0A458")
+            text.append(f"{'█' * value:<16}", style="#E0A458")
+            text.append(f" {attribute.description}\n", style=MUTED_STYLE)
         text.append("\nStarting kit\n", style="bold")
         for template_id in data["starting_items"]:
             item = ITEMS.create(template_id)

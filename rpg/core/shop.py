@@ -9,6 +9,7 @@ from enum import Enum
 from rpg import config
 from rpg.core.catalog import GENERAL_SHOP_COUNTS, GENERAL_SHOP_POOLS, ITEMS, MAGIC_SHOP_COUNTS, MAGIC_SHOP_SPELLS
 from rpg.core.entities import Player
+from rpg.core.formulas import buy_price_multiplier, sell_ratio
 from rpg.core.inventory import InventoryFullError
 from rpg.core.items import Armor, Item, ItemKind, Weapon
 
@@ -81,43 +82,56 @@ class Shop:
     def offers_of_kind(self, kind: ItemKind | None = None) -> list[Offer]:
         return [o for o in self.offers if kind is None or o.item.kind == kind]
 
+    # ------------------------------------------------------------ prices (Charisma haggles)
+    @staticmethod
+    def price_for(offer: Offer, player: Player) -> int:
+        return max(1, int(round(offer.price * buy_price_multiplier(player.attributes.charisma))))
+
+    @staticmethod
+    def sell_price_for(item: Item, player: Player) -> int:
+        return max(1, int(item.value * sell_ratio(player.attributes.charisma)))
+
     # ------------------------------------------------------------ transactions
     def buy(self, player: Player, offer: Offer) -> Item:
         if offer not in self.offers:
             raise ShopError("That item is no longer on sale.")
         if offer.sold_out:
             raise ShopError(f"{offer.item.name} is sold out.")
-        if player.gold < offer.price:
-            raise ShopError(f"You need {offer.price}g but only have {player.gold}g.")
+        price = self.price_for(offer, player)
+        if player.gold < price:
+            raise ShopError(f"You need {price}g but only have {player.gold}g.")
         purchase = offer.item.clone()
         try:
             player.inventory.add(purchase)
         except InventoryFullError:
             raise ShopError("Your inventory is full.") from None
-        player.spend_gold(offer.price)
+        player.spend_gold(price)
         offer.stock -= 1
         return purchase
 
-    @staticmethod
-    def sell(player: Player, item: Item) -> int:
+    @classmethod
+    def sell(cls, player: Player, item: Item) -> int:
         if player.inventory.find(item.uid) is None:
             raise ShopError(f"You don't have {item.name}.")
         if player.inventory.is_equipped(item):
             raise ShopError(f"Unequip {item.name} before selling it.")
         player.inventory.remove(item.uid, 1)
-        price = item.sell_price
+        price = cls.sell_price_for(item, player)
         player.add_gold(price)
         return price
 
     @staticmethod
-    def repair_cost(item: Item) -> int:
+    def repair_cost(item: Item, player: Player | None = None) -> int:
         if not isinstance(item, (Weapon, Armor)) or item.missing_durability <= 0:
             return 0
         fraction = item.missing_durability / item.max_durability
-        return max(1, int(round(max(item.value, 20) * config.REPAIR_COST_RATIO * fraction)))
+        cost = max(item.value, 20) * config.REPAIR_COST_RATIO * fraction
+        if player is not None:
+            cost *= buy_price_multiplier(player.attributes.charisma)
+        return max(1, int(round(cost)))
 
     def repair(self, player: Player, item: Item) -> int:
-        cost = self.repair_cost(item)
+        cost = self.repair_cost(item, player)
         if cost == 0:
             raise ShopError(f"{item.name} doesn't need repairs.")
         if not player.spend_gold(cost):

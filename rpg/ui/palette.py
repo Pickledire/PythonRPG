@@ -82,3 +82,16 @@ def effect_badges(effects: dict[EffectKind, StatusEffect]) -> Text:
 
 def is_dot(kind: EffectKind) -> bool:
     return kind in DAMAGE_OVER_TIME
+
+
+def requirements_text(item, player, long: bool = False) -> Text:
+    """Each requirement colored by whether the player meets it: "STR 14 · DEX 13"."""
+    if not item.requirements:
+        return Text("—", style=MUTED_STYLE)
+    text = Text()
+    for i, requirement in enumerate(item.requirements):
+        if i:
+            text.append(", " if long else " · ", style=MUTED_STYLE)
+        met = requirement.met_by(player.attributes)
+        text.append(requirement.describe() if long else requirement.short(), style=GOOD_STYLE if met else BAD_STYLE)
+    return text

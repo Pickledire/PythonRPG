@@ -6,6 +6,7 @@ import unittest
 from rpg import config
 from rpg.core import campfire
 from rpg.core.attributes import Attribute
+from rpg.core.catalog import ITEMS
 from rpg.core.combat import CombatSession, Hesitate, Phase
 from rpg.core.effects import EffectKind, StatusEffect
 from rpg.core.enemies import AFFIXES, ENEMIES, UnknownEnemyError, apply_affix
@@ -20,15 +21,18 @@ from tests.helpers import ScriptedRandom, make_enemy, make_player
 class ProgressionTests(unittest.TestCase):
     def test_gain_xp_levels_multiple_times(self):
         player = make_player()
+        hp, mana = player.max_hp, player.max_mana
         levels = player.gain_xp(100 + 115 + 10)
         self.assertEqual(levels, 2)
         self.assertEqual(player.level, 3)
         self.assertEqual(player.xp, 10)
-        self.assertEqual(player.max_hp, 120)
-        self.assertEqual(player.max_mana, 120)
+        self.assertEqual(player.max_hp, hp + 2 * config.HEALTH_GAIN_PER_LEVEL)
+        self.assertEqual(player.max_mana, mana + 2 * config.MANA_GAIN_PER_LEVEL)
         self.assertEqual(player.stat_points, 2)
         player.spend_stat_point(Attribute.AGILITY)
-        self.assertEqual(player.attributes.agility, 9)
+        self.assertEqual(player.attributes.agility, 10)
+        player.spend_stat_point(Attribute.VITALITY)
+        self.assertEqual(player.max_hp, hp + 2 * config.HEALTH_GAIN_PER_LEVEL + config.HP_PER_VITALITY)
 
     def test_victory_rewards_applied(self):
         player, enemy = make_player(), make_enemy()
@@ -155,8 +159,22 @@ class ShopTests(unittest.TestCase):
             Shop.sell(self.player, self.player.weapon)
         potion = self.player.inventory.consumables()[0].item
         gold = self.player.gold
-        self.assertEqual(Shop.sell(self.player, potion), potion.sell_price)
-        self.assertEqual(self.player.gold, gold + potion.sell_price)
+        price = Shop.sell_price_for(potion, self.player)
+        self.assertEqual(Shop.sell(self.player, potion), price)
+        self.assertEqual(self.player.gold, gold + price)
+
+    def test_charisma_changes_prices(self):
+        offer = self.shop.offers_of_kind(ItemKind.WEAPON)[0]
+        self.player.attributes.charisma = 10
+        base = Shop.price_for(offer, self.player)
+        self.assertEqual(base, offer.price)
+        self.player.attributes.charisma = 20
+        self.assertLess(Shop.price_for(offer, self.player), base)
+        self.player.attributes.charisma = 5
+        self.assertGreater(Shop.price_for(offer, self.player), base)
+        potion = ITEMS.create("superior_health_potion")
+        self.player.attributes.charisma = 15
+        self.assertGreater(Shop.sell_price_for(potion, self.player), potion.value // 2)
 
     def test_repair(self):
         weapon = self.player.weapon

@@ -11,7 +11,7 @@ from dataclasses import dataclass, field
 from enum import Enum
 from typing import ClassVar
 
-from rpg.core.attributes import Attribute, Requirement
+from rpg.core.attributes import Attribute, Requirement, Requirements, describe_requirements
 from rpg.core.effects import EffectKind, EffectSpec
 
 
@@ -56,7 +56,12 @@ class SpellType(str, Enum):
 
 
 # ---------------------------------------------------------------- default requirement rules
-AGILE_MELEE_KEYWORDS = ("dagger", "claw", "rapier")
+# Catalog entries may override these with explicit (often multi-attribute) requirements.
+FINESSE_KEYWORDS = ("dagger", "claw", "rapier")
+
+
+def is_finesse(name: str, weapon_class: "WeaponClass") -> bool:
+    return weapon_class == WeaponClass.MELEE and any(k in name.lower() for k in FINESSE_KEYWORDS)
 
 
 def _tier(value: int, tiers: tuple[tuple[int, int], ...], top: int) -> int:
@@ -66,31 +71,30 @@ def _tier(value: int, tiers: tuple[tuple[int, int], ...], top: int) -> int:
     return top
 
 
-def default_weapon_requirement(name: str, damage: int, weapon_class: "WeaponClass") -> Requirement:
-    lowered = name.lower()
-    agile = weapon_class == WeaponClass.MELEE and any(k in lowered for k in AGILE_MELEE_KEYWORDS)
-    if weapon_class == WeaponClass.RANGED or agile:
-        return Requirement(Attribute.AGILITY, _tier(damage, ((18, 10), (25, 12)), 14))
+def default_weapon_requirements(name: str, damage: int, weapon_class: "WeaponClass", finesse: bool) -> Requirements:
+    if weapon_class == WeaponClass.RANGED or finesse:
+        return (Requirement(Attribute.DEXTERITY, _tier(damage, ((18, 10), (25, 12)), 14)),)
     if weapon_class == WeaponClass.MAGIC:
-        return Requirement(Attribute.INTELLIGENCE, _tier(damage, ((20, 10), (35, 12)), 14))
-    return Requirement(Attribute.STRENGTH, _tier(damage, ((15, 8), (25, 12)), 15))
+        return (Requirement(Attribute.INTELLIGENCE, _tier(damage, ((20, 10), (35, 12)), 14)),)
+    return (Requirement(Attribute.STRENGTH, _tier(damage, ((15, 8), (25, 12)), 15)),)
 
 
-def default_armor_requirement(name: str, defense: int) -> Requirement:
+def default_armor_requirements(name: str, defense: int) -> Requirements:
     lowered = name.lower()
     if any(k in lowered for k in ("plate", "dragon", "mithril", "chain", "scale", "mail")):
         attribute = Attribute.STRENGTH
-    elif any(k in lowered for k in ("leather", "studded")):
+    elif any(k in lowered for k in ("leather", "studded", "hide")):
         attribute = Attribute.AGILITY
-    elif any(k in lowered for k in ("cloth", "robe", "enchanted")):
+    elif any(k in lowered for k in ("cloth", "robe", "enchanted", "vestment")):
         attribute = Attribute.INTELLIGENCE
     else:
         attribute = Attribute.STRENGTH if defense >= 20 else Attribute.AGILITY
-    return Requirement(attribute, _tier(defense, ((12, 8), (20, 10), (35, 12)), 14))
+    return (Requirement(attribute, _tier(defense, ((12, 8), (20, 10), (35, 12)), 14)),)
 
 
-def default_spell_requirement(power: int) -> Requirement:
-    return Requirement(Attribute.INTELLIGENCE, _tier(power, ((20, 10), (35, 12)), 14))
+def default_spell_requirements(power: int, spell_type: "SpellType") -> Requirements:
+    attribute = Attribute.WISDOM if spell_type in (SpellType.HEAL, SpellType.SHIELD) else Attribute.INTELLIGENCE
+    return (Requirement(attribute, _tier(power, ((20, 10), (35, 12)), 14)),)
 
 
 # ---------------------------------------------------------------- items
@@ -100,10 +104,19 @@ class Item:
     name: str
     value: int = 0
     description: str = ""
-    requirement: Requirement | None = None
+    requirements: Requirements | None = None  # None -> derived from the item's default rules
     uid: str = field(default_factory=new_uid)
 
     kind: ClassVar[ItemKind] = ItemKind.MISC
+
+    def __post_init__(self) -> None:
+        if self.requirements is None:
+            self.requirements = self.default_requirements()
+        else:
+            self.requirements = tuple(self.requirements)
+
+    def default_requirements(self) -> Requirements:
+        return ()
 
     @property
     def stackable(self) -> bool:
@@ -126,8 +139,8 @@ class Item:
     def details(self) -> list[str]:
         """Multi-line description for detail panes."""
         lines = [f"{self.kind.label}", self.description] if self.description else [self.kind.label]
-        if self.requirement:
-            lines.append(f"Requires {self.requirement.describe()}")
+        if self.requirements:
+            lines.append(f"Requires {describe_requirements(self.requirements)}")
         lines.append(f"Value {self.value}g · sells for {self.sell_price}g")
         return lines
 
@@ -144,7 +157,7 @@ class Item:
             "name": self.name,
             "value": self.value,
             "description": self.description,
-            "requirement": self.requirement.to_dict() if self.requirement else None,
+            "requirements": [r.to_dict() for r in self.requirements or ()],
         }
 
     @classmethod
@@ -155,7 +168,10 @@ class Item:
             "name": data["name"],
             "value": int(data.get("value", 0)),
             "description": data.get("description", ""),
-            "requirement": Requirement.from_dict(data.get("requirement")),
+            # Older saves stored a single "requirement"; those are re-derived from the current rules
+            # (catalog items are refreshed from the catalog on load anyway).
+            "requirements": (tuple(Requirement.from_dict(r) for r in data["requirements"])
+                             if "requirements" in data else None),
         }
 
     @classmethod
@@ -170,14 +186,19 @@ class Weapon(Item):
     max_durability: int = 100
     durability: int = -1  # -1 means "start at max"
     on_hit: EffectSpec | None = None
+    finesse: bool | None = None  # light blade that scales with Dexterity; None -> guessed from the name
 
     kind: ClassVar[ItemKind] = ItemKind.WEAPON
 
     def __post_init__(self) -> None:
         if self.durability < 0:
             self.durability = self.max_durability
-        if self.requirement is None:
-            self.requirement = default_weapon_requirement(self.name, self.damage, self.weapon_class)
+        if self.finesse is None:
+            self.finesse = is_finesse(self.name, self.weapon_class)
+        super().__post_init__()
+
+    def default_requirements(self) -> Requirements:
+        return default_weapon_requirements(self.name, self.damage, self.weapon_class, bool(self.finesse))
 
     @property
     def is_broken(self) -> bool:
@@ -205,22 +226,23 @@ class Weapon(Item):
         return self.max_durability - self.durability
 
     def summary(self) -> str:
-        text = f"DMG {self.damage} · {self.weapon_class.value} · {self.durability}/{self.max_durability}"
+        style = "finesse" if self.finesse else self.weapon_class.value
+        text = f"DMG {self.damage} · {style} · {self.durability}/{self.max_durability}"
         if self.on_hit:
             text += f" · {self.on_hit.describe()}"
         return text
 
     def details(self) -> list[str]:
         lines = [
-            f"{self.weapon_class.value.capitalize()} weapon",
+            ("Finesse" if self.finesse else self.weapon_class.value.capitalize()) + " weapon",
             self.description,
             f"Damage {self.damage} (effective {self.effective_damage})",
             f"Durability {self.durability}/{self.max_durability}" + ("  BROKEN" if self.is_broken else ""),
         ]
         if self.on_hit:
             lines.append(f"On hit: {self.on_hit.describe()}")
-        if self.requirement:
-            lines.append(f"Requires {self.requirement.describe()}")
+        if self.requirements:
+            lines.append(f"Requires {describe_requirements(self.requirements)}")
         lines.append(f"Value {self.value}g · sells for {self.sell_price}g")
         return [line for line in lines if line]
 
@@ -232,6 +254,7 @@ class Weapon(Item):
             "max_durability": self.max_durability,
             "durability": self.durability,
             "on_hit": self.on_hit.to_dict() if self.on_hit else None,
+            "finesse": self.finesse,
         }
 
     @classmethod
@@ -243,6 +266,7 @@ class Weapon(Item):
             max_durability=int(data.get("max_durability", 100)),
             durability=int(data.get("durability", -1)),
             on_hit=EffectSpec.from_dict(data.get("on_hit")),
+            finesse=data.get("finesse"),
         )
 
 
@@ -257,8 +281,10 @@ class Armor(Item):
     def __post_init__(self) -> None:
         if self.durability < 0:
             self.durability = self.max_durability
-        if self.requirement is None:
-            self.requirement = default_armor_requirement(self.name, self.defense)
+        super().__post_init__()
+
+    def default_requirements(self) -> Requirements:
+        return default_armor_requirements(self.name, self.defense)
 
     @property
     def is_broken(self) -> bool:
@@ -294,8 +320,8 @@ class Armor(Item):
             f"Defense {self.defense} (effective {self.effective_defense:.0f})",
             f"Durability {self.durability}/{self.max_durability}" + ("  BROKEN" if self.is_broken else ""),
         ]
-        if self.requirement:
-            lines.append(f"Requires {self.requirement.describe()}")
+        if self.requirements:
+            lines.append(f"Requires {describe_requirements(self.requirements)}")
         lines.append(f"Value {self.value}g · sells for {self.sell_price}g")
         return [line for line in lines if line]
 
@@ -354,9 +380,8 @@ class Spell(Item):
 
     kind: ClassVar[ItemKind] = ItemKind.SPELL
 
-    def __post_init__(self) -> None:
-        if self.requirement is None:
-            self.requirement = default_spell_requirement(self.power)
+    def default_requirements(self) -> Requirements:
+        return default_spell_requirements(self.power, self.spell_type)
 
     @property
     def targets_self(self) -> bool:
@@ -387,8 +412,8 @@ class Spell(Item):
 
     def details(self) -> list[str]:
         lines = [f"{self.spell_type.value.capitalize()} spell", self.description, self.summary()]
-        if self.requirement:
-            lines.append(f"Requires {self.requirement.describe()}")
+        if self.requirements:
+            lines.append(f"Requires {describe_requirements(self.requirements)}")
         lines.append(f"Value {self.value}g · sells for {self.sell_price}g")
         return [line for line in lines if line]
 

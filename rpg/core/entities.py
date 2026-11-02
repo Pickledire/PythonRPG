@@ -5,10 +5,17 @@ from __future__ import annotations
 from enum import Enum
 
 from rpg import config
-from rpg.core.attributes import Attribute, Attributes
+from rpg.core.attributes import Attribute, Attributes, unmet
 from rpg.core.catalog import ITEMS
 from rpg.core.effects import CLEANSABLE, EffectKind, StatusEffect
-from rpg.core.formulas import armor_mitigation
+from rpg.core.formulas import (
+    armor_mitigation,
+    dodge_chance,
+    dot_resistance,
+    max_hp_for,
+    max_mana_for,
+    status_resist_chance,
+)
 from rpg.core.inventory import Inventory
 from rpg.core.items import Armor, Item, Spell, Weapon
 
@@ -93,15 +100,28 @@ class Combatant:
         blind = self.effects.get(EffectKind.BLIND)
         return blind.potency if blind else 0.0
 
+    # Defensive traits (enemies have none of these by default; the player gets them from attributes)
+    def dot_multiplier(self) -> float:
+        """Multiplier on poison/burn/bleed damage taken."""
+        return 1.0
+
+    def status_resist(self) -> float:
+        """Chance to resist a harmful status effect entirely."""
+        return 0.0
+
+    def dodge(self) -> float:
+        """Chance to avoid a weapon attack."""
+        return 0.0
+
 
 class Player(Combatant):
-    def __init__(self, name: str, race: str, attributes: Attributes, max_hp: int) -> None:
+    def __init__(self, name: str, race: str, attributes: Attributes, max_hp: int, max_mana: int) -> None:
         super().__init__(name, max_hp, attributes)
         self.race = race
         self.level = 1
         self.xp = 0
         self.gold = config.STARTING_GOLD
-        self.max_mana = config.STARTING_MANA
+        self.max_mana = max_mana
         self.mana = self.max_mana
         self.inventory = Inventory()
         self.kills = 0
@@ -112,7 +132,9 @@ class Player(Combatant):
         if race not in config.RACES:
             raise ValueError(f"Unknown race: {race}")
         data = config.RACES[race]
-        player = cls(name.strip() or "Adventurer", race, Attributes.from_dict(data), int(data["health"]))
+        attributes = Attributes.from_dict(data)
+        player = cls(name.strip() or "Adventurer", race, attributes,
+                     max_hp_for(int(data["base_hp"]), attributes.vitality), max_mana_for(attributes.wisdom))
         for template_id in data["starting_items"]:
             item = ITEMS.create(template_id)
             player.inventory.add(item)
@@ -146,7 +168,34 @@ class Player(Combatant):
         if self.stat_points <= 0:
             raise ValueError("No stat points to spend")
         self.stat_points -= 1
-        return self.attributes.add(attribute, 1)
+        return self.change_attribute(attribute, 1)
+
+    def change_attribute(self, attribute: Attribute | str, delta: int) -> int:
+        """Change an attribute and keep derived pools in step (Vitality -> HP, Wisdom -> mana)."""
+        attribute = Attribute(attribute)
+        before = self.attributes.get(attribute)
+        after = self.attributes.add(attribute, delta)
+        diff = after - before
+        if attribute == Attribute.VITALITY and diff:
+            self.max_hp = max(1, self.max_hp + diff * config.HP_PER_VITALITY)
+            self.hp = max(1, min(self.max_hp, self.hp + diff * config.HP_PER_VITALITY))
+        elif attribute == Attribute.WISDOM and diff:
+            self.max_mana = max(0, self.max_mana + diff * config.MANA_PER_WISDOM)
+            self.mana = max(0, min(self.max_mana, self.mana + diff * config.MANA_PER_WISDOM))
+        return after
+
+    def set_attribute(self, attribute: Attribute | str, value: int) -> int:
+        return self.change_attribute(attribute, int(value) - self.attributes.get(attribute))
+
+    # ------------------------------------------------------------ attribute-driven defenses
+    def dot_multiplier(self) -> float:
+        return 1.0 - dot_resistance(self.attributes.vitality)
+
+    def status_resist(self) -> float:
+        return status_resist_chance(self.attributes.wisdom)
+
+    def dodge(self) -> float:
+        return dodge_chance(self.attributes.agility)
 
     # ------------------------------------------------------------ resources
     def restore_mana(self, amount: int) -> int:
@@ -188,11 +237,12 @@ class Player(Combatant):
         return self.inventory.spell
 
     def meets_requirement(self, item: Item) -> tuple[bool, str]:
-        req = item.requirement
-        if req is None or req.met_by(self.attributes):
+        """Check every attribute requirement; the reason lists each one that isn't met."""
+        missing = unmet(item.requirements or (), self.attributes)
+        if not missing:
             return True, ""
-        current = self.attributes.get(req.attribute)
-        return False, f"Requires {req.describe()} (you have {current})."
+        parts = [f"{r.attribute.label} {r.minimum} (you have {self.attributes.get(r.attribute)})" for r in missing]
+        return False, "Requires " + ", ".join(parts) + "."
 
     def equip(self, item: Item) -> str:
         ok, reason = self.meets_requirement(item)
@@ -235,13 +285,15 @@ class Player(Combatant):
 
     @classmethod
     def from_dict(cls, data: dict) -> "Player":
-        player = cls(data["name"], data.get("race", "Human"), Attributes.from_dict(data.get("attributes", {})),
-                     int(data.get("max_hp", 100)))
+        race = data.get("race", "Human")
+        # Saves from before the seven-attribute system only have STR/AGI/INT: fill the rest from the race.
+        attributes = Attributes.from_dict(data.get("attributes", {}), defaults=config.RACES.get(race, {}))
+        player = cls(data["name"], race, attributes, int(data.get("max_hp", 100)),
+                     int(data.get("max_mana", max_mana_for(attributes.wisdom))))
         player.level = int(data.get("level", 1))
         player.xp = int(data.get("xp", 0))
         player.gold = int(data.get("gold", 0))
         player.hp = int(data.get("hp", player.max_hp))
-        player.max_mana = int(data.get("max_mana", config.STARTING_MANA))
         player.mana = int(data.get("mana", player.max_mana))
         player.stat_points = int(data.get("stat_points", 0))
         player.kills = int(data.get("kills", 0))

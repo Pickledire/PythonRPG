@@ -13,10 +13,12 @@ Dialogue nodes are JSON files under ``dialogues/``; a node id is its path withou
       ]
     }
 
-Conditions: flag_set, flag_not_set, min_kills, min_level, min_gold, has_item, time_at, time_gte,
-time_between [a, b] (wraps midnight).
-Effects: set_flag [k, v], remove_flag, set_health, heal, set_mana, set_strength / set_agility /
-set_intelligence, stat_change [stat, delta], add_gold, give_xp, advance_time, set_time,
+Conditions: flag_set, flag_not_set, min_kills, min_level, min_gold, min_stat [stat, value]
+(e.g. ["charisma", 12] for a persuasion branch), has_item, time_at, time_gte, time_between [a, b]
+(wraps midnight).
+Effects: set_flag [k, v], remove_flag, set_health, heal, set_mana, set_<stat> for any attribute
+(set_strength, set_dexterity, set_agility, set_vitality, set_intelligence, set_wisdom, set_charisma),
+stat_change [stat, delta], add_gold, give_xp, advance_time, set_time,
 give_item (id, name or spec dict), unlock_shop (item id), open_shop ("general"/"magic"),
 start_combat (enemy id or name), visual (+ "duration").
 
@@ -183,9 +185,11 @@ class DialogueRepository:
         return problems
 
 
+SET_STAT_EFFECTS = {f"set_{attribute.value}": attribute for attribute in Attribute}
+
 KNOWN_EFFECTS = {
-    "set_flag", "remove_flag", "set_health", "heal", "set_mana", "set_stamina", "set_strength", "set_agility",
-    "set_intelligence", "stat_change", "add_gold", "give_xp", "advance_time", "set_time", "give_item",
+    "set_flag", "remove_flag", "set_health", "heal", "set_mana", "set_stamina", *SET_STAT_EFFECTS,
+    "stat_change", "add_gold", "give_xp", "advance_time", "set_time", "give_item",
     "unlock_shop", "open_shop", "start_combat", "visual", "duration",
 }
 
@@ -209,6 +213,10 @@ def _check_one(ctx: DialogueContext, cond: dict) -> bool:
             return False
         if "min_level" in cond and player.level < int(cond["min_level"]):
             return False
+        if "min_stat" in cond:
+            stat, minimum = cond["min_stat"]
+            if player.attributes.get(str(stat).lower()) < int(minimum):
+                return False
         if "min_gold" in cond and player.gold < int(cond["min_gold"]):
             return False
         if "has_item" in cond and player.inventory.find_by_name(str(cond["has_item"])) is None:
@@ -258,11 +266,11 @@ def _apply_one(ctx: DialogueContext, effect: dict, out: StepResult) -> None:
         say(LogEvent(f"Your mana is now {amount}.", Tone.MANA))
     elif "set_stamina" in effect:
         pass  # legacy effect from the original game; stamina no longer exists
-    elif any(k in effect for k in ("set_strength", "set_agility", "set_intelligence")):
-        key = next(k for k in ("set_strength", "set_agility", "set_intelligence") if k in effect)
-        attribute = Attribute(key.removeprefix("set_"))
-        player.attributes.set(attribute, int(effect[key]))
-        say(LogEvent(f"Your {attribute.value} is now {player.attributes.get(attribute)}.", Tone.REWARD))
+    elif any(k in effect for k in SET_STAT_EFFECTS):
+        key = next(k for k in SET_STAT_EFFECTS if k in effect)
+        attribute = SET_STAT_EFFECTS[key]
+        value = player.set_attribute(attribute, int(effect[key]))
+        say(LogEvent(f"Your {attribute.value} is now {value}.", Tone.REWARD))
     elif "stat_change" in effect:
         stat, delta = effect["stat_change"]
         try:
@@ -270,7 +278,7 @@ def _apply_one(ctx: DialogueContext, effect: dict, out: StepResult) -> None:
         except ValueError:
             say(LogEvent(f"(Unknown stat '{stat}')", Tone.SYSTEM))
             return
-        new = player.attributes.add(attribute, int(delta))
+        new = player.change_attribute(attribute, int(delta))
         sign = "+" if int(delta) >= 0 else ""
         say(LogEvent(f"{attribute.label} {sign}{int(delta)} (now {new}).", Tone.REWARD if int(delta) >= 0 else Tone.WARNING))
     elif "add_gold" in effect:

@@ -17,36 +17,45 @@ SAVE_SLOTS = 3
 SAVE_VERSION = 2
 
 # --------------------------------------------------------------------------- races
-# health is the starting max HP; the rest are attributes.
+# Max HP  = base_hp + vitality × HP_PER_VITALITY
+# Max mana = BASE_MANA + wisdom × MANA_PER_WISDOM
+HP_PER_VITALITY = 5
+BASE_MANA = 50
+MANA_PER_WISDOM = 5
+
+
+def _race(stats: str, base_hp: int, blurb: str, kit: list[str], equip: list[str] | None = None) -> dict:
+    """``stats`` is "STR DEX AGI VIT INT WIS CHA"."""
+    keys = ("strength", "dexterity", "agility", "vitality", "intelligence", "wisdom", "charisma")
+    return {**dict(zip(keys, map(int, stats.split()))), "base_hp": base_hp, "blurb": blurb,
+            "starting_items": kit, "equip": kit if equip is None else equip}
+
+
 RACES: dict[str, dict] = {
-    "Human": {
-        "strength": 10, "agility": 8, "intelligence": 10, "health": 100,
-        "blurb": "Adaptable and steady. A reliable blade and a level head.",
-        "starting_items": ["iron_sword"],
-        "equip": ["iron_sword"],
-    },
-    "Elf": {
-        "strength": 8, "agility": 11, "intelligence": 15, "health": 80,
-        "blurb": "Graceful archers with a natural gift for the arcane.",
-        "starting_items": ["elven_bow", "elven_blast"],
-        "equip": ["elven_bow", "elven_blast"],
-    },
-    "Orc": {
-        "strength": 15, "agility": 10, "intelligence": 5, "health": 135,
-        "blurb": "Brutal and tireless. Hits hard, takes harder.",
-        "starting_items": ["orcish_axe"],
-        "equip": ["orcish_axe"],
-    },
-    "Dwarf": {
-        "strength": 12, "agility": 7, "intelligence": 11, "health": 120,
-        "blurb": "Stubborn as stone, with a war cry that shakes mountains.",
-        "starting_items": ["dwarven_hammer", "dwarven_scream"],
-        "equip": ["dwarven_hammer", "dwarven_scream"],
-    },
+    #                    STR DEX AGI VIT INT WIS CHA
+    "Human": _race("10 10  9 10 10 10 12", 55, "Adaptable and steady. A reliable blade and a silver tongue.",
+                   ["iron_sword"]),
+    "Elf": _race(" 8 12 11  8 15 12 10", 40, "Graceful archers with a natural gift for the arcane.",
+                 ["elven_bow", "elven_blast"]),
+    "Orc": _race("15  8 10 14  5  6  7", 65, "Brutal and tireless. Hits hard, takes harder.",
+                 ["orcish_axe"]),
+    "Dwarf": _race("12  9  7 13 11 10  8", 55, "Stubborn as stone, with a war cry that shakes mountains.",
+                   ["dwarven_hammer", "dwarven_scream"]),
+    "Druid": _race(" 9  9 10 11 11 15 10", 45, "Grove-born keepers of the wild. Thorns answer their call, and "
+                   "one day the beasts will too.", ["thornwood_staff", "thorn_lash"]),
+    "Halfling": _race(" 7 14 14  9  9 10 13", 45, "Small, quick and impossibly lucky. Hard to hit, harder to "
+                      "haggle with.", ["halfling_dagger"]),
+    "Gnome": _race(" 6 12 11  9 15 12 11", 45, "Tinkerers and spark-casters with a crossbow for every problem.",
+                   ["clockwork_crossbow", "arc_spark"]),
+    "Dragonkin": _race("14  8  7 13  9  9 11", 60, "Scaled descendants of wyrms who carry fire in their lungs.",
+                       ["dragonkin_glaive", "ember_breath"]),
+    "Beastkin": _race("12 11 14 12  6  9  7", 55, "Feral hunters with claws for blades and senses for maps.",
+                      ["bone_claws"]),
+    "Revenant": _race("11 10  8 12 10 13  5", 50, "Risen from the grave with unfinished business. People "
+                      "tend to stare.", ["grave_blade", "wither"]),
 }
 STARTING_CONSUMABLES = {"health_potion": 3}
 STARTING_GOLD = 100
-STARTING_MANA = 100
 
 # --------------------------------------------------------------------------- progression
 BASE_XP_REQUIREMENT = 100
@@ -70,7 +79,7 @@ FLEE_CHANCE = 0.70
 BOSS_FLEE_CHANCE = 0.25
 UNARMED_DAMAGE = 4
 SPELL_INT_SCALING = 0.01  # +1% spell power per point of intelligence
-HEAL_INT_SCALING = 2  # flat bonus HP per intelligence point
+HEAL_WIS_SCALING = 2  # flat bonus HP per wisdom point
 DEFAULT_HEAL_POTENCY = 60
 ENEMY_SPELL_CHANCE = 0.35
 
