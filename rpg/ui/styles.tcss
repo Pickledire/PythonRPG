@@ -1,0 +1,461 @@
+/* Epic RPG Adventure — Textual stylesheet.
+ *
+ * Theme colors ($primary, $accent, $error, ...) come from the "ember" theme in palette.py.
+ * Swap the theme or override any rule below to re-skin the game.
+ */
+
+Screen {
+    background: $background;
+}
+
+Header {
+    background: $panel;
+    color: $primary;
+}
+
+.screen-title {
+    text-style: bold;
+    color: $primary;
+    padding: 0 1;
+    margin-bottom: 1;
+    width: 100%;
+}
+
+.muted {
+    color: $text-muted;
+    padding: 0 1;
+}
+
+.button-row {
+    height: auto;
+    margin-top: 1;
+}
+.button-row Button {
+    margin-right: 2;
+}
+
+/* ------------------------------------------------------------------ resource bars */
+StatBar.-hp > .statbar--fill { color: $success; }
+StatBar.-hp.-mid > .statbar--fill { color: $warning; }
+StatBar.-hp.-low > .statbar--fill { color: $error; }
+StatBar.-mp > .statbar--fill { color: #7FA8E0; }
+StatBar.-xp > .statbar--fill { color: $primary; }
+
+/* ------------------------------------------------------------------ title */
+TitleScreen {
+    align: center middle;
+}
+#title-root {
+    width: 100%;
+    height: auto;
+    align: center middle;
+}
+#title-art, #title-tagline, #title-blurb {
+    width: 100%;
+    content-align: center middle;
+    text-align: center;
+}
+#title-tagline {
+    color: $accent;
+    text-style: bold;
+    margin: 1 0;
+}
+#title-blurb {
+    color: $text-muted;
+    margin-bottom: 2;
+}
+#title-menu {
+    width: 30;
+    height: auto;
+}
+#title-menu Button {
+    width: 100%;
+    margin-bottom: 1;
+}
+
+/* ------------------------------------------------------------------ character creation */
+#create-root {
+    padding: 1 2;
+}
+.field-label {
+    color: $text-muted;
+    text-style: bold;
+    margin-top: 1;
+}
+#name {
+    width: 50;
+}
+#race-row {
+    height: 18;
+}
+#race-list {
+    width: 24;
+    height: 100%;
+    border: round $primary 40%;
+}
+#race-preview {
+    width: 1fr;
+    height: 100%;
+    border: round $primary 40%;
+    padding: 0 2;
+    background: $surface;
+}
+#create-error {
+    color: $error;
+    height: 1;
+}
+
+/* ------------------------------------------------------------------ shared split layout */
+.split-root, #hub-root {
+    height: 1fr;
+}
+PlayerPanel {
+    width: 38;
+    height: 100%;
+    border: round $primary 50%;
+    border-title-color: $primary;
+    background: $surface;
+    padding: 0 1;
+}
+PlayerPanel .panel-title {
+    text-style: bold;
+    color: $primary;
+}
+PlayerPanel .panel-subtitle {
+    color: $text-muted;
+    margin-bottom: 1;
+}
+PlayerPanel #pp-gold {
+    margin: 1 0;
+}
+PlayerPanel .panel-section {
+    margin-bottom: 1;
+    border-top: solid $panel-lighten-1;
+    padding-top: 1;
+}
+.split-main, #hub-main {
+    width: 1fr;
+    height: 100%;
+    padding: 0 1;
+}
+
+/* ------------------------------------------------------------------ hub */
+#hub-actions {
+    grid-size: 3;
+    grid-gutter: 1 2;
+    grid-rows: 3;
+    height: auto;
+    margin-bottom: 1;
+}
+.hub-button {
+    width: 100%;
+}
+#act-hunt { background: $error 60%; }
+#act-quests { background: $accent 50%; }
+#act-rest { background: $warning 40%; }
+#hub-log {
+    height: 1fr;
+    border: round $panel-lighten-2;
+    border-title-color: $text-muted;
+}
+
+/* ------------------------------------------------------------------ tables & detail panes */
+Tabs {
+    margin-bottom: 1;
+}
+ItemTable {
+    height: 1fr;
+    min-height: 6;
+    border: round $panel-lighten-2;
+}
+.detail-row {
+    height: 13;
+    margin-top: 1;
+}
+.detail-pane {
+    width: 1fr;
+    height: 100%;
+    border: round $primary 40%;
+    background: $surface;
+    padding: 0 1;
+}
+.detail-actions {
+    width: 18;
+    height: 100%;
+    padding-left: 1;
+}
+.detail-actions Button {
+    width: 100%;
+    margin-bottom: 0;
+}
+#shop-greeting {
+    padding: 0 1;
+}
+#shop-fx {
+    height: 1;
+}
+#sheet-scroll {
+    height: 1fr;
+    border: round $primary 40%;
+    background: $surface;
+    padding: 0 2;
+}
+
+/* ------------------------------------------------------------------ encounter intro */
+EncounterScreen {
+    align: center middle;
+}
+#encounter-root {
+    width: 100%;
+    height: auto;
+    max-height: 100%;
+    padding: 1 2;
+}
+#encounter-banner {
+    width: 100%;
+    content-align: center middle;
+    text-style: bold;
+    color: $error;
+    margin-bottom: 1;
+}
+EncounterScreen.-boss #encounter-banner {
+    color: $warning;
+}
+#encounter-story, #encounter-name, #encounter-info {
+    width: 100%;
+    text-align: center;
+    content-align: center middle;
+    margin-bottom: 1;
+}
+#encounter-info {
+    border: round $error 50%;
+    padding: 1 2;
+    background: $surface;
+}
+#fight {
+    margin-top: 1;
+    min-width: 20;
+}
+
+/* ------------------------------------------------------------------ combat */
+#combat-root {
+    height: 1fr;
+    padding: 0 1;
+}
+#arena {
+    height: auto;
+}
+.combatant-card {
+    width: 1fr;
+    height: auto;
+    min-height: 9;
+    padding: 0 1;
+    background: $surface;
+}
+.combatant-card.-player {
+    border: round $success;
+}
+.combatant-card.-enemy {
+    border: round $error;
+}
+.combatant-card.-boss {
+    border: heavy $warning;
+}
+.combatant-card .card-name {
+    text-style: bold;
+}
+.combatant-card .card-sub {
+    color: $text-muted;
+}
+.combatant-card .card-effects {
+    margin-top: 1;
+}
+#versus {
+    width: 6;
+    height: 100%;
+    content-align: center middle;
+    text-style: bold;
+    color: $accent;
+}
+#combat-log {
+    height: 1fr;
+    margin-top: 1;
+    border: round $panel-lighten-2;
+    border-title-color: $text-muted;
+}
+#turn-row {
+    height: 1;
+    margin-top: 1;
+}
+#turn-label {
+    width: 1fr;
+}
+#turn-timer {
+    width: 34;
+}
+#turn-timer Bar > .bar--bar {
+    color: $primary;
+}
+#turn-timer.-urgent Bar > .bar--bar {
+    color: $error;
+}
+#combat-actions, #combat-done {
+    height: auto;
+    margin-top: 1;
+}
+.combat-button {
+    width: 1fr;
+    margin-right: 1;
+}
+#combat-done {
+    align: center middle;
+}
+
+/* ------------------------------------------------------------------ dialogue */
+#dialogue-root {
+    padding: 1 2;
+}
+#dialogue-speaker {
+    text-style: bold;
+    color: $accent;
+    border-bottom: solid $accent 50%;
+    width: 100%;
+    margin-bottom: 1;
+}
+#dialogue-scroll {
+    height: 1fr;
+    border: round $primary 30%;
+    background: $surface;
+    padding: 1 2;
+}
+#dialogue-outcomes {
+    height: auto;
+    max-height: 7;
+    margin-top: 1;
+    border: round $warning 40%;
+}
+#dialogue-choices {
+    height: auto;
+    margin-top: 1;
+}
+.choice-button {
+    width: 100%;
+    height: auto;
+    min-height: 3;
+    content-align: left middle;
+    text-align: left;
+    margin-bottom: 0;
+}
+#dialogue-fx {
+    color: $warning;
+}
+
+/* ------------------------------------------------------------------ quests & slots */
+#quest-root, #slots-root {
+    padding: 1 2;
+}
+#quest-list, #slot-list {
+    height: 1fr;
+    border: round $primary 40%;
+    background: $surface;
+}
+
+/* ------------------------------------------------------------------ campfire */
+#campfire-root {
+    padding: 1 2;
+}
+#campfire-fx {
+    height: 7;
+    margin-bottom: 1;
+}
+#campfire-log {
+    height: 1fr;
+    border: round $warning 40%;
+}
+#campfire-buttons {
+    height: auto;
+    width: auto;
+    margin-top: 1;
+}
+#campfire-buttons Button {
+    margin: 0 1;
+}
+
+/* ------------------------------------------------------------------ game over */
+GameOverScreen {
+    align: center middle;
+}
+#gameover-root {
+    width: 100%;
+    height: auto;
+}
+#gameover-title, #gameover-body {
+    width: 100%;
+    text-align: center;
+    content-align: center middle;
+    margin-bottom: 2;
+}
+#gameover-menu {
+    width: 30;
+    height: auto;
+}
+#gameover-menu Button {
+    width: 100%;
+    margin-bottom: 1;
+}
+
+/* ------------------------------------------------------------------ modals */
+ModalScreen {
+    align: center middle;
+    background: $background 70%;
+}
+.modal-box {
+    width: 76;
+    max-width: 95%;
+    height: auto;
+    max-height: 90%;
+    border: thick $primary;
+    background: $panel;
+    padding: 1 2;
+}
+.modal-box.-small {
+    width: 60;
+}
+.modal-title {
+    text-style: bold;
+    color: $primary;
+    width: 100%;
+    content-align: center middle;
+    margin-bottom: 1;
+}
+.modal-title.-victory {
+    color: $warning;
+}
+.modal-prompt {
+    margin-bottom: 1;
+}
+.modal-hint {
+    color: $text-muted;
+    margin-top: 1;
+}
+.modal-buttons {
+    height: auto;
+    align: center middle;
+}
+.modal-buttons Button {
+    margin: 0 1;
+}
+#modal-options {
+    height: auto;
+    max-height: 20;
+    background: $surface;
+}
+.stat-button {
+    height: 5;
+    width: 1fr;
+}
+.victory-rewards {
+    border: round $warning 50%;
+    padding: 0 1;
+    margin-bottom: 1;
+}

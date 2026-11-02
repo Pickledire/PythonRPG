@@ -1,0 +1,173 @@
+"""The Textual application: screen navigation and the multi-screen game flows."""
+
+from __future__ import annotations
+
+import random
+from collections.abc import Coroutine
+from pathlib import Path
+from typing import Any
+
+from textual.app import App
+from textual.binding import Binding
+from textual.reactive import reactive
+from textual.screen import Screen
+
+from rpg.core.combat import Phase
+from rpg.core.events import LogEvent, Tone
+from rpg.core.session import Encounter, GameSession
+from rpg.services.persistence import SaveManager
+from rpg.ui.palette import EMBER_THEME
+
+
+class RPGApp(App):
+    """Owns the current ``GameSession`` and orchestrates flows that span several screens.
+
+    State changes are announced by bumping the reactive ``revision`` (see ``touch``); widgets such as
+    ``PlayerPanel`` watch it and redraw themselves.
+    """
+
+    CSS_PATH = "styles.tcss"
+    TITLE = "Epic RPG Adventure"
+    BINDINGS = [Binding("ctrl+q", "quit", "Quit", priority=True)]
+
+    revision: reactive[int] = reactive(0)
+
+    def __init__(self, save_dir: Path | None = None, seed: int | None = None) -> None:
+        super().__init__()
+        self.saves = SaveManager(save_dir)
+        self.session: GameSession | None = None
+        self._seed = seed
+        self._hunting = False  # guards against starting two encounters at once
+
+    def make_rng(self) -> random.Random:
+        return random.Random(self._seed)
+
+    def on_mount(self) -> None:
+        from rpg.ui.screens.title import TitleScreen
+
+        self.register_theme(EMBER_THEME)
+        self.theme = "ember"
+        self.push_screen(TitleScreen())
+
+    # ------------------------------------------------------------ state & navigation
+    def touch(self) -> None:
+        """Announce that game state changed so watchers refresh."""
+        if self.session:
+            self.sub_title = f"{self.session.player.name} · {self.session.world.time_label}"
+        else:
+            self.sub_title = ""
+        self.revision += 1
+
+    def run_flow(self, flow: Coroutine[Any, Any, Any]):
+        """Run a multi-screen flow as an app-level worker, so it survives the screens it pops."""
+        return self.run_worker(flow, group="flows")
+
+    async def reset_to(self, screen: Screen) -> None:
+        """Clear the screen stack and show ``screen``."""
+        while len(self.screen_stack) > 1:
+            await self.pop_screen()
+        await self.push_screen(screen)
+
+    def start_session(self, session: GameSession, welcome: bool = False) -> None:
+        from rpg.ui.screens.hub import HubScreen
+
+        self.session = session
+        self.touch()
+
+        async def go() -> None:
+            hub = HubScreen()
+            await self.reset_to(hub)
+            if welcome:
+                p = session.player
+                hub.journal(LogEvent(f"Welcome, {p.name} the {p.race}! Your legend begins today.", Tone.REWARD))
+
+        self.run_flow(go())
+
+    async def quit_to_title_flow(self) -> None:
+        from rpg.ui.screens.modals import ConfirmModal
+        from rpg.ui.screens.title import TitleScreen
+
+        if await self.push_screen_wait(ConfirmModal("Return to the title screen? Unsaved progress will be lost.",
+                                                    "Return", "Stay")):
+            self.session = None
+            self.touch()
+            await self.reset_to(TitleScreen())
+
+    # ------------------------------------------------------------ flows (must run inside a worker)
+    async def resolve_level_ups(self) -> None:
+        from rpg.ui.screens.modals import LevelUpModal
+
+        session = self.session
+        while session is not None and session.player.stat_points > 0:
+            attribute = await self.push_screen_wait(LevelUpModal(session.player))
+            if attribute is None:
+                break
+            value = session.allocate_stat(attribute)
+            self.notify(f"{attribute.label} increased to {value}.")
+            self.touch()
+
+    async def run_encounter(self, encounter: Encounter, allow_flee: bool = True) -> Phase:
+        """Intro → combat → rewards → level-ups (or game over). Returns how the fight ended."""
+        from rpg.ui.screens.combat import CombatScreen
+        from rpg.ui.screens.encounter import EncounterScreen
+        from rpg.ui.screens.modals import VictoryModal, trophy_modal
+
+        session = self.session
+        assert session is not None
+        await self.push_screen_wait(EncounterScreen(encounter))
+        combat = session.begin_combat(encounter, allow_flee=allow_flee)
+        phase = await self.push_screen_wait(CombatScreen(combat))
+        report = session.conclude_combat(combat)
+        self.touch()
+        if phase == Phase.VICTORY and report:
+            await self.push_screen_wait(VictoryModal(report))
+            if report.trophy_choices:
+                item = await self.push_screen_wait(trophy_modal(report.trophy_choices, session.player))
+                if item is not None:
+                    self.notify(session.claim_trophy(item).text)
+            await self.resolve_level_ups()
+        elif phase == Phase.DEFEAT:
+            await self.handle_defeat(combat.enemy.name)
+        self.touch()
+        return phase
+
+    async def handle_defeat(self, killer: str) -> None:
+        from rpg.ui.screens.game_over import GameOverScreen
+
+        session = self.session
+        assert session is not None
+        p = session.player
+        self.session = None
+        self.touch()
+        await self.reset_to(GameOverScreen(p.name, p.level, p.kills, killer))
+
+    async def hunt_flow(self) -> None:
+        from rpg.ui.screens.modals import Choice, ChoiceModal
+
+        session = self.session
+        if session is None or self._hunting:
+            return
+        self._hunting = True
+        try:
+            risky = False
+            if session.pending_boss() is None:
+                choice = await self.push_screen_wait(ChoiceModal("Choose your hunt", [
+                    Choice("Standard hunt — normal enemies, normal rewards", False),
+                    Choice("Risky hunt — enemies +20% stronger, rewards +50%", True),
+                ]))
+                if choice is None:
+                    return
+                risky = choice
+            await self.run_encounter(session.create_hunt(risky))
+        finally:
+            self._hunting = False
+
+    async def ghost_horror_flow(self) -> None:
+        session = self.session
+        if session is None or self._hunting or not session.ghost_horror_available():
+            return
+        self._hunting = True
+        try:
+            await self.run_encounter(session.summon_ghost_horror())
+        finally:
+            self._hunting = False

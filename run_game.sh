@@ -70,5 +70,5 @@ if [ -f "requirements.txt" ]; then
 fi
 
 # Run the game using python3
-python3 Main.py
+python3 -m rpg
 

@@ -1,194 +1,142 @@
-# Brenden's Epic RPG Adventure
+# Epic RPG Adventure
 
-A comprehensive turn-based RPG game written in Python with improved mechanics, inventory system, gold economy, shop system, and **beautiful colorful interface**.
+A turn-based fantasy RPG for the terminal, built with [Textual](https://textual.textualize.io/).
+Create a hero, hunt monsters that scale with your level, face Titans and ancient story bosses,
+follow branching quests, and build your character through gear, spells and attributes.
 
-## 🚀 How to Run
+## Quick start
 
-### Easy Method (Recommended)
-1. Double-click `run_game.bat` to automatically start the game with the virtual environment
+Python 3.10 or newer is required.
 
-### Manual Method
-1. Make sure you have Python 3.6+ installed
-2. Install colorama: `pip install colorama`
-3. Navigate to the game directory
-4. Run the game:
-   ```bash
-   python Main.py
-   ```
-
-### Virtual Environment Method
-1. Activate the virtual environment:
-   ```bash
-   .venv\Scripts\activate  # Windows
-   source .venv/bin/activate  # Linux/Mac
-   ```
-2. Run the game:
-   ```bash
-   python Main.py
-   ```
-
-## 🎨 Visual Features
-
-### Color Scheme
-- **🔴 Red**: Health, damage, enemies, warnings
-- **🟢 Green**: XP, success messages, player actions
-- **🔵 Blue**: Mana, armor, information
-- **🟡 Yellow**: Gold, race selection, warnings
-- **🟣 Magenta**: Combat actions, items
-- **🔵 Cyan**: Weapons, titles, borders
-- **⚪ White**: Menu options, general text
-
-### Visual Elements
-- **Health Bars**: Color-coded progress bars (green/yellow/red based on health %)
-- **XP Bars**: Visual progress tracking for experience points
-- **Borders**: Decorative borders and separators
-- **Icons**: Emojis and symbols for better visual appeal
-- **ASCII Art**: Enhanced title screen
-
-## 🎯 How to Play
-
-### Character Creation
-1. Enter your character's name
-2. Choose your race from the available options
-3. Each race has different starting stats and equipment
-4. You start with 100 gold
-
-### Main Menu Options
-- **🗡️ Find an enemy to fight**: Start a random combat encounter
-- **📦 Check inventory**: Manage your items and equipment
-- **📊 View character status**: See detailed character information with visual bars
-- **🏪 Visit shop**: Buy and sell items at the Merchant's Emporium
-- **💾 Save/Load game**: (Coming soon)
-
-### Combat
-1. **⚔️ Attack**: Use your equipped weapon to damage enemies
-2. **🧪 Use item**: Consume health potions or other items
-3. **🏃 Try to flee**: Attempt to escape from combat (70% success rate)
-4. **🔮 Cast spell**: Attack using current spell
-4. **🎉 Earn rewards**: Gain XP and gold from victories 
-
-### Shopping System
-- **Browse Categories**: View weapons, armor, or consumables separately
-- **Buy Items**: Purchase equipment and consumables with gold
-- **Sell Items**: Sell unwanted items for 50% of their value
-- **Check Prices**: All items show their gold cost and stats
-
-### Inventory Management
-- **Equip weapons**: Change your active weapon
-- **Equip armor**: Change your defensive equipment
-- **Equip magic**: Change your current spell
-- **Use items**: Consume potions and other usable items
-
-## 📁 File Structure
-
-```
-RPG Game/
-├── Main.py           # Main entry point
-├── GameEngine.py     # Game loop and UI management
-├── Character.py      # Player character class
-├── Enemy.py          # Enemy classes and factory
-├── Weapon.py         # Weapon class with durability
-├── Item.py           # Base item classes (Item, Consumable, Armor)
-├── Magic.py          # Base magic system
-├── Inventory.py      # Inventory management system
-├── Shop.py           # Shop system for buying/selling
-├── config.py         # Game configuration and constants
-├── run_game.bat      # Easy launcher for Windows
-├── requirements.txt  # Python dependencies
-├── .venv/            # Virtual environment
-└── README.md         # This file
-```
-
-## 🎨 Testing Colors
-
-Run the color demo to see all the visual enhancements:
 ```bash
-python test_colors.py
+python -m pip install -r requirements.txt
 ```
 
-## 💰 Gold System
+```bash
+python -m rpg
+```
 
-### Earning Gold
-- **Combat Victories**: Earn 10-50+ gold per enemy defeated
-- **Stronger Enemies**: Tougher enemies give more gold
-- **Random Amounts**: Gold rewards vary for excitement
+On Windows you can also double-click `run_game.bat`; on macOS/Linux run `./run_game.sh`. Both
+create a virtual environment, install dependencies and launch the game.
 
-### Spending Gold
-- **Weapons**: 80-400+ gold for various weapon types
-- **Armor**: 30-600+ gold for different armor pieces
-- **Consumables**: 25-200 gold for health potions
-- **Selling**: Get 50% value when selling items
+For the best look use a modern terminal (Windows Terminal, iTerm2, kitty, WezTerm) at 120×40 or larger.
 
-## 🛍️ Shop Items
+## How to play
 
-### Weapons Available
-- **Melee Weapons**: Bronze Sword, Steel Sword, Silver Sword, Enchanted Blade, War Hammer, Battle Axe
-- **Ranged Weapons**: Short Bow, Long Bow, Crossbow
-- **Magic Weapons**: Oak Staff, Crystal Staff, Arcane Staff
+| Where | Keys |
+|---|---|
+| Camp (hub) | `h` hunt · `q` quests · `r` rest · `i` inventory · `c` character · `s` shop · `ctrl+s` save · `l` load · `esc` title |
+| Combat | `1` attack · `2` cast · `3` item · `4` flee |
+| Dialogue | `1`–`9` choose · `esc` walk away |
+| Inventory | `e` equip · `u` use · `d` discard |
+| Shop | `b` buy / sell / repair · `esc` leave |
+| Anywhere | `ctrl+q` quit · `ctrl+p` command palette (themes) |
 
-### Armor Available
-- **Light Armor**: Cloth Robes, Leather Armor, Studded Leather
-- **Medium Armor**: Chain Mail, Scale Mail, Enchanted Robes
-- **Heavy Armor**: Plate Armor, Dragon Scale
+Mouse clicks work everywhere too.
 
-### Consumables Available
-- **Health Potion**: Restores 50 HP (25 gold)
-- **Greater Health Potion**: Restores 100 HP (50 gold)
-- **Superior Health Potion**: Restores 200 HP (100 gold)
-- **Mega Health Potion**: Restores 500 HP (200 gold)
+### Features
+- **Four races**: Human, Elf, Orc and Dwarf, each with their own attributes and starting kit.
+- **Turn-based combat** with accuracy, critical hits, armor mitigation and armor penetration,
+  weapon and armor durability, and a turn timer: hesitate and the enemy strikes.
+- **Status effects** that tick each turn: poison, burn and bleed damage over time, regeneration,
+  wards (damage shields), blindness (lower accuracy) and freezing (lose a turn).
+  Weapons, spells and enemies can inflict them; antidotes cure them.
+- **Spells**: damage, healing, wards, blinding, freezing, burning, poisoning and bleeding.
+  Spell power scales with Intelligence.
+- **Level-scaled hunts** with weighted enemy pools, risky hunts (stronger foes, +50% rewards) and
+  random modifiers: *Enraged, Armored, Shielded, Swift, Venomous* and *Searing*.
+- **Bosses**: a Titan at level 10, the Elder Dragon at 15, the Earth Eater Worm at 20 and the Rat King
+  at 25, each with a cinematic intro and a choice of three legendary trophies. Story bosses appear in quests.
+- **Progression**: XP, levels, +HP and +mana each level, and stat points you spend on Strength,
+  Agility or Intelligence. Gear has attribute requirements.
+- **Economy**: a rotating Merchant's Emporium (buy, sell, repair) and the Collegium Arcana spell stall
+  reached through the Mages Academy questline.
+- **Eight quest lines** written as JSON dialogue with conditions, effects, fights and rewards.
+- **Campfire rest**: full recovery, time passes, and the night may bring ambushes, thieves, gifts
+  or visitors.
+- **The Ghost Horror**: linger too long at camp and something comes for you.
+- **Three save slots** with atomic writes. Saves from the original version of the game are imported automatically.
 
-## 🎲 Race Statistics
+## Project layout
 
-| Race  | Strength | Agility | Intelligence | Health | Starting Gold |
-|-------|----------|---------|--------------|--------|---------------|
-| Elf   | 8        | 11      | 15           | 80     | 100           |
-| Orc   | 15       | 10      | 5            | 135    | 100           |
-| Human | 10       | 8       | 10           | 100    | 100           |
-| Dwarf | 12       | 7       | 11           | 120    | 100           |
+```
+rpg/
+  config.py            Balance constants and paths (tune the game here)
+  core/                Game rules. No UI imports; fully unit-tested
+    attributes.py      Strength / Agility / Intelligence, equipment requirements
+    effects.py         Status effects and their timing rules
+    items.py           Weapon, Armor, Consumable, Spell, Curio models
+    catalog.py         Item definitions + ItemFactory, shop pools and loot tables
+    inventory.py       Stacking inventory and equipment slots
+    entities.py        Combatant base class and Player
+    enemies.py         Enemy templates, bosses, affixes, EnemyFactory
+    formulas.py        Pure combat math (hit, crit, mitigation, spell power)
+    combat.py          CombatSession state machine
+    progression.py     XP, gold, loot and trophies
+    shop.py            Rotating shops, selling, repairs
+    campfire.py        Resting and night events
+    dialogue.py        Data-driven dialogue engine
+    world.py           Time of day and story flags
+    session.py         GameSession: the single façade the UI uses
+  services/
+    persistence.py     Save slots, atomic writes, v1 save migration
+  ui/
+    app.py             RPGApp: navigation and multi-screen flows
+    palette.py         Theme + text colors (re-skin here)
+    styles.tcss        Layout and widget styles (re-skin here)
+    widgets/           StatBar, PlayerPanel, CombatantCard, ItemTable, EventLog, VisualEffect
+    screens/           Title, character creation, camp, encounter, combat, inventory,
+                       character sheet, shop, quests, dialogue, campfire, save/load, game over, modals
+dialogues/             Quest and encounter content (JSON)
+saves/                 Save slots (slot1.json ... slot3.json)
+tests/                 Unit tests for every core system + a headless UI test
+```
 
-## 🗡️ Starting Equipment
+### How it fits together
+- The **UI never contains game rules**. Screens call `GameSession` methods (`create_hunt`,
+  `begin_combat`, `rest`, `shop`, `equip`, ...) and render the `LogEvent`s they return.
+- **Combat is a step-wise state machine** (`CombatSession.act()` / `enemy_turn()`), so the combat screen
+  controls pacing and animation and tests can play whole fights without a terminal.
+- **State changes are broadcast** with a reactive counter: screens call `app.touch()` and widgets that
+  `watch(app, "revision")` (such as the player panel) redraw themselves.
+- **Flows that span screens** (intro → combat → victory → trophy → level-up, or a quest fight that ends in
+  game over) are `async` methods on `RPGApp` that run as workers and `await push_screen_wait(...)`.
 
-- **Elf**: Elven Bow (12 damage, ranged) + 3 Health Potions
-- **Orc**: Orcish Axe (18 damage, melee) + 3 Health Potions
-- **Human**: Iron Sword (15 damage, melee) + 3 Health Potions
-- **Dwarf**: Dwarven Hammer (16 damage, melee) + 3 Health Potions
+## Extending the game
 
-## 🐉 Enemy Types
+**Add an item**: one line in `rpg/core/catalog.py`:
+```python
+ITEMS.weapon("frost_brand", "Frost Brand", 34, 150, 260, "A blade rimed in frost.",
+             on_hit=EffectSpec(EffectKind.FROZEN, 0, 1, 0.15))
+```
+Then add its id to a shop pool or loot table, or hand it out from dialogue with `{"give_item": "frost_brand"}`.
 
-- **Goblin**: Weak but quick (40 HP, 8 damage) - Low gold reward
-- **Orc Warrior**: Balanced fighter (80 HP, 15 damage) - Medium gold reward
-- **Skeleton**: Undead creature (35 HP, 10 damage) - Low gold reward
-- **Cave Troll**: Strong and tough (120 HP, 20 damage) - High gold reward
-- **Young Dragon**: Powerful boss-type (200 HP, 35 damage) - Very high gold reward
+**Add an enemy**: add an `EnemyTemplate` to `_TEMPLATES` in `rpg/core/enemies.py` (stats, spellbook,
+on-hit effects, regeneration, intro text, trophy choices) and, for random hunts, to `LEVEL_POOLS`.
+Dialogue can start a fight with `{"start_combat": "frost_giant"}` (by id or display name).
 
-- **Titan Boss**: Strongest enemy in the game - You should probably run
+**Write a quest**: add JSON nodes under `dialogues/` and a `Quest` entry in `rpg/core/session.py`.
+The schema (conditions and effects) is documented at the top of `rpg/core/dialogue.py`. To check
+content for broken links and unknown enemies or items:
 
-## 🔮 Future Enhancements
+```bash
+python -c "from rpg.core.dialogue import DialogueRepository; from rpg.config import DIALOGUE_DIR; print('\n'.join(DialogueRepository(DIALOGUE_DIR).validate()) or 'OK')"
+```
 
-- **Save/Load System**: Persistent game progress
-- **Quests**: Story-driven objectives
-- **Multiple Areas**: Different locations to explore
-- **Crafting System**: Create items from materials
-- **More Shop Features**: Item repairs, special deals, rare items
+**Re-skin**: change the `EMBER_THEME` colors and `TONE_STYLES` in `rpg/ui/palette.py`, or any rule in
+`rpg/ui/styles.tcss`. Run with `textual run --dev rpg.ui.app:RPGApp` (needs `textual-dev`) for live CSS reloading.
 
-## 🐛 Known Issues
+## Tests
 
-- Save/Load functionality not yet implemented
-- Limited enemy AI (basic attack only)
-- Shop stock is unlimited for consumables
+```bash
+python -m unittest discover -s tests -t .
+```
 
-## 📝 Changelog
+The suite covers combat (including every status effect), items, inventory, progression, enemies, hunts,
+shops, the campfire, dialogue (including a lint of all shipped dialogue), persistence and save migration,
+plus an end-to-end UI run through Textual's headless pilot. It also runs under `pytest`.
 
-### Version (Current) - Visual Enhancement Update + Magic
-- **NEW**: 🔮 New magic system for mages, and spells you can buy in shop
-- **NEW**: 🎨 Complete colorama integration for beautiful terminal colors
-- **NEW**: 📊 Visual health and XP progress bars
-- **NEW**: 🖼️ ASCII art title screen with enhanced startup experience
-- **NEW**: 🎯 Color-coded combat messages and status displays
-- **NEW**: 🌈 Comprehensive color scheme for all game elements
-- **NEW**: 📦 Virtual environment setup with requirements.txt
-- **NEW**: 🚀 Easy launcher (run_game.bat) for Windows users
-- **IMPROVED**: 📱 Fullscreen terminal optimization (120x40 characters)
-- **IMPROVED**: 🎮 Enhanced user interface with borders and visual elements
-- **IMPROVED**: 🎨 All menus, status screens, and combat displays now colorful
-- **IMPROVED**: 📈 Character status display with visual progress indicators
+## The original version
+
+The first version of the game (`Main.py`, `GameEngine.py` and friends at the repository root) is still
+here for reference and runs with `python Main.py`. The new game reads its dialogue files and imports its saves.

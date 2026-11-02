@@ -59,7 +59,7 @@ if exist requirements.txt (
 )
 
 echo Launching game...
-%PYEXE% Main.py
+%PYEXE% -m rpg
 
 pause
 endlocal
