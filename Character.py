@@ -300,10 +300,9 @@ class Character:
         crit_txt = " (CRIT!)" if crit else ""
         result = f"{self.colors['name']}{self.name}{self.colors['reset']} attacks {Fore.RED}{target.name}{self.colors['reset']} with {self.colors['weapon']}{weapon.name}{self.colors['reset']} for {Fore.RED + Style.BRIGHT}{actual_damage}{self.colors['reset']} damage{crit_txt}!"
         
+        # XP/gold for the kill are granted once, in GameEngine.end_combat
         if not target.alive:
-            xp_gained = random.randint(MIN_XP_REWARD, MAX_XP_REWARD)
-            self.gain_xp(xp_gained)
-            result += f"\n{Fore.RED + Style.BRIGHT}💀 {target.name} has been defeated!{self.colors['reset']} {self.colors['xp']}Gained {xp_gained} XP!{self.colors['reset']}"
+            result += f"\n{Fore.RED + Style.BRIGHT}💀 {target.name} has been defeated!{self.colors['reset']}"
         
         return result
 
@@ -345,12 +344,11 @@ class Character:
             b['turns'] -= 1
             if b['turns'] <= 0:
                 self.status_effects.pop('blind', None)
-        # Frozen decay (skip handled in player_turn/enemy_turn)
-        f = self.status_effects.get('frozen')
-        if f and f.get('turns', 0) > 0:
-            f['turns'] -= 1
-            if f['turns'] <= 0:
-                self.status_effects.pop('frozen', None)
+        # Frozen is consumed when the skipped turn happens (GameEngine.player_turn/enemy_turn),
+        # not here, otherwise a 1-turn freeze would expire before it could take effect.
+        if self.health <= 0:
+            self.health = 0
+            self.alive = False
         return messages
     
     def cast_magic(self, target):
@@ -367,15 +365,8 @@ class Character:
         # Deduct mana
         self.mana -= magic.mana
         
-        # Cast the spell
+        # Cast the spell (kill rewards are granted in GameEngine.end_combat)
         result, damage = magic.cast(self, target)
-        
-        # Give XP if target is killed
-        if not target.alive:
-            xp_gained = target.get_xp_reward()
-            self.gain_xp(xp_gained)
-            result += f"\n{self.colors['xp']}Gained {xp_gained} XP!{self.colors['reset']}"
-        
         return result
     
     def use_item(self, item_name):

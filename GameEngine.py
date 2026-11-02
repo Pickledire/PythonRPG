@@ -2,8 +2,6 @@ import random
 import os
 import shutil
 import time
-import threading
-from queue import Queue, Empty
 import json
 import re
 import sys
@@ -31,6 +29,11 @@ from Quests import (
 # autoreset=True automatically resets colors after each print statement
 init(autoreset=True)
 
+class PlayerDied(Exception):
+    """Raised after the game-over screen so every nested menu/dialogue/combat loop unwinds
+    back to main_menu, which starts a fresh run."""
+
+
 class GameEngine:
     """Main game engine that handles the game loop and combat"""
     
@@ -40,6 +43,7 @@ class GameEngine:
         self.game_running = True
         self.in_combat = False
         self.shop = Shop()
+        self.magic_shop = None
         self.level_10_boss = False
         self.level_15_boss = False
         self.level_20_boss = False
@@ -73,6 +77,21 @@ class GameEngine:
             'reset': Style.RESET_ALL
         }
     
+    def reset_run(self):
+        """Reset all per-run world state for a new character."""
+        self.current_enemy = None
+        self.in_combat = False
+        self.shop = Shop()
+        self.magic_shop = None
+        self.level_10_boss = False
+        self.level_15_boss = False
+        self.level_20_boss = False
+        self.level_25_boss = False
+        self.ghost_horror = False
+        self.quest_flags = {}
+        self.world_bells = 8
+        self.fight_reward_multiplier = 1.0
+
     def clear_screen(self):
         """Clear the console screen and set fullscreen-like appearance"""
         os.system('cls' if os.name == 'nt' else 'clear')
@@ -420,6 +439,15 @@ class GameEngine:
         input(f"\n{self.colors['menu']}Press Enter to continue...{self.colors['reset']}")
     
     def main_menu(self):
+        """Run the main menu; on player death start a fresh run instead of resuming nested flows."""
+        while self.game_running:
+            try:
+                self._main_menu_loop()
+            except PlayerDied:
+                self.reset_run()
+                self.create_character()
+
+    def _main_menu_loop(self):
         """Display the main menu"""
         while self.game_running:
             self.clear_screen()
@@ -478,6 +506,7 @@ class GameEngine:
             choice = self._prompt_with_haunting(f"{self.colors['menu']}Enter your choice: {self.colors['reset']}", total_timeout=30)
             if choice is None and not self.ghost_horror:
                 self._summon_ghost_horror()
+                self.fight_reward_multiplier = 1.0
                 self.in_combat = True
                 self.combat_loop()
                 continue
@@ -517,8 +546,15 @@ class GameEngine:
         boss_name = self.current_enemy.name
         boss_title = self.current_enemy.description if self.current_enemy.description else "a fearsome creature"
         
-        # Narrative story intro
+        # Narrative story intro: the cave/Titan narration only fits the random Titan bosses
         story_lines = [
+            f"{boss_name} stands before you — {boss_title.lower()}.",
+            "",
+            "The air thickens. Every instinct tells you to run.",
+            "You hold your ground.",
+            "",
+            "This is no ordinary foe.",
+        ] if not boss_name.startswith("Titan") else [
             "As you adventure around looking for enemies to slay, you find yourself entering a dark cave.",
             "The air grows cold and heavy as you venture deeper into its depths...",
             "",
@@ -833,7 +869,7 @@ class GameEngine:
     def player_turn(self):
         """Handle player's turn in combat"""
         # Check frozen
-        if self.player.status_effects.get('frozen', {}).get('turns', 0) > 0:
+        if self._consume_frozen(self.player):
             print(f"{self.colors['warning']}You are frozen and cannot act this turn!{self.colors['reset']}")
             return
         print(f"{self.colors['header']}Your turn! Choose an action:{self.colors['reset']}")
@@ -886,6 +922,10 @@ class GameEngine:
                 return
             if 1 <= idx <= len(spells):
                 spell = spells[idx-1]
+                req_stat, req_value = spell.get_requirement()
+                if self.player.stats.get(req_stat, 0) < req_value:
+                    print(f"{self.colors['error']}You need {req_stat.capitalize()} {req_value} to cast {spell.name}.{self.colors['reset']}")
+                    return
                 if self.player.mana < spell.mana:
                     print(f"{self.colors['error']}Not enough mana! Need {spell.mana}.{self.colors['reset']}")
                     return
@@ -905,59 +945,93 @@ class GameEngine:
         """Prompt for input with a timeout. While waiting, print haunting narrative at intervals.
         Returns the input string, or None if timeout elapsed.
         """
-        q: Queue = Queue()
-
-        def reader():
-            try:
-                s = input(prompt)
-            except Exception:
-                s = ""
-            q.put(s)
-
-        t = threading.Thread(target=reader, daemon=True)
-        t.start()
-
-        start = time.time()
         milestones = {
             10: "The air grows cold...",
             20: "Whispers echo from the darkness...",
             28: "A presence gathers just beyond your sight...",
         }
         printed = set()
-        while True:
-            elapsed = int(time.time() - start)
-            if elapsed >= total_timeout:
-                return None
-            try:
-                return q.get(timeout=1)
-            except Empty:
-                if (not self.ghost_horror) and (elapsed in milestones) and (elapsed not in printed):
-                    self.print_centered(milestones[elapsed], 120, self.colors['warning'])
-                    printed.add(elapsed)
+
+        def on_tick(elapsed):
+            second = int(elapsed)
+            if (not self.ghost_horror) and (second in milestones) and (second not in printed):
+                printed.add(second)
+                print()
+                self.print_centered(milestones[second], 120, self.colors['warning'])
+                return True
+            return False
+
+        return self._read_line_timed(prompt, total_timeout, on_tick)
 
     def _timed_input(self, prompt: str, total_timeout: int = 15):
         """Simple timed input without additional messages. Returns input or None on timeout."""
-        q: Queue = Queue()
+        return self._read_line_timed(prompt, total_timeout)
 
-        def reader():
-            try:
-                s = input(prompt)
-            except Exception:
-                s = ""
-            q.put(s)
+    def _read_line_timed(self, prompt: str, total_timeout: float, on_tick=None):
+        """Read one line with a timeout, without a background reader thread.
+        (A timed-out thread blocked in input() would otherwise steal the player's next line.)
+        on_tick(elapsed) may print; return True from it to have the prompt redrawn.
+        Returns the line, or None on timeout.
+        """
+        if not sys.stdin.isatty():
+            # No console to poll (piped input): fall back to a plain blocking read
+            return input(prompt)
 
-        t = threading.Thread(target=reader, daemon=True)
-        t.start()
+        def finish(line):
+            if line.strip() == "/exit":  # same dev shortcut Main.py installs on input()
+                sys.exit(0)
+            return line
 
+        sys.stdout.write(prompt)
+        sys.stdout.flush()
         start = time.time()
-        while True:
-            elapsed = time.time() - start
-            if elapsed >= total_timeout:
-                return None
-            try:
-                return q.get(timeout=0.5)
-            except Empty:
-                continue
+
+        if os.name == 'nt':
+            import msvcrt
+            buf = []
+            while True:
+                elapsed = time.time() - start
+                if elapsed >= total_timeout:
+                    print()
+                    return None
+                if on_tick and on_tick(elapsed):
+                    sys.stdout.write(prompt + "".join(buf))
+                    sys.stdout.flush()
+                if not msvcrt.kbhit():
+                    time.sleep(0.05)
+                    continue
+                ch = msvcrt.getwch()
+                if ch in ('\r', '\n'):
+                    print()
+                    return finish("".join(buf))
+                if ch == '\x03':
+                    raise KeyboardInterrupt
+                if ch in ('\x00', '\xe0'):  # arrow/function keys send a second code; ignore both
+                    msvcrt.getwch()
+                    continue
+                if ch == '\b':
+                    if buf:
+                        buf.pop()
+                        sys.stdout.write('\b \b')
+                        sys.stdout.flush()
+                    continue
+                buf.append(ch)
+                sys.stdout.write(ch)
+                sys.stdout.flush()
+        else:
+            import select
+            while True:
+                elapsed = time.time() - start
+                remaining = total_timeout - elapsed
+                if remaining <= 0:
+                    print()
+                    return None
+                if on_tick and on_tick(elapsed):
+                    sys.stdout.write(prompt)
+                    sys.stdout.flush()
+                ready, _, _ = select.select([sys.stdin], [], [], min(0.25, remaining))
+                if ready:
+                    return finish(sys.stdin.readline().rstrip('\n'))
 
     def _summon_ghost_horror(self):
         """Summon the Ghost Horror with a cinematic intro and replace the current enemy."""
@@ -997,9 +1071,20 @@ class GameEngine:
         print("\n")
         input(f"{self.colors['menu']}Press Enter to face the horror...{self.colors['reset']}")
     
+    def _consume_frozen(self, combatant):
+        """If frozen, spend one frozen turn and return True (the turn is skipped)."""
+        effects = getattr(combatant, 'status_effects', {})
+        f = effects.get('frozen')
+        if not f or f.get('turns', 0) <= 0:
+            return False
+        f['turns'] -= 1
+        if f['turns'] <= 0:
+            effects.pop('frozen', None)
+        return True
+
     def enemy_turn(self):
         """Handle enemy's turn in combat"""
-        if getattr(self.current_enemy, 'status_effects', {}).get('frozen', {}).get('turns', 0) > 0:
+        if self._consume_frozen(self.current_enemy):
             print(f"\n{self.colors['warning']}{self.current_enemy.name} is frozen and cannot act!{self.colors['reset']}")
             return
         print(f"\n{self.colors['enemy']}{self.current_enemy.name}'s turn!{self.colors['reset']}")
@@ -1026,7 +1111,7 @@ class GameEngine:
                 return
             if 1 <= choice <= len(consumables):
                 item = consumables[choice - 1]
-                result = self.player.use_item(item.name)
+                result = self.player.use_item(item)
                 print(f"\n{self.colors['success']}{result}{self.colors['reset']}")
             else:
                 print(f"{self.colors['error']}Invalid choice!{self.colors['reset']}")
@@ -1100,6 +1185,7 @@ class GameEngine:
                 # Start a normal random fight
                 player_level = self.player.level if self.player else 1
                 self.current_enemy = EnemyFactory.create_random_enemy(player_level, self)
+                self.fight_reward_multiplier = 1.0
                 self.in_combat = True
                 # Normal non-boss intro
                 print()
@@ -1176,16 +1262,9 @@ class GameEngine:
             print(f"{self.colors['error']}💀 GAME OVER! You have been defeated!{self.colors['reset']}")
             print(f"{self.colors['warning']}Better luck next time, adventurer...{self.colors['reset']}")
             self.print_border("☠", 60, self.colors['error'])
-            # Restart flow: allow creating a new character without closing the game
+            # Restart flow: unwind to main_menu, which resets the run and creates a new character
             input(f"{self.colors['menu']}Press Enter to create a new character...{self.colors['reset']}")
-            # Reset run-specific flags
-            self.level_10_boss = False
-            self.level_15_boss = False
-            self.ghost_horror = False
-            self.current_enemy = None
-            # Create a new character and return to main menu loop
-            self.create_character()
-            return
+            raise PlayerDied()
         elif not self.current_enemy.alive:
             xp_reward = self.current_enemy.get_xp_reward()
             gold_reward = self.current_enemy.get_gold_reward()
@@ -1319,9 +1398,8 @@ class GameEngine:
         print()
 
         # 3 Superior Health Potions
-        superior_potion = Consumable("Superior Health Potion", "heal", 150, "Restores 150 HP", 100)
-        for _ in range(3):
-            self.player.inventory.add_item(superior_potion)
+        superior_potion = Consumable("Superior Health Potion", "heal", 200, "Restores 200 HP", 100)
+        self.player.inventory.add_item(superior_potion, 3)
         self.print_centered(f"{self.colors['success']}Received x3 {self.colors['item']}{superior_potion.name}{self.colors['reset']}")
 
         # Mage Robes
@@ -1584,9 +1662,10 @@ class GameEngine:
             
             inventory_options = [
                 ("1", "⚔️ Equip weapon", self.colors['weapon']),
-            ("2", "🛡️ Equip armor", self.colors['armor']),
-            ("3", "🧪 Use item", self.colors['item']),
-            ("4", "🔙 Back to main menu", self.colors['warning'])
+                ("2", "🛡️ Equip armor", self.colors['armor']),
+                ("3", "🔮 Equip magic", self.colors['magic']),
+                ("4", "🧪 Use item", self.colors['item']),
+                ("5", "🔙 Back to main menu", self.colors['warning'])
             ]
             
             for num, text, color in inventory_options:
@@ -1599,8 +1678,10 @@ class GameEngine:
             elif choice == "2":
                 self.equip_armor_menu()
             elif choice == "3":
-                self.use_item_menu()
+                self.equip_magic_menu()
             elif choice == "4":
+                self.use_item_menu()
+            elif choice == "5":
                 break
             else:
                 print(f"{self.colors['error']}Invalid choice!{self.colors['reset']}")
@@ -1627,7 +1708,7 @@ class GameEngine:
                 return
             if 1 <= choice <= len(weapons):
                 weapon = weapons[choice - 1]
-                result = self.player.equip_weapon(weapon.name)
+                result = self.player.equip_weapon(weapon)
                 print(f"\n{self.colors['success']}{result}{self.colors['reset']}")
             else:
                 print(f"{self.colors['error']}Invalid choice!{self.colors['reset']}")
@@ -1660,7 +1741,7 @@ class GameEngine:
                 return
             if 1 <= choice <= len(armors):
                 armor = armors[choice - 1]
-                result = self.player.equip_armor(armor.name)
+                result = self.player.equip_armor(armor)
                 print(f"\n{self.colors['success']}{result}{self.colors['reset']}")
             else:
                 print(f"{self.colors['error']}Invalid choice!{self.colors['reset']}")
@@ -1690,7 +1771,7 @@ class GameEngine:
                 return
             if 1 <= choice <= len(magic_items):
                 magic = magic_items[choice - 1]
-                result = self.player.inventory.equip_magic(magic.name)
+                result = self.player.inventory.equip_magic(magic)
                 if result[0]:
                     print(f"\n{self.colors['success']}{result[1]}{self.colors['reset']}")
                 else:
@@ -1723,7 +1804,7 @@ class GameEngine:
                 return
             if 1 <= choice <= len(consumables):
                 item = consumables[choice - 1]
-                result = self.player.use_item(item.name)
+                result = self.player.use_item(item)
                 print(f"\n{self.colors['success']}{result}{self.colors['reset']}")
             else:
                 print(f"{self.colors['error']}Invalid choice!{self.colors['reset']}")
@@ -1760,7 +1841,7 @@ class GameEngine:
             self.play_effect("banner", duration=0.6)
             # Rotate inventory each visit based on world time
             try:
-                self.shop.refresh_inventory(seed=self.world_bells)
+                self.shop.rotate(self.world_bells)
             except Exception:
                 pass
             self.print_centered(f"{self.colors['gold']}Your gold: {self.player.gold} 💰{self.colors['reset']}")
@@ -1891,7 +1972,7 @@ class GameEngine:
                     break
                 elif 1 <= item_choice <= len(sellable_items):
                     item_to_sell = sellable_items[item_choice - 1]['item']
-                    success, message = self.shop.sell_item(self.player, item_to_sell.name)
+                    success, message = self.shop.sell_item(self.player, item_to_sell)
                     if success:
                         print(f"\n{self.colors['success']}{message}{self.colors['reset']}")
                     else:
@@ -1982,19 +2063,37 @@ class GameEngine:
                         ],
                         'equipped_weapon': getattr(self.player.inventory.equipped_weapon, 'name', None),
                         'equipped_armor': getattr(self.player.inventory.equipped_armor, 'name', None),
-                    }
+                        'equipped_magic': getattr(self.player.inventory.equipped_magic, 'name', None),
+                        # Entry indices disambiguate several items sharing a name
+                        'equipped_indices': {
+                            slot: next((i for i, entry in enumerate(self.player.inventory.items) if entry['item'] is obj), None)
+                            for slot, obj in (
+                                ('weapon', self.player.inventory.equipped_weapon),
+                                ('armor', self.player.inventory.equipped_armor),
+                                ('magic', self.player.inventory.equipped_magic),
+                            )
+                        },
+                    },
+                    'status_effects': self.player.status_effects,
                 }
             }
 
+            # quest_flags may hold sets (e.g. shop_unlocks); store them as sorted lists
+            def to_json(o):
+                if isinstance(o, set):
+                    return sorted(o)
+                raise TypeError(f"Object of type {type(o).__name__} is not JSON serializable")
+
             with open(path, 'w', encoding='utf-8') as f:
-                json.dump(payload, f, indent=2)
+                json.dump(payload, f, indent=2, default=to_json)
             print(f"{self.colors['success']}Game saved to {path}{self.colors['reset']}")
         except Exception as e:
             print(f"{self.colors['error']}Failed to save: {e}{self.colors['reset']}")
         input(f"{self.colors['menu']}Press Enter to continue...{self.colors['reset']}")
     
     def load_game(self):
-        """Load game state from saves/slot1.json"""
+        """Load game state from saves/slot1.json. Returns True on success."""
+        loaded = False
         try:
             save_dir = os.path.join(os.path.dirname(__file__), 'saves')
             path = os.path.join(save_dir, 'slot1.json')
@@ -2020,9 +2119,14 @@ class GameEngine:
             self.player.max_mana = int(p.get('max_mana', self.player.max_mana))
             self.player.mana = int(p.get('mana', self.player.max_mana))
             self.player.kills = int(p.get('kills', 0))
+            self.player.alive = self.player.health > 0
+            self.player.status_effects = dict(p.get('status_effects', {}))
 
-            # Rebuild inventory
+            # Rebuild inventory (drop the starting gear Character() just equipped)
             self.player.inventory.items = []
+            self.player.inventory.equipped_weapon = None
+            self.player.inventory.equipped_armor = None
+            self.player.inventory.equipped_magic = None
             inv = p.get('inventory', {})
             from Item import Consumable, Armor
             from Weapon import Weapon
@@ -2049,13 +2153,18 @@ class GameEngine:
                     self.player.inventory.add_item(obj, max(1, int(qty)))
                     name_to_item[obj.name] = obj
 
-            # Equip stored gear
-            ew = inv.get('equipped_weapon')
-            if ew and ew in name_to_item:
-                self.player.inventory.equipped_weapon = name_to_item[ew]
-            ea = inv.get('equipped_armor')
-            if ea and ea in name_to_item:
-                self.player.inventory.equipped_armor = name_to_item[ea]
+            # Equip stored gear: prefer the saved entry index, fall back to name for older saves
+            items = self.player.inventory.items
+            indices = inv.get('equipped_indices') or {}
+            for slot in ('weapon', 'armor', 'magic'):
+                obj = None
+                idx = indices.get(slot)
+                if isinstance(idx, int) and 0 <= idx < len(items):
+                    obj = items[idx]['item']
+                else:
+                    saved_name = inv.get(f'equipped_{slot}')
+                    obj = name_to_item.get(saved_name) if saved_name else None
+                setattr(self.player.inventory, f'equipped_{slot}', obj)
 
             # Restore flags and world state
             self.world_bells = int(data.get('world_bells', 0))
@@ -2066,17 +2175,24 @@ class GameEngine:
             self.level_25_boss = bool(flags.get('level_25_boss', False))
             self.ghost_horror = bool(flags.get('ghost_horror', False))
             self.quest_flags = data.get('quest_flags', {})
+            if isinstance(self.quest_flags.get('shop_unlocks'), list):
+                self.quest_flags['shop_unlocks'] = set(self.quest_flags['shop_unlocks'])
             self.player.quest_flags = self.quest_flags
+            self.current_enemy = None
+            self.in_combat = False
+            loaded = True
 
             print(f"{self.colors['success']}Game loaded from {path}{self.colors['reset']}")
         except Exception as e:
             print(f"{self.colors['error']}Failed to load: {e}{self.colors['reset']}")
         input(f"{self.colors['menu']}Press Enter to continue...{self.colors['reset']}")
+        return loaded
     
     def visit_magic_shop(self):
         """College Magic Shop with better spells and rotation."""
-        from Shop import Shop
-        magic_shop = Shop(mode='magic')
+        if self.magic_shop is None:
+            self.magic_shop = Shop(mode='magic')
+        magic_shop = self.magic_shop
         while True:
             self.clear_screen()
             self.display_title()
@@ -2085,7 +2201,7 @@ class GameEngine:
             self.print_centered(f"{self.colors['gold']}Your gold: {self.player.gold} 💰{self.colors['reset']}")
             print()
             try:
-                magic_shop.refresh_inventory(seed=(self.world_bells + self.player.level))
+                magic_shop.rotate(self.world_bells + self.player.level)
             except Exception:
                 pass
             self.print_border("─", 50, self.colors['magic'])
@@ -2146,7 +2262,15 @@ class GameEngine:
     def start_game(self):
         """Start the main game"""
         self.display_startup_screen()
-        self.create_character()
+        save_path = os.path.join(os.path.dirname(__file__), 'saves', 'slot1.json')
+        loaded = False
+        if os.path.isfile(save_path):
+            self.print_centered("1. New game", 120, self.colors['menu'])
+            self.print_centered("2. Load saved game", 120, self.colors['menu'])
+            if input(f"\n{self.colors['menu']}Enter your choice: {self.colors['reset']}").strip() == "2":
+                loaded = self.load_game()
+        if not loaded:
+            self.create_character()
         self.main_menu()
 
     def display_startup_screen(self):

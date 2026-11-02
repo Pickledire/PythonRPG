@@ -12,14 +12,64 @@ def _dialogue_path(dialogue_id: str) -> str:
     return os.path.join(base, "dialogues", rel)
 
 
-def _load_dialogue(dialogue_id: str) -> dict:
+def _load_dialogue(dialogue_id: str):
+    """Load a dialogue node. Returns None (instead of crashing the game) if the file is missing or malformed."""
     path = _dialogue_path(dialogue_id)
     try:
         with open(path, "r", encoding="utf-8") as f:
             return json.load(f)
+    except FileNotFoundError:
+        print(f"[dialogue] Missing dialogue file: {path}")
+        return None
     except json.JSONDecodeError as e:
         # Surface which file is malformed to aid debugging
-        raise RuntimeError(f"Dialogue JSON error in {path}: {e}")
+        print(f"[dialogue] JSON error in {path}: {e}")
+        return None
+
+
+# Dialogue enemy ids -> EnemyFactory constructor names. Keys are normalized (lowercase, '_' -> ' ').
+_ENEMY_IDS = {
+    "goblin": "create_goblin",
+    "orc": "create_orc",
+    "orc warrior": "create_orc",
+    "horrid monster": "create_horrid_monster",
+    "yjurgen": "create_Yjurgen",
+    "ziggy": "create_Ziggy",
+    "jarvask": "create_Jarvask",
+    "gorren": "create_Gorren",
+    "morrg": "create_Morrg",
+    "hagraven": "create_Hagraven",
+    "archmage": "create_Archmage",
+    "bandit": "create_bandit",
+    "skeleton": "create_skeleton",
+    "wraith": "create_wraith",
+    "wolf": "create_wolf",
+    "dire wolf": "create_dire_wolf",
+    "spriggan": "create_spriggan",
+    "troll": "create_troll",
+    "cave troll": "create_troll",
+    "giant": "create_giant",
+    "ogre": "create_ogre",
+    "minotaur": "create_minotaur",
+    "dragon": "create_dragon",
+    "young dragon": "create_dragon",
+    "elder dragon": "create_elder_dragon",
+    "valorian warden": "create_valorian_warden",
+    "lich regent": "create_lich_regent",
+    "clockwork colossus": "create_clockwork_colossus",
+    "earth eater worm": "create_earth_eater_worm",
+    "rat king": "create_rat_king",
+}
+
+
+def _create_enemy(enemy_id: str):
+    from Enemy import EnemyFactory
+    key = str(enemy_id or "").strip().lower().replace("_", " ")
+    ctor_name = _ENEMY_IDS.get(key)
+    if ctor_name is None:
+        print(f"[dialogue] Unknown enemy id '{enemy_id}', defaulting to Goblin")
+        ctor_name = "create_goblin"
+    return getattr(EnemyFactory, ctor_name)()
 
 
 def _check_conditions(engine, node: dict) -> bool:
@@ -79,11 +129,14 @@ def _apply_effects(engine, effects: list):
             engine.quest_flags[key] = value
         
         elif "set_health" in eff:
-            amount = eff["set_health"]
+            # Clamp so dialogue can neither overheal nor leave a 0 HP "alive" character
+            amount = max(1, min(engine.player.max_health, int(eff["set_health"])))
             engine.player.health = amount
             engine.print_centered(f"{engine.colors['success']}Your health is now {amount}{engine.colors['reset']}")
         elif "set_mana" in eff:
-            amount = eff["set_mana"]
+            amount = max(0, int(eff["set_mana"]))
+            # Story effects may grant mana beyond the normal cap; raise the cap to match
+            engine.player.max_mana = max(engine.player.max_mana, amount)
             engine.player.mana = amount
             engine.print_centered(f"{engine.colors['success']}Your mana is now {amount}{engine.colors['reset']}")
         elif "set_stamina" in eff:
@@ -144,46 +197,9 @@ def _apply_effects(engine, effects: list):
             except Exception:
                 pass
         elif "start_combat" in eff:
-            enemy_id = eff["start_combat"]
-            from Enemy import EnemyFactory, Boss
-            if enemy_id == "goblin":
-                engine.current_enemy = EnemyFactory.create_goblin()
-            elif enemy_id == "orc":
-                engine.current_enemy = EnemyFactory.create_orc()
-            elif enemy_id == "horrid_monster":
-                engine.current_enemy = EnemyFactory.create_horrid_monster()
-            elif enemy_id == "Yjurgen":
-                engine.current_enemy = EnemyFactory.create_Yjurgen()
-            elif enemy_id == "Ziggy":
-                engine.current_enemy = EnemyFactory.create_Ziggy()
-            elif enemy_id == "Jarvask":
-                engine.current_enemy = EnemyFactory.create_Jarvask()
-            elif enemy_id == "Gorren":
-                engine.current_enemy = EnemyFactory.create_Gorren()
-            elif enemy_id == "Morrg":
-                engine.current_enemy = EnemyFactory.create_Morrg()
-            elif enemy_id == "Hagraven":
-                engine.current_enemy = EnemyFactory.create_Hagraven()
-            elif enemy_id == "Archmage":
-                engine.current_enemy = EnemyFactory.create_Archmage()
-            elif enemy_id == "Bandit":
-                engine.current_enemy = EnemyFactory.create_bandit()
-            elif enemy_id == "Skeleton":
-                engine.current_enemy = EnemyFactory.create_skeleton()
-            elif enemy_id == "Wraith":
-                engine.current_enemy = EnemyFactory.create_wraith()
-            elif enemy_id == "Valorian Warden":
-                engine.current_enemy = EnemyFactory.create_valorian_warden()
-            elif enemy_id == "Lich Regent":
-                engine.current_enemy = EnemyFactory.create_lich_regent()
-            elif enemy_id == "Clockwork Colossus":
-                engine.current_enemy = EnemyFactory.create_clockwork_colossus()
-            elif enemy_id in ("Earth Eater Worm", "Earth_Eater_Worm"):
-                engine.current_enemy = EnemyFactory.create_earth_eater_worm()
-            elif enemy_id in ("Rat King", "Rat_King"):
-                engine.current_enemy = EnemyFactory.create_rat_king()
-            else:
-                engine.current_enemy = EnemyFactory.create_goblin()
+            from Enemy import Boss
+            engine.current_enemy = _create_enemy(eff["start_combat"])
+            engine.fight_reward_multiplier = 1.0
             engine.in_combat = True
             # Mirror normal combat intro with description
             if isinstance(engine.current_enemy, Boss) and hasattr(engine, 'display_boss_intro'):
@@ -261,6 +277,10 @@ def show_dialogue(engine, dialogue_id: str):
     current = dialogue_id
     while True:
         node = _load_dialogue(current)
+        if node is None:
+            engine.print_centered(f"{engine.colors['warning']}This path is not written yet...{engine.colors['reset']}")
+            input(f"{engine.colors['menu']}Press Enter to continue...{engine.colors['reset']}")
+            return
         if not _check_conditions(engine, node):
             engine.print_centered(f"{engine.colors['warning']}You cannot do this right now.{engine.colors['reset']}")
             return
@@ -283,9 +303,11 @@ def show_dialogue(engine, dialogue_id: str):
         for line in node.get("lines", []):
             engine.print_centered(f"{engine.colors['info']}{line}{engine.colors['reset']}")
 
+        # Node-level effects apply once on entering the node, whether or not it has choices
+        _apply_effects(engine, node.get("effects"))
+
         choices = node.get("choices", [])
         if not choices:
-            _apply_effects(engine, node.get("effects"))
             input(f"{engine.colors['menu']}Press Enter to continue...{engine.colors['reset']}")
             return
 
@@ -300,14 +322,16 @@ def show_dialogue(engine, dialogue_id: str):
         for idx, ch in enumerate(filtered, 1):
             engine.print_centered(f"{idx}. {engine.colors['menu']}{ch['text']}{engine.colors['reset']}")
 
-        sel = input(f"{engine.colors['menu']}Enter your choice: {engine.colors['reset']}").strip()
-        try:
-            idx = int(sel) - 1
-            if idx < 0 or idx >= len(filtered):
-                raise ValueError()
-        except ValueError:
+        # Re-prompt in place on invalid input so the node (and its effects) is not replayed
+        while True:
+            sel = input(f"{engine.colors['menu']}Enter your choice: {engine.colors['reset']}").strip()
+            try:
+                idx = int(sel) - 1
+                if 0 <= idx < len(filtered):
+                    break
+            except ValueError:
+                pass
             engine.print_centered(f"{engine.colors['error']}Invalid choice.{engine.colors['reset']}")
-            continue
 
         chosen = filtered[idx]
         _apply_effects(engine, chosen.get("effects"))

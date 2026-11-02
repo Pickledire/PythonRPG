@@ -1,3 +1,4 @@
+import copy
 import shutil
 from Weapon import Weapon
 from Item import Consumable, Armor
@@ -10,6 +11,7 @@ class Shop:
         self.mode = mode  # 'general' or 'magic'
         self.inventory = []
         self._pools = self._build_pools()
+        self.last_seed = None
         self.refresh_inventory()
     
     def _build_pools(self):
@@ -71,7 +73,7 @@ class Shop:
             Magic("Lightning Bolt", "A powerful lightning bolt", 80, 25, 300),
             Magic("Fire Bolt", "A fiery bolt of energy", 30, 10, 100),
             Magic("Ice Bolt", "A sharp ice bolt", 25, 10, 100),
-            Magic("Lightning Bolt", "A powerful lightning bolt", 23, 10, 150),
+            Magic("Lesser Lightning Bolt", "A crackling minor bolt", 23, 10, 150),
             Magic("Heal", "Mend flesh and resolve", 0, 14, 180, spell_type='heal'),
             Magic("Ward", "Shape a barrier of will", 0, 12, 160, spell_type='shield'),
             Magic("Blind", "Steal the enemy's surety", 0, 16, 200, spell_type='blind'),
@@ -91,6 +93,7 @@ class Shop:
         """Rotate inventory selection. Use optional seed for deterministic rotation."""
         import random
         rnd = random.Random()
+        self.last_seed = seed
         if seed is not None:
             rnd.seed(int(seed))
         else:
@@ -124,6 +127,11 @@ class Shop:
             for item in rnd.sample(self._pools['consumable'], k=min(3, len(self._pools['consumable']))):
                 self.inventory.append({'item': item, 'stock': 99, 'price': item.value})
     
+    def rotate(self, seed):
+        """Refresh stock only when the rotation seed changes, so purchases aren't instantly restocked."""
+        if seed is None or seed != self.last_seed:
+            self.refresh_inventory(seed=seed)
+
     def display_items(self, item_type=None):
         """Display shop items, optionally filtered by type"""
         def center(line: str):
@@ -192,7 +200,8 @@ class Shop:
             # Check if player has enough gold
             if player.gold >= price:
                 # Check if player has inventory space
-                success, message = player.inventory.add_item(item)
+                # Hand over a copy so the shop's pool item is never shared with the player
+                success, message = player.inventory.add_item(copy.deepcopy(item))
                 if success:
                     # Deduct gold and reduce stock
                     player.spend_gold(price)
@@ -209,16 +218,16 @@ class Shop:
         """Handle selling an item from player inventory"""
         item = player.inventory.get_item(item_name)
         if not item:
-            return False, f"You don't have {item_name} in your inventory!"
+            return False, f"You don't have {getattr(item_name, 'name', item_name)} in your inventory!"
         
         # Calculate sell price (50% of original value)
         sell_price = max(1, item.value // 2)
         
         # Remove item from inventory and add gold
-        success, message = player.inventory.remove_item(item_name, 1)
+        success, message = player.inventory.remove_item(item, 1)
         if success:
             player.add_gold(sell_price)
-            return True, f"Sold {item_name} for {sell_price}💰!"
+            return True, f"Sold {item.name} for {sell_price}💰!"
         else:
             return False, message
     

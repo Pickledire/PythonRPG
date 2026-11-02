@@ -31,7 +31,7 @@ class Magic(Item):
         """Cast the magic spell. For support spells, target may be ignored."""
         from Enemy import Enemy
         if not caster.alive:
-            return f"{caster.name} is dead and cannot cast magic!"
+            return f"{caster.name} is dead and cannot cast magic!", 0
         if self.spell_type == 'heal':
             # Use damage as potency if provided, else a sensible default
             amount = self.damage if self.damage > 0 else 60

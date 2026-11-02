@@ -1,3 +1,4 @@
+import copy
 from Item import Item, Consumable, Armor
 from Weapon import Weapon
 from Magic import Magic
@@ -13,58 +14,93 @@ class Inventory:
         self.equipped_magic = None
         self.owner = None  # Character that owns this inventory
     
+    def _find_index(self, item_or_name):
+        """Locate an inventory entry by the item object itself (preferred) or by name."""
+        if isinstance(item_or_name, Item):
+            for i, inv_item in enumerate(self.items):
+                if inv_item['item'] is item_or_name:
+                    return i
+            return None
+        for i, inv_item in enumerate(self.items):
+            if inv_item['item'].name == item_or_name:
+                return i
+        return None
+
+    @staticmethod
+    def _can_stack(a, b):
+        """Only identical consumables stack. Gear keeps its own entry (own durability),
+        and same-named items with different stats are never merged."""
+        return (
+            isinstance(a, Consumable) and isinstance(b, Consumable)
+            and a.name == b.name
+            and a.effect_type == b.effect_type
+            and a.effect_value == b.effect_value
+        )
+
     def add_item(self, item, quantity=1):
         """Add an item to inventory"""
-        if len(self.items) >= self.max_size:
-            return False, "Inventory is full!"
-        
-        # Check if item already exists (for stackable items)
+        # Stack onto an existing identical consumable first (doesn't need a free slot)
         for inv_item in self.items:
-            if inv_item['item'].name == item.name and inv_item['item'].item_type == item.item_type:
+            if self._can_stack(inv_item['item'], item):
                 inv_item['quantity'] += quantity
                 return True, f"Added {quantity} {item.name}(s) to inventory"
-        
-        # Add new item
-        self.items.append({'item': item, 'quantity': quantity})
+
+        if isinstance(item, Consumable):
+            if len(self.items) >= self.max_size:
+                return False, "Inventory is full!"
+            self.items.append({'item': item, 'quantity': quantity})
+            return True, f"Added {quantity} {item.name}(s) to inventory"
+
+        # Non-stackable gear: one entry per copy, each its own object
+        if len(self.items) + quantity > self.max_size:
+            return False, "Inventory is full!"
+        for n in range(quantity):
+            copy_needed = n > 0 or any(inv_item['item'] is item for inv_item in self.items)
+            self.items.append({'item': copy.deepcopy(item) if copy_needed else item, 'quantity': 1})
         return True, f"Added {quantity} {item.name}(s) to inventory"
-    
-    def remove_item(self, item_name, quantity=1):
-        """Remove an item from inventory"""
-        for i, inv_item in enumerate(self.items):
-            if inv_item['item'].name == item_name:
-                if inv_item['quantity'] > quantity:
-                    inv_item['quantity'] -= quantity
-                    return True, f"Removed {quantity} {item_name}(s)"
-                elif inv_item['quantity'] == quantity:
-                    removed_item = self.items.pop(i)
-                    return True, f"Removed {quantity} {item_name}(s)"
-                else:
-                    return False, f"Not enough {item_name} in inventory"
-        return False, f"{item_name} not found in inventory"
-    
-    def get_item(self, item_name):
-        """Get an item from inventory by name"""
-        for inv_item in self.items:
-            if inv_item['item'].name == item_name:
-                return inv_item['item']
-        return None
-    
+
+    def remove_item(self, item_or_name, quantity=1):
+        """Remove an item from inventory (by object or name). Unequips it if it was equipped."""
+        i = self._find_index(item_or_name)
+        if i is None:
+            return False, f"{getattr(item_or_name, 'name', item_or_name)} not found in inventory"
+        inv_item = self.items[i]
+        name = inv_item['item'].name
+        if inv_item['quantity'] > quantity:
+            inv_item['quantity'] -= quantity
+            return True, f"Removed {quantity} {name}(s)"
+        if inv_item['quantity'] < quantity:
+            return False, f"Not enough {name} in inventory"
+        removed = self.items.pop(i)['item']
+        if self.equipped_weapon is removed:
+            self.equipped_weapon = None
+        if self.equipped_armor is removed:
+            self.equipped_armor = None
+        if self.equipped_magic is removed:
+            self.equipped_magic = None
+        return True, f"Removed {quantity} {name}(s)"
+
+    def get_item(self, item_or_name):
+        """Get an item from inventory by object or name"""
+        i = self._find_index(item_or_name)
+        return self.items[i]['item'] if i is not None else None
+
     def equip_weapon(self, weapon_name):
         """Equip a weapon"""
         weapon = self.get_item(weapon_name)
         if weapon and isinstance(weapon, Weapon):
             self.equipped_weapon = weapon
-            return True, f"Equipped {weapon_name}"
-        return False, f"Cannot equip {weapon_name}"
-    
+            return True, f"Equipped {weapon.name}"
+        return False, f"Cannot equip {getattr(weapon_name, 'name', weapon_name)}"
+
     def equip_armor(self, armor_name):
         """Equip armor"""
         armor = self.get_item(armor_name)
         if armor and isinstance(armor, Armor):
             self.equipped_armor = armor
-            return True, f"Equipped {armor_name}"
-        return False, f"Cannot equip {armor_name}"
-    
+            return True, f"Equipped {armor.name}"
+        return False, f"Cannot equip {getattr(armor_name, 'name', armor_name)}"
+
     def equip_magic(self, magic_name):
         """Equip a magic spell"""
         magic = self.get_item(magic_name)
@@ -75,18 +111,18 @@ class Inventory:
                 if getattr(self.owner, 'stats', {}).get(req_stat, 0) < req_value:
                     return False, f"You need {req_stat.capitalize()} {req_value} to equip {magic.name}. (Current: {self.owner.stats.get(req_stat,0)})"
             self.equipped_magic = magic
-            return True, f"Equipped {magic_name}"
-        return False, f"Cannot equip {magic_name}"
-    
+            return True, f"Equipped {magic.name}"
+        return False, f"Cannot equip {getattr(magic_name, 'name', magic_name)}"
+
     def use_item(self, item_name, target=None):
         """Use a consumable item"""
         item = self.get_item(item_name)
         if item and isinstance(item, Consumable):
             result = item.use(target)
-            self.remove_item(item_name, 1)
+            self.remove_item(item, 1)
             return True, result
-        return False, f"Cannot use {item_name}"
-    
+        return False, f"Cannot use {getattr(item_name, 'name', item_name)}"
+
     def list_items(self):
         """List all items in inventory"""
         if not self.items:

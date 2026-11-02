@@ -163,12 +163,10 @@ class Enemy:
             b['turns'] -= 1
             if b['turns'] <= 0:
                 self.status_effects.pop('blind', None)
-        # Frozen decay
-        f = self.status_effects.get('frozen')
-        if f and f.get('turns', 0) > 0:
-            f['turns'] -= 1
-            if f['turns'] <= 0:
-                self.status_effects.pop('frozen', None)
+        # Frozen is consumed by GameEngine.enemy_turn when the turn is skipped
+        if self.health <= 0:
+            self.health = 0
+            self.alive = False
         # Troll regeneration
         if 'Troll' in self.name:
             regen = max(5, int(self.max_health * 0.03))
@@ -240,8 +238,6 @@ class EnemyFactory:
 
 
     @staticmethod
-    def create_Hagraven():
-        return Enemy("Hagraven", 200, 40, "undead", "A creature of the night, commonly known as the Nightstalkers")
     def create_Yjurgen():
         return Enemy("Yjurgen", 150, 50, "humanoid", "A large brute of a man, with a thick beard and a strong sense of honor and justice")
     @staticmethod
