@@ -42,6 +42,8 @@ class ConsumableEffect(str, Enum):
     MANA = "mana"
     RESTORE = "restore"  # heals HP and mana by the same amount
     CURE = "cure"  # removes harmful status effects
+    SKILL_BOOST = "skill_boost"  # primes ``skill`` by ``potency`` for the next minigame that uses it
+    LOCKPICK = "lockpick"  # spent by the lockpicking minigame; ``potency`` is the pick's quality (1-3)
 
 
 class SpellType(str, Enum):
@@ -105,6 +107,9 @@ class Item:
     value: int = 0
     description: str = ""
     requirements: Requirements | None = None  # None -> derived from the item's default rules
+    # Minigame modifiers (see rpg.core.skills). Equipped gear and carried curios apply them.
+    skill_bonuses: dict[str, int] = field(default_factory=dict)
+    traits: tuple[str, ...] = ()
     uid: str = field(default_factory=new_uid)
 
     kind: ClassVar[ItemKind] = ItemKind.MISC
@@ -114,6 +119,22 @@ class Item:
             self.requirements = self.default_requirements()
         else:
             self.requirements = tuple(self.requirements)
+        self.skill_bonuses = {str(k): int(v) for k, v in (self.skill_bonuses or {}).items() if int(v)}
+        self.traits = tuple(self.traits or ())
+
+    def bonus_text(self) -> str:
+        """``Stealth +3 · Balance -1 · Keen senses`` (empty when the item has no minigame modifiers)."""
+        from rpg.core.skills import SKILL_INFO, TRAITS, Skill
+
+        parts = []
+        for key, amount in self.skill_bonuses.items():
+            try:
+                label = SKILL_INFO[Skill(key)].label
+            except ValueError:
+                label = key.capitalize()
+            parts.append(f"{label} {amount:+d}")
+        parts += [TRAITS[t].label if t in TRAITS else t for t in self.traits]
+        return " · ".join(parts)
 
     def default_requirements(self) -> Requirements:
         return ()
@@ -139,6 +160,8 @@ class Item:
     def details(self) -> list[str]:
         """Multi-line description for detail panes."""
         lines = [f"{self.kind.label}", self.description] if self.description else [self.kind.label]
+        if self.bonus_text():
+            lines.append(("Carried: " if self.kind == ItemKind.MISC else "") + self.bonus_text())
         if self.requirements:
             lines.append(f"Requires {describe_requirements(self.requirements)}")
         lines.append(f"Value {self.value}g · sells for {self.sell_price}g")
@@ -158,6 +181,8 @@ class Item:
             "value": self.value,
             "description": self.description,
             "requirements": [r.to_dict() for r in self.requirements or ()],
+            **({"skill_bonuses": dict(self.skill_bonuses)} if self.skill_bonuses else {}),
+            **({"traits": list(self.traits)} if self.traits else {}),
         }
 
     @classmethod
@@ -172,6 +197,8 @@ class Item:
             # (catalog items are refreshed from the catalog on load anyway).
             "requirements": (tuple(Requirement.from_dict(r) for r in data["requirements"])
                              if "requirements" in data else None),
+            "skill_bonuses": dict(data.get("skill_bonuses") or {}),
+            "traits": tuple(data.get("traits") or ()),
         }
 
     @classmethod
@@ -230,6 +257,8 @@ class Weapon(Item):
         text = f"DMG {self.damage} · {style} · {self.durability}/{self.max_durability}"
         if self.on_hit:
             text += f" · {self.on_hit.describe()}"
+        if self.bonus_text():
+            text += f" · {self.bonus_text()}"
         return text
 
     def details(self) -> list[str]:
@@ -241,6 +270,8 @@ class Weapon(Item):
         ]
         if self.on_hit:
             lines.append(f"On hit: {self.on_hit.describe()}")
+        if self.bonus_text():
+            lines.append(f"When equipped: {self.bonus_text()}")
         if self.requirements:
             lines.append(f"Requires {describe_requirements(self.requirements)}")
         lines.append(f"Value {self.value}g · sells for {self.sell_price}g")
@@ -311,7 +342,8 @@ class Armor(Item):
         return self.max_durability - self.durability
 
     def summary(self) -> str:
-        return f"DEF {self.defense} · {self.durability}/{self.max_durability}"
+        text = f"DEF {self.defense} · {self.durability}/{self.max_durability}"
+        return f"{text} · {self.bonus_text()}" if self.bonus_text() else text
 
     def details(self) -> list[str]:
         lines = [
@@ -320,6 +352,8 @@ class Armor(Item):
             f"Defense {self.defense} (effective {self.effective_defense:.0f})",
             f"Durability {self.durability}/{self.max_durability}" + ("  BROKEN" if self.is_broken else ""),
         ]
+        if self.bonus_text():
+            lines.append(f"When worn: {self.bonus_text()}")
         if self.requirements:
             lines.append(f"Requires {describe_requirements(self.requirements)}")
         lines.append(f"Value {self.value}g · sells for {self.sell_price}g")
@@ -342,6 +376,7 @@ class Armor(Item):
 class Consumable(Item):
     effect: ConsumableEffect
     potency: int = 0
+    skill: str | None = None  # the skill a SKILL_BOOST primes
 
     kind: ClassVar[ItemKind] = ItemKind.CONSUMABLE
 
@@ -350,9 +385,21 @@ class Consumable(Item):
         return True
 
     def stack_key(self) -> tuple:
-        return (self.kind.value, self.name, self.effect.value, self.potency)
+        return (self.kind.value, self.name, self.effect.value, self.potency, self.skill)
+
+    @property
+    def usable_in_combat(self) -> bool:
+        return self.effect != ConsumableEffect.LOCKPICK
 
     def summary(self) -> str:
+        if self.effect == ConsumableEffect.SKILL_BOOST:
+            from rpg.core.skills import Skill
+
+            label = Skill(self.skill).label if self.skill else "Skill"
+            return f"+{self.potency} {label} for your next {label.lower()} trial"
+        if self.effect == ConsumableEffect.LOCKPICK:
+            return {1: "Snaps under strain", 2: "Takes more strain before it snaps"}.get(
+                self.potency, "Almost never snaps")
         return {
             ConsumableEffect.HEAL: f"Restores {self.potency} HP",
             ConsumableEffect.MANA: f"Restores {self.potency} mana",
@@ -364,11 +411,15 @@ class Consumable(Item):
         return [line for line in ["Consumable", self.description, self.summary(), f"Value {self.value}g · sells for {self.sell_price}g"] if line]
 
     def to_dict(self) -> dict:
-        return {**super().to_dict(), "effect": self.effect.value, "potency": self.potency}
+        data = {**super().to_dict(), "effect": self.effect.value, "potency": self.potency}
+        if self.skill:
+            data["skill"] = self.skill
+        return data
 
     @classmethod
     def from_dict(cls, data: dict) -> "Consumable":
-        return cls(**cls._base_kwargs(data), effect=ConsumableEffect(data.get("effect", "heal")), potency=int(data.get("potency", 0)))
+        return cls(**cls._base_kwargs(data), effect=ConsumableEffect(data.get("effect", "heal")),
+                   potency=int(data.get("potency", 0)), skill=data.get("skill"))
 
 
 @dataclass(kw_only=True)
@@ -439,7 +490,10 @@ class Spell(Item):
 
 @dataclass(kw_only=True)
 class Curio(Item):
-    """Quest trinkets and story items. They stack, can be sold, and do nothing in combat."""
+    """Quest trinkets, tools and charms. They stack, can be sold, and do nothing in combat.
+
+    A curio's ``skill_bonuses`` and ``traits`` apply while it is carried (once per kind, however many you hold).
+    """
 
     kind: ClassVar[ItemKind] = ItemKind.MISC
 
@@ -449,6 +503,9 @@ class Curio(Item):
 
     def stack_key(self) -> tuple:
         return (self.kind.value, self.name)
+
+    def summary(self) -> str:
+        return f"Carried: {self.bonus_text()}" if self.bonus_text() else self.description
 
 
 ITEM_CLASSES: dict[str, type[Item]] = {

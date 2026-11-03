@@ -13,8 +13,8 @@ FRAMES: dict[str, tuple[list[str], list[str]]] = {
     "quake": (["▓ ▓▓▓  ▓▓ ▓  ▓▓▓", " ▓▓  ▓▓▓  ▓ ▓ ▓▓", "▓  ▓▓  ▓▓▓  ▓▓ ", "  ▓▓▓ ▓  ▓ ▓▓▓ "], ["#E3B85C", "#C98A4B"]),
     "shadow_sweep": (["████████████████        ", "    ████████████████    ", "        ████████████████"], ["#4A4036"]),
     "glyphs": (["∆ ∴ ✧ ✦ ∵ ✩ ✪ ∆ ✧", "✦ ∵ ∆ ✩ ∴ ✧ ✪ ∵ ✦", "✩ ✧ ∴ ✪ ∆ ✦ ∵ ✩ ∴"], ["#C99BE8", "#7FA8E0"]),
-    "candle": (["  |  🕯", "  )  🕯", "  (  🕯"], ["#E3B85C"]),
-    "gears": (["[|] ⚙ [/] ⚙ [-] ⚙", "[/] ⚙ [-] ⚙ [\\] ⚙", "[-] ⚙ [\\] ⚙ [|] ⚙"], ["#7FA8E0", "#9C7A54"]),
+    "candle": (["  )   (  ", "  (   )  ", "   ) (   "], ["#E3B85C", "#FFB347"]),
+    "gears": (["(|) (/) (-) (\\)", "(/) (-) (\\) (|)", "(-) (\\) (|) (/)"], ["#7FA8E0", "#9C7A54"]),
     "banner": (["≈≈≈≈≈≈≈≈≈≈≈≈", "~~~~~~~~~~~~", "≋≋≋≋≋≋≋≋≋≋≋≋", "-~-~-~-~-~-~"], ["#F2C46D"]),
     "cold_breath": (["·  ·   ·", " · ·  ·  ", "   ·  · ·", "·   ·    "], ["#9EDCF2"]),
     "snow": (["*  ·  ✦   .  *   ·", " ·  *   .  ✦  ·  *", "✦   ·  *   ·   .  "], ["#EDE4D3", "#9EDCF2"]),
@@ -38,7 +38,8 @@ class VisualEffect(Static):
 
     async def play(self, name: str, duration: float = 1.2, rows: int = 3) -> None:
         key = ALIASES.get(name.lower(), name.lower())
-        if key not in FRAMES:
+        settings = getattr(self.app, "settings", None)
+        if key not in FRAMES or (settings and settings.reduced_motion):
             return
         frames, colors = FRAMES[key]
         rng = random.Random()

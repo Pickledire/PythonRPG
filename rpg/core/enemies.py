@@ -29,6 +29,35 @@ def _enemy_spell(name: str, spell_type: SpellType, power: int = 0, description: 
                  power=power, mana_cost=0, description=description)
 
 
+# ------------------------------------------------------------------ boss quick-time events
+@dataclass(frozen=True)
+class QTETrigger:
+    """A telegraphed boss move the player answers with a quick-time event instead of a dice roll.
+
+    It fires (once) on the boss's first turn at or below ``hp_below`` of its health and replaces the boss's
+    action that turn. Hit every prompt (score >= ``success_score``) to avoid it, optionally staggering the boss
+    or punishing it for ``counter_damage`` of its max HP; hit some (>= ``partial_score``) to take half damage;
+    otherwise take ``fail_damage`` of your max HP plus ``fail_effect``. ``{name}`` is the boss's name.
+    """
+
+    hp_below: float
+    title: str
+    telegraph: str
+    success_text: str = "You evade {name}'s attack!"
+    partial_text: str = "You only half avoid the blow."
+    fail_text: str = "{name}'s attack lands squarely."
+    prompts: int = 4
+    window: float = 1.5  # seconds per prompt before skill and traits adjust it
+    dc: int = 12  # Reflexes difficulty
+    keys: str = ""  # prompt key pool; empty uses the default letters
+    fail_damage: float = config.QTE_FAIL_DAMAGE
+    fail_effect: EffectSpec | None = None
+    stagger: bool = True
+    counter_damage: float = 0.0
+    success_score: float = 1.0
+    partial_score: float = 0.5
+
+
 # ------------------------------------------------------------------ templates
 @dataclass(frozen=True)
 class EnemyTemplate:
@@ -49,6 +78,7 @@ class EnemyTemplate:
     reward_choices: tuple[str, ...] = ()  # boss trophies: player picks one
     guaranteed_drops: tuple[tuple[str, int], ...] = ()
     aliases: tuple[str, ...] = ()
+    qte_triggers: tuple[QTETrigger, ...] = ()  # telegraphed moves answered with quick-time events
 
 
 class Enemy(Combatant):
@@ -196,6 +226,55 @@ TITANS = (
 _bleed = lambda p, t, c: EffectSpec(EffectKind.BLEED, p, t, c)  # noqa: E731
 _poison = lambda p, t, c: EffectSpec(EffectKind.POISON, p, t, c)  # noqa: E731
 
+_burn = lambda p, t, c: EffectSpec(EffectKind.BURN, p, t, c)  # noqa: E731
+
+TITAN_QTES = (
+    QTETrigger(0.6, "CRUSHING FISTS", "{name} raises both fists high above your head!",
+               success_text="You roll aside as the fists crater the stone where you stood!",
+               fail_text="The fists come down on you like a falling mountain.", prompts=4, window=1.5, dc=12),
+    QTETrigger(0.25, "AVALANCHE", "{name} tears a slab from the cave wall and hurls it!",
+               success_text="You weave through the falling rock and slash at its exposed ankle!",
+               fail_text="Stone buries you to the waist.", prompts=5, window=1.3, dc=13, counter_damage=0.06),
+)
+DRAGON_QTES = (
+    QTETrigger(0.65, "INFERNO", "{name} rears back, its throat glowing white-hot!",
+               success_text="You dive behind a pillar as the flames roar past!",
+               fail_text="Dragonfire washes over you.", prompts=5, window=1.3, dc=14,
+               fail_effect=_burn(14, 3, 1.0)),
+    QTETrigger(0.3, "TAIL SWEEP", "{name}'s tail whips around in a scything arc!",
+               success_text="You vault the tail and drive your blade between two scales!",
+               fail_text="The tail sweeps you off your feet.", prompts=5, window=1.2, dc=14, keys="←→↑↓",
+               counter_damage=0.05),
+)
+WORM_QTES = (
+    QTETrigger(0.6, "ERUPTION", "The ground bulges beneath your feet — {name} is coming up!",
+               success_text="You leap clear as the maw bursts out of the earth!",
+               fail_text="You are thrown into the air by the eruption.", prompts=5, window=1.2, dc=15, keys="←→↑↓"),
+    QTETrigger(0.3, "ENGULF", "{name} opens its maw wide and lunges to swallow you whole!",
+               success_text="You brace your weapon in its jaws and wrench free, tearing its gums!",
+               fail_text="Teeth like millstones close around you before you tear loose.", prompts=6, window=1.15,
+               dc=16, counter_damage=0.05),
+)
+RAT_KING_QTES = (
+    QTETrigger(0.55, "THE SWARM", "{name} shrieks and the floor turns into a carpet of rats!",
+               success_text="You stamp a path through the swarm before it can climb you!",
+               fail_text="Rats pour over you, biting.", prompts=6, window=1.1, dc=16, fail_effect=_poison(10, 3, 1.0)),
+    QTETrigger(0.25, "CROWN OF TAILS", "{name}'s knotted tails lash out to bind you!",
+               success_text="You cut through the knot of tails and the whole crown screams!",
+               fail_text="The tails squeeze the air from your lungs.", prompts=6, window=1.05, dc=17,
+               counter_damage=0.05),
+)
+SENTINEL_QTES = (
+    QTETrigger(0.7, "STONE FIST", "{name} lifts its fist; the runes on its knuckles flare!",
+               success_text="You sidestep and the fist cracks the flagstones!",
+               fail_text="The stone fist slams into your chest.", prompts=3, window=1.8, dc=10),
+    QTETrigger(0.35, "CORE BREACH", "{name}'s chest plate grinds open, its core blazing — strike it!",
+               success_text="You drive your weapon into the blazing core!",
+               partial_text="You graze the core as the plates slam shut.",
+               fail_text="The plates slam shut and a pulse of force hurls you back.", prompts=4, window=1.6, dc=11,
+               stagger=False, counter_damage=0.15),
+)
+
 GENERIC_BOSS_INTRO = (
     "{name} stands before you — {title}.",
     "",
@@ -271,7 +350,7 @@ _TEMPLATES: list[EnemyTemplate] = [
                                "The very walls of the cave tremble with each movement it makes.",
                                "",
                                "This is not just an enemy... This is a Titan."),
-                  reward_choices=TITAN_REWARDS),
+                  reward_choices=TITAN_REWARDS, qte_triggers=TITAN_QTES),
     EnemyTemplate("valorian_warden", "Valorian Warden", 650, 50, "Boss",
                   "A sentinel bound to the gates by oath and old steel.", is_boss=True,
                   intro_title="THE GATE REMEMBERS", intro_lines=GENERIC_BOSS_INTRO, reward_choices=TITAN_REWARDS),
@@ -294,7 +373,8 @@ _TEMPLATES: list[EnemyTemplate] = [
                                "Its breath sears the air. Scales blaze like forged mail.",
                                "Claws score the stone with idle, ruinous grace...",
                                "This is no mere beast. This is an ending with wings."),
-                  reward_choices=("dragon_tooth_greatsword", "elder_scale_bow", "dragons_breath")),
+                  reward_choices=("dragon_tooth_greatsword", "elder_scale_bow", "dragons_breath"),
+                  qte_triggers=DRAGON_QTES),
     EnemyTemplate("earth_eater_worm", "Earth Eater Worm", (1100, 1300), (60, 70), "Boss",
                   "A burrowing leviathan whose maw devours stone and light.", is_boss=True,
                   intro_title="THE EARTH SPLITS OPEN",
@@ -303,7 +383,8 @@ _TEMPLATES: list[EnemyTemplate] = [
                                "Soil domes, shatters — and the maw of {name}, {title}, blooms like a pit.",
                                "Ribs of stone snap between its rings. The air tastes of iron and old dark.",
                                "It listens with its whole body. It answers with hunger."),
-                  reward_choices=("earthsplitter_maul", "stonebore_crossbow", "seismic_rift")),
+                  reward_choices=("earthsplitter_maul", "stonebore_crossbow", "seismic_rift"),
+                  qte_triggers=WORM_QTES),
     EnemyTemplate("rat_king", "Rat King", (1400, 1600), (70, 85), "Boss",
                   "A crown of tails, sovereign of skitter and rot.", is_boss=True,
                   on_hit=(_poison(8, 3, 0.30),),
@@ -313,7 +394,19 @@ _TEMPLATES: list[EnemyTemplate] = [
                                "Rats pour like water, braiding themselves about a throne — {name}, {title}.",
                                "Eyes glitter in a hundred small faces. One voice speaks from all of them.",
                                "It promises a kingdom of tunnels, and taxes paid in gnawed bone."),
-                  reward_choices=("gnawblade", "sewer_longbow", "pestilent_swarm")),
+                  reward_choices=("gnawblade", "sewer_longbow", "pestilent_swarm"), qte_triggers=RAT_KING_QTES),
+    # Minigame showcase quest (dialogues/test_vault). A beatable level-1 boss with two quick-time events.
+    EnemyTemplate("stone_sentinel", "Stone Sentinel", 230, 15, "construct",
+                  "A vault guardian of carved granite, its core ticking like a slow heart.", is_boss=True,
+                  intro_title="THE VAULT WAKES",
+                  intro_lines=("Dust sifts from the ceiling as the alcove at the end of the hall splits open.",
+                               "",
+                               "{name} steps down from its plinth, granite grinding on granite.",
+                               "Runes crawl across its knuckles. Somewhere in its chest, a core ticks.",
+                               "",
+                               "It turns its blank face toward you."),
+                  reward_choices=("sentinel_plate", "sentinel_core", "hourglass_pendant"),
+                  qte_triggers=SENTINEL_QTES),
 ]
 
 # Weighted hunt pools by player level band: (max_level_exclusive, [(template_id, weight), ...])

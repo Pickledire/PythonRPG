@@ -164,26 +164,26 @@ class Shop:
                 if hasattr(item, 'get_requirement'):
                     stat, val = item.get_requirement()
                     req_txt = f", Req: {stat.capitalize()} {val}+"
-                center(f"{i}. {item.name} - {price}💰 (Damage: {item.damage}, Durability: {item.max_durability}{req_txt})")
+                center(f"{i}. {item.name} - {price}(Damage: {item.damage}, Durability: {item.max_durability}{req_txt})")
             elif item.item_type == 'armor':
                 req_txt = ""
                 if hasattr(item, 'get_requirement'):
                     stat, val = item.get_requirement()
                     req_txt = f", Req: {stat.capitalize()} {val}+"
-                center(f"{i}. {item.name} - {price}💰 (Defense: {item.defense}, Durability: {item.max_durability}{req_txt})")
+                center(f"{i}. {item.name} - {price}(Defense: {item.defense}, Durability: {item.max_durability}{req_txt})")
             elif item.item_type == 'consumable':
-                center(f"{i}. {item.name} - {price}💰 (Effect: {item.effect_value}, Stock: {stock})")
+                center(f"{i}. {item.name} - {price}(Effect: {item.effect_value}, Stock: {stock})")
             elif item.item_type == 'magic':
                 req_txt = ""
                 if hasattr(item, 'get_requirement'):
                     stat, val = item.get_requirement()
                     req_txt = f", Req: {stat.capitalize()} {val}+"
                 if hasattr(item, 'spell_type') and item.spell_type != 'damage':
-                    center(f"{i}. {item.name} - {price}💰 (Spell: {item.spell_type}, Mana: {item.mana}{req_txt})")
+                    center(f"{i}. {item.name} - {price}(Spell: {item.spell_type}, Mana: {item.mana}{req_txt})")
                 else:
-                    center(f"{i}. {item.name} - {price}💰 (Damage: {item.damage}, Mana: {item.mana}{req_txt})")
+                    center(f"{i}. {item.name} - {price}(Damage: {item.damage}, Mana: {item.mana}{req_txt})")
             else:
-                center(f"{i}. {item.name} - {price}💰")
+                center(f"{i}. {item.name} - {price}")
             
             if item.description:
                 center(f"{item.description}")
@@ -206,11 +206,11 @@ class Shop:
                     # Deduct gold and reduce stock
                     player.spend_gold(price)
                     shop_item['stock'] -= 1
-                    return True, f"Purchased {item.name} for {price}💰!"
+                    return True, f"Purchased {item.name} for {price}!"
                 else:
                     return False, "Your inventory is full!"
             else:
-                return False, f"Not enough gold! You need {price}💰 but only have {player.gold}💰"
+                return False, f"Not enough gold! You need {price}but only have {player.gold}"
         else:
             return False, "Invalid item selection!"
     
@@ -227,7 +227,7 @@ class Shop:
         success, message = player.inventory.remove_item(item, 1)
         if success:
             player.add_gold(sell_price)
-            return True, f"Sold {item.name} for {sell_price}💰!"
+            return True, f"Sold {item.name} for {sell_price}!"
         else:
             return False, message
     

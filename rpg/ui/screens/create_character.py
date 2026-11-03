@@ -16,7 +16,7 @@ from rpg.core.attributes import Attributes
 from rpg.core.catalog import ITEMS
 from rpg.core.formulas import max_hp_for, max_mana_for
 from rpg.core.session import GameSession
-from rpg.ui.palette import MUTED_STYLE
+from rpg.ui.palette import ATTRIBUTE_COLORS, MUTED_STYLE, attribute_bar
 
 RACE_STYLES = {
     "Human": "bold #EDE4D3", "Elf": "bold #86B57F", "Orc": "bold #D9574B", "Dwarf": "bold #F2C46D",
@@ -73,10 +73,11 @@ class CreateCharacterScreen(Screen):
         text.append("Mana ", style=MUTED_STYLE)
         text.append(f"{mana}\n\n", style="bold #7FA8E0")
         for attribute, value in attributes.items():
-            text.append(f"{attribute.label:<13}", style=MUTED_STYLE)
-            text.append(f"{value:>4} ", style="bold")
-            text.append(f"{'█' * value:<16}", style="#E0A458")
-            text.append(f" {attribute.description}\n", style=MUTED_STYLE)
+            color = ATTRIBUTE_COLORS[attribute]
+            text.append(f"{attribute.label:<13}", style=f"bold {color}")
+            text.append(f"{value:>3} ", style="bold")
+            text.append_text(attribute_bar(attribute, value))
+            text.append(f"  {attribute.description}\n", style=MUTED_STYLE)
         text.append("\nStarting kit\n", style="bold")
         for template_id in data["starting_items"]:
             item = ITEMS.create(template_id)

@@ -20,7 +20,7 @@ class GameOverScreen(Screen[None]):
     def compose(self) -> ComposeResult:
         name, level, kills, killer = self.summary
         with Vertical(id="gameover-root"):
-            yield Static(Text("☠  YOU HAVE FALLEN  ☠", style="bold #E8604F"), id="gameover-title")
+            yield Static(Text("═══  YOU HAVE FALLEN  ═══", style="bold #E8604F"), id="gameover-title")
             yield Static(Text.assemble((f"{name}", "bold"), (f", level {level}, was slain by {killer}.\n", ""),
                                        (f"{kills} foes fell before the end.\n\n", MUTED_STYLE),
                                        ("Better luck next time, adventurer...", "italic #C9BFAE"),

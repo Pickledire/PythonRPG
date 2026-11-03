@@ -1,0 +1,17 @@
+{
+  "speaker": "The Sanctum",
+  "lines": [
+    "You throw yourself forward, but a falling block clips your shoulder."
+  ],
+  "effects": [
+    {
+      "damage": 6
+    }
+  ],
+  "choices": [
+    {
+      "text": "Get up.",
+      "next": "test_vault/sanctum"
+    }
+  ]
+}

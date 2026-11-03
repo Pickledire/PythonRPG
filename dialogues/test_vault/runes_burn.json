@@ -1,0 +1,29 @@
+{
+  "speaker": "The Rune Door",
+  "lines": [
+    "The runes flare white and a jolt of force throws you back from the door, hands stinging."
+  ],
+  "effects": [
+    {
+      "damage": 10
+    }
+  ],
+  "choices": [
+    {
+      "text": "Try again.",
+      "next": "test_vault/runes"
+    },
+    {
+      "text": "Smash through the crumbling wall beside it. [Strength 13]",
+      "next": "test_vault/gate",
+      "conditions": [
+        {
+          "min_stat": [
+            "strength",
+            13
+          ]
+        }
+      ]
+    }
+  ]
+}

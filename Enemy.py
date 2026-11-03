@@ -123,7 +123,7 @@ class Enemy:
         result = f"{self.name} attacks {target.name} for {actual_damage} damage!" + (" (CRIT!)" if crit else "")
         
         if not target.alive:
-            result += f"\n💀 {self.name} has killed {target.name}!"
+            result += f"\n{self.name} has killed {target.name}!"
         
         return result
 

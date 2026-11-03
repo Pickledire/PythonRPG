@@ -1,0 +1,73 @@
+{
+  "speaker": "The Sanctum",
+  "lines": [
+    "The inner vault: a round chamber with a chest on a dais and, in an alcove, the Sentinel's plinth."
+  ],
+  "choices": [
+    {
+      "text": "Collect the treasure.",
+      "next": "test_vault/treasure",
+      "conditions": [
+        {
+          "flag_set": "sentinel_down"
+        }
+      ]
+    },
+    {
+      "text": "Slip up behind the resting Sentinel and strike its cracked core.",
+      "next": "test_vault/treasure",
+      "effects": [
+        {
+          "start_combat": "stone_sentinel",
+          "opener": 0.25
+        }
+      ],
+      "conditions": [
+        {
+          "flag_not_set": "sentinel_down"
+        },
+        {
+          "flag_is": [
+            "vault_hide",
+            "success"
+          ]
+        }
+      ]
+    },
+    {
+      "text": "Creep up on the Sentinel and strike where you saw the crack.",
+      "next": "test_vault/treasure",
+      "effects": [
+        {
+          "start_combat": "stone_sentinel",
+          "opener": 0.1
+        }
+      ],
+      "conditions": [
+        {
+          "flag_not_set": "sentinel_down"
+        },
+        {
+          "flag_is": [
+            "vault_hide",
+            "partial"
+          ]
+        }
+      ]
+    },
+    {
+      "text": "Reach for the chest. (The Sentinel will wake.)",
+      "next": "test_vault/treasure",
+      "effects": [
+        {
+          "start_combat": "stone_sentinel"
+        }
+      ],
+      "conditions": [
+        {
+          "flag_not_set": "sentinel_down"
+        }
+      ]
+    }
+  ]
+}

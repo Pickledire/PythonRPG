@@ -1,0 +1,17 @@
+{
+  "speaker": "The Sanctum",
+  "lines": [
+    "The rubble catches you square across the back and pins you to the floor before you drag yourself free."
+  ],
+  "effects": [
+    {
+      "damage": 14
+    }
+  ],
+  "choices": [
+    {
+      "text": "Get up.",
+      "next": "test_vault/sanctum"
+    }
+  ]
+}

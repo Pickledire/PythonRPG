@@ -1,0 +1,17 @@
+{
+  "speaker": "The Iron Door",
+  "lines": [
+    "The lock beats you. Out of patience, you hammer at the hinges until one gives, then squeeze through the gap, scraping skin on rusty iron."
+  ],
+  "effects": [
+    {
+      "damage": 8
+    }
+  ],
+  "choices": [
+    {
+      "text": "Keep going.",
+      "next": "test_vault/shaft"
+    }
+  ]
+}

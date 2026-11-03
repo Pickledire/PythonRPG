@@ -19,7 +19,8 @@ from rpg.ui.widgets import ItemTable, PlayerPanel, VisualEffect
 from rpg.ui.widgets.item_table import ItemRow
 
 BUY_TABS = {
-    ShopMode.GENERAL: [("weapon", "Weapons"), ("armor", "Armor"), ("spell", "Spells"), ("consumable", "Potions")],
+    ShopMode.GENERAL: [("weapon", "Weapons"), ("armor", "Armor"), ("spell", "Spells"), ("consumable", "Supplies"),
+                       ("misc", "Tools & charms")],
     ShopMode.MAGIC: [("spell", "Spells"), ("consumable", "Potions")],
 }
 GREETINGS = {

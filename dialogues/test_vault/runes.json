@@ -1,0 +1,48 @@
+{
+  "speaker": "The Rune Door",
+  "lines": [
+    "A round door of black stone, set with nine runes in three rows. As you approach they light one by one, then fade. It's waiting for you to answer."
+  ],
+  "choices": [
+    {
+      "text": "Trace the runes the way the Sentinel did. (Easier)",
+      "effects": [
+        {
+          "minigame": {
+            "type": "memory",
+            "dc": 9,
+            "title": "The Rune Door",
+            "intro": "You watched the Sentinel open it. The rhythm of the runes is still fresh in your mind.",
+            "success": "test_vault/gate",
+            "failure": "test_vault/runes_burn",
+            "partial": "test_vault/gate"
+          }
+        }
+      ],
+      "conditions": [
+        {
+          "flag_is": [
+            "vault_hide",
+            "success"
+          ]
+        }
+      ]
+    },
+    {
+      "text": "Watch the runes and repeat the pattern.",
+      "effects": [
+        {
+          "minigame": {
+            "type": "memory",
+            "dc": 12,
+            "title": "The Rune Door",
+            "intro": "Watch the order they light up in, then touch them in turn.",
+            "success": "test_vault/gate",
+            "failure": "test_vault/runes_burn",
+            "partial": "test_vault/gate"
+          }
+        }
+      ]
+    }
+  ]
+}

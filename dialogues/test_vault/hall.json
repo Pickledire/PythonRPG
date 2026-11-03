@@ -1,0 +1,34 @@
+{
+  "speaker": "The Drowned Hall",
+  "lines": [
+    "Black water laps at the bottom step. The hall beyond is long and pillared, its floor ankle-deep.",
+    "Then the grinding starts: stone on stone, slow and regular, like a mill wheel turning.",
+    "A STONE SENTINEL rounds the far pillar, walking its patrol. Blank face. Runes glowing on its knuckles. It hasn't seen you yet."
+  ],
+  "choices": [
+    {
+      "text": "Duck behind the toppled statue and wait for it to pass.",
+      "effects": [
+        {
+          "minigame": {
+            "type": "stealth",
+            "dc": 12,
+            "title": "Hide from the Sentinel",
+            "intro": "It walks its patrol, pausing to listen. If it hears you, it will not stop.",
+            "success": "test_vault/hall_hidden",
+            "failure": "test_vault/hall_discovered",
+            "partial": "test_vault/hall_half_hidden",
+            "retreat": "test_vault/hall",
+            "flag": "vault_hide",
+            "creature": "The Sentinel",
+            "duration": 22
+          }
+        }
+      ]
+    },
+    {
+      "text": "Step out and fight it.",
+      "next": "test_vault/hall_fight"
+    }
+  ]
+}

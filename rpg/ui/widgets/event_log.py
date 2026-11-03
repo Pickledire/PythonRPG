@@ -18,7 +18,7 @@ class EventLog(RichLog):
 
     def __init__(self, *, id: str | None = None, classes: str | None = None, max_lines: int = 500) -> None:
         super().__init__(id=id, classes=classes, wrap=True, markup=False, highlight=False, max_lines=max_lines,
-                         auto_scroll=True)
+                         auto_scroll=True, min_width=20)  # wrap to the log, however narrow
 
     def add(self, events: LogEvent | Iterable[LogEvent]) -> None:
         if isinstance(events, LogEvent):

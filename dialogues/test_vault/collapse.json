@@ -1,0 +1,22 @@
+{
+  "speaker": "The Sanctum",
+  "lines": [
+    "The rope parts, the counterweight plunges and the portcullis grinds up. You step through, and the ceiling of the passage gives way behind you!"
+  ],
+  "effects": [
+    {
+      "minigame": {
+        "type": "qte",
+        "dc": 11,
+        "title": "Collapse!",
+        "intro": "Stone rains down. Move!",
+        "success": "test_vault/sanctum",
+        "failure": "test_vault/sanctum_hurt",
+        "partial": "test_vault/sanctum_bruised",
+        "prompts": 4,
+        "window": 1.5,
+        "keys": "←→↑↓"
+      }
+    }
+  ]
+}

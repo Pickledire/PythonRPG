@@ -18,7 +18,7 @@ from rpg.core.attributes import Attribute
 from rpg.core.entities import Player
 from rpg.core.items import Item
 from rpg.core.progression import VictoryReport
-from rpg.ui.palette import GOLD_STYLE, MUTED_STYLE, event_text, requirements_text
+from rpg.ui.palette import ATTRIBUTE_COLORS, GOLD_STYLE, MUTED_STYLE, event_text, requirements_text
 
 T = TypeVar("T")
 
@@ -134,7 +134,7 @@ class LevelUpModal(ModalScreen[Attribute]):
         for i, attr in enumerate(Attribute, 1):
             value = p.attributes.get(attr)
             label = Text(f"{i}. ", style=MUTED_STYLE)
-            label.append(f"{attr.label:<13}", style="bold")
+            label.append(f"{attr.label:<13}", style=f"bold {ATTRIBUTE_COLORS[attr]}")
             label.append(f"{value:>3} → {value + 1:<3}", style="bold #F2C46D")
             label.append(f"  {attr.description}", style=MUTED_STYLE)
             options.append(Option(label, id=attr.value))

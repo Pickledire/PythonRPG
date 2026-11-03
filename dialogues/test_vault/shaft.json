@@ -1,0 +1,25 @@
+{
+  "speaker": "The Flooded Shaft",
+  "lines": [
+    "The passage ends at a shaft that drops into black water. The only way across is a single beam, slick and rotten, and a cold draught gusts up from below."
+  ],
+  "choices": [
+    {
+      "text": "Cross the beam.",
+      "effects": [
+        {
+          "minigame": {
+            "type": "balance",
+            "dc": 11,
+            "title": "The Rotten Beam",
+            "intro": "Don't look down. Don't overcorrect.",
+            "success": "test_vault/runes",
+            "failure": "test_vault/shaft_fall",
+            "partial": "test_vault/runes",
+            "duration": 16
+          }
+        }
+      ]
+    }
+  ]
+}

@@ -14,12 +14,14 @@ from rpg.core import campfire
 from rpg.core.attributes import Attribute
 from rpg.core.combat import CombatSession, Phase, apply_consumable, consumable_blocker
 from rpg.core.dialogue import DialogueRepository, DialogueRunner
-from rpg.core.enemies import ENEMIES, Enemy, UnknownEnemyError
+from rpg.core.enemies import ENEMIES, Enemy, QTETrigger, UnknownEnemyError
 from rpg.core.entities import Player
 from rpg.core.events import LogEvent, Tone
-from rpg.core.items import Consumable, Item
+from rpg.core.items import Consumable, ConsumableEffect, Item
+from rpg.core.minigames import Minigame, MinigameKind, MinigameSpec, Outcome, build_minigame
 from rpg.core.progression import VictoryReport, apply_victory, grant_item, roll_victory
 from rpg.core.shop import Shop, ShopMode
+from rpg.core.skills import SkillCheck, skill_check
 from rpg.core.world import WorldState
 
 
@@ -43,6 +45,9 @@ QUESTS: list[Quest] = [
     Quest("mt_aegis", "Mt. Aegis", "Climb Mt. Aegis in search of something strange.", "mt_aegis/intro"),
     Quest("valoria", "Ruins of Valoria", "Explore the ruins of the ancient city.", "valoria/intro"),
     Quest("graveyard", "The Graveyard", "Visit the local graveyard in search of a lost soul.", "graveyard/intro"),
+    # Temporary: a showcase of every minigame. Remove once real quests use them.
+    Quest("test_vault", "The Sunken Vault (trial run)", "Sneak, pick, balance and fight through a drowned vault. "
+          "Every minigame in one quest.", "test_vault/intro"),
 ]
 
 
@@ -51,6 +56,8 @@ class Encounter:
     enemy: Enemy
     reward_multiplier: float = 1.0
     is_milestone_boss: bool = False
+    ambush: bool = False  # the enemy acts first (you were discovered)
+    opener: float = 0.0  # share of the enemy's HP removed by a sneak attack
 
     @property
     def has_intro(self) -> bool:
@@ -65,6 +72,20 @@ class GameSession:
         self.rng = rng or random.Random()
         self.dialogues = DialogueRepository(dialogue_dir or config.DIALOGUE_DIR)
         self.shops = {mode: Shop(mode) for mode in ShopMode}
+        # Player settings (not saved with the game): see rpg/services/settings.py.
+        self.difficulty = "normal"
+        self.reaction_time = 1.0
+
+    @property
+    def difficulty_rules(self) -> dict:
+        return config.DIFFICULTIES.get(self.difficulty, config.DIFFICULTIES["normal"])
+
+    def _prepare(self, enemy: Enemy) -> Enemy:
+        """Scale a freshly created enemy for the difficulty setting."""
+        rules = self.difficulty_rules
+        if rules["enemy_hp"] != 1.0 or rules["enemy_damage"] != 1.0:
+            enemy.scale(rules["enemy_hp"], rules["enemy_damage"])
+        return enemy
 
     @classmethod
     def new_game(cls, name: str, race: str, rng: random.Random | None = None, dialogue_dir=None) -> "GameSession":
@@ -80,7 +101,7 @@ class GameSession:
     def create_hunt(self, risky: bool = False) -> Encounter:
         boss_id = self.pending_boss()
         if boss_id:
-            return Encounter(ENEMIES.create(boss_id, self.rng), 1.0, is_milestone_boss=True)
+            return Encounter(self._prepare(ENEMIES.create(boss_id, self.rng)), 1.0, is_milestone_boss=True)
         enemy = ENEMIES.random_for_level(self.player.level, self.rng)
         multiplier = 1.0
         if risky:
@@ -88,24 +109,30 @@ class GameSession:
             enemy.scale(scale, scale, scale)
             multiplier = config.RISKY_HUNT_REWARD_MULTIPLIER
         ENEMIES.roll_affix(enemy, self.rng)
-        return Encounter(enemy, multiplier)
+        return Encounter(self._prepare(enemy), multiplier)
 
     def create_story_enemy(self, enemy_id: str) -> tuple[Enemy, list[LogEvent]]:
         try:
-            return ENEMIES.create(enemy_id, self.rng), []
+            return self._prepare(ENEMIES.create(enemy_id, self.rng)), []
         except UnknownEnemyError:
             note = LogEvent(f"(Unknown enemy '{enemy_id}' — a goblin appears instead.)", Tone.SYSTEM)
-            return ENEMIES.create("goblin", self.rng), [note]
+            return self._prepare(ENEMIES.create("goblin", self.rng)), [note]
 
     def ghost_horror_available(self) -> bool:
         return not self.world.ghost_horror_seen
 
     def summon_ghost_horror(self) -> Encounter:
         self.world.ghost_horror_seen = True
-        return Encounter(ENEMIES.create("ghost_horror", self.rng))
+        return Encounter(self._prepare(ENEMIES.create("ghost_horror", self.rng)))
 
     def begin_combat(self, encounter: Encounter, allow_flee: bool = True) -> CombatSession:
-        return CombatSession(self.player, encounter.enemy, self.rng, encounter.reward_multiplier, allow_flee)
+        rewards = encounter.reward_multiplier * self.difficulty_rules["rewards"]
+        combat = CombatSession(self.player, encounter.enemy, self.rng, rewards, allow_flee)
+        if encounter.ambush:
+            combat.ambush()
+        if encounter.opener:
+            combat.opening_strike(encounter.opener)
+        return combat
 
     def conclude_combat(self, combat: CombatSession) -> VictoryReport | None:
         """Apply the outcome. Returns the victory report (XP/gold/loot already granted) on a win."""
@@ -120,6 +147,44 @@ class GameSession:
 
     def claim_trophy(self, item: Item) -> LogEvent:
         return grant_item(self.player, item)
+
+    # ------------------------------------------------------------ minigames
+    def minigame_check(self, spec: MinigameSpec) -> SkillCheck:
+        """The skill check a minigame would use right now (for the briefing screen)."""
+        return skill_check(self.player, spec.skill_used, spec.dc + self.difficulty_rules["trial_dc"])
+
+    def start_minigame(self, spec: MinigameSpec) -> Minigame:
+        """Build the game from the player's current skill check. Uses up the primed boost for that skill."""
+        check = self.minigame_check(spec)
+        self.player.consume_prime(check.skill.value)
+        return build_minigame(spec, check, self.rng, picks=self.player.lockpicks(),
+                              vitality=self.player.attributes.vitality, time_scale=self.reaction_time)
+
+    def finish_minigame(self, game: Minigame) -> list[LogEvent]:
+        """Spend what the game used up (broken lockpicks) and describe the outcome."""
+        result = game.result
+        if result is None:
+            return []
+        tone = {Outcome.SUCCESS: Tone.REWARD, Outcome.PARTIAL: Tone.WARNING, Outcome.FAILURE: Tone.DAMAGE}[result.outcome]
+        events = [LogEvent(result.summary, tone)]
+        for item in result.spent:
+            if self.player.inventory.find(item.uid):
+                self.player.inventory.remove(item.uid, 1)
+        if result.spent:
+            events.append(LogEvent(f"{len(result.spent)} lockpick(s) broken.", Tone.WARNING))
+        return events
+
+    @staticmethod
+    def qte_spec(trigger: QTETrigger) -> MinigameSpec:
+        return MinigameSpec(MinigameKind.QTE, trigger.dc, trigger.title, trigger.telegraph, {
+            "prompts": trigger.prompts, "window": trigger.window, "keys": trigger.keys,
+            "success_score": trigger.success_score, "partial_score": trigger.partial_score,
+        })
+
+    def skill_tonics(self, skill: str) -> list[Consumable]:
+        """Tonics in the pack that prime ``skill``."""
+        return [s.item for s in self.player.inventory.consumables()  # type: ignore[misc]
+                if s.item.effect == ConsumableEffect.SKILL_BOOST and s.item.skill == skill]
 
     # ------------------------------------------------------------ character
     def allocate_stat(self, attribute: Attribute) -> int:
@@ -143,7 +208,10 @@ class GameSession:
 
     # ------------------------------------------------------------ camp, shops, quests
     def rest(self) -> campfire.CampfireReport:
-        return campfire.rest(self.player, self.world, self.rng)
+        report = campfire.rest(self.player, self.world, self.rng)
+        if report.ambush:
+            self._prepare(report.ambush)
+        return report
 
     def random_dialogue(self, category: str) -> str | None:
         return self.dialogues.random_id(category, self.rng)

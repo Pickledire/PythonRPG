@@ -21,6 +21,13 @@ Header {
     width: 100%;
 }
 
+/* Focus: a gold edge instead of Textual's white reverse-video highlight. */
+Button:focus {
+    border-top: tall $warning;
+    border-bottom: tall $warning;
+    text-style: bold;
+}
+
 .muted {
     color: $text-muted;
     padding: 0 1;
@@ -142,7 +149,7 @@ PlayerPanel .panel-section {
 
 /* ------------------------------------------------------------------ hub */
 #hub-actions {
-    grid-size: 3;
+    grid-size: 5;
     grid-gutter: 1 2;
     grid-rows: 3;
     height: auto;
@@ -232,6 +239,30 @@ EncounterScreen.-boss #encounter-banner {
     border: round $error 50%;
     padding: 1 2;
     background: $surface;
+}
+#encounter-stage {
+    height: auto;
+    width: 100%;
+}
+#encounter-stage.-with-art {
+    align: center top;
+}
+#encounter-art {
+    margin: 0 4 1 0;
+}
+#encounter-text {
+    height: auto;
+}
+#encounter-stage.-with-art #encounter-text {
+    width: 1fr;
+    max-width: 72;
+}
+#encounter-stage.-with-art #encounter-story {
+    text-align: left;
+    content-align: left top;
+}
+#encounter-stage.-with-art #encounter-info {
+    padding: 0 1;
 }
 #fight {
     margin-top: 1;
@@ -365,12 +396,15 @@ EncounterScreen.-boss #encounter-banner {
 #campfire-root {
     padding: 1 2;
 }
-#campfire-fx {
-    height: 7;
-    margin-bottom: 1;
+#campfire-scene {
+    height: 1fr;
+}
+#campfire-art {
+    margin: 0 3 0 1;
 }
 #campfire-log {
-    height: 1fr;
+    width: 1fr;
+    height: 100%;
     border: round $warning 40%;
 }
 #campfire-buttons {
@@ -466,4 +500,138 @@ ModalScreen {
     border: round $warning 50%;
     padding: 0 1;
     margin-bottom: 1;
+}
+
+/* ------------------------------------------------------------------ minigames */
+.minigame-box {
+    width: 96;
+    max-width: 98%;
+    height: auto;
+    max-height: 95%;
+    border: thick $accent;
+    background: $panel;
+    padding: 1 2;
+}
+.minigame-box.-qte {
+    width: 64;
+    border: heavy $error;
+}
+.minigame-box.-stealth {
+    border: thick #4A4036;
+    background: #120F0C;
+}
+.minigame-box.-memory {
+    width: 72;
+    border: thick #C99BE8 60%;
+}
+.minigame-title {
+    text-style: bold;
+    color: $warning;
+    width: 100%;
+    content-align: center middle;
+}
+.minigame-subtitle {
+    color: $text-muted;
+    text-style: italic;
+    text-align: center;
+    width: 100%;
+    margin-bottom: 1;
+}
+#mg-stage {
+    width: 100%;
+    height: auto;
+    margin: 1 0;
+}
+#mg-flash {
+    width: 100%;
+    height: auto;
+    min-height: 1;
+    text-align: center;
+    margin-top: 1;
+}
+#mg-controls {
+    width: 100%;
+    text-align: center;
+    margin-top: 1;
+}
+#mg-done {
+    height: auto;
+    align: center middle;
+    margin-top: 1;
+}
+#rune-grid {
+    grid-size: 3 3;
+    grid-gutter: 1 2;
+    height: 17;
+    width: 100%;
+    padding: 0 4;
+}
+.rune-tile {
+    height: 5;
+    border: round #4A4036;
+    background: $surface;
+    content-align: center middle;
+    text-align: center;
+}
+.rune-tile:hover {
+    border: round $primary 60%;
+}
+.rune-tile.-lit {
+    border: heavy $warning;
+    background: #3A2E1F;
+}
+.rune-tile.-right {
+    border: heavy $success;
+}
+.rune-tile.-wrong {
+    border: heavy $error;
+    background: #3A1F1B;
+}
+.modal-box.-briefing {
+    width: 84;
+}
+.briefing-section {
+    border-top: solid $panel-lighten-1;
+    padding-top: 1;
+    margin-bottom: 1;
+}
+#brief-tonics {
+    height: auto;
+    margin-bottom: 1;
+}
+.tonic-button {
+    width: 100%;
+    margin-bottom: 0;
+}
+
+/* ------------------------------------------------------------------ settings */
+#settings-root {
+    padding: 1 2;
+}
+#settings-scroll {
+    height: 1fr;
+    border: round $primary 40%;
+    background: $surface;
+    padding: 0 2;
+}
+.settings-group {
+    color: $primary;
+    text-style: bold;
+    margin-top: 1;
+    border-bottom: solid $primary 30%;
+    width: 100%;
+}
+.settings-row {
+    height: auto;
+    padding: 1 0 0 0;
+}
+.settings-text {
+    width: 1fr;
+    height: auto;
+}
+.settings-label {
+    text-style: bold;
+}
+.settings-select {
+    width: 30;
 }

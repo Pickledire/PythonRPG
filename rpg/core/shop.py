@@ -7,7 +7,14 @@ from dataclasses import dataclass
 from enum import Enum
 
 from rpg import config
-from rpg.core.catalog import GENERAL_SHOP_COUNTS, GENERAL_SHOP_POOLS, ITEMS, MAGIC_SHOP_COUNTS, MAGIC_SHOP_SPELLS
+from rpg.core.catalog import (
+    GENERAL_SHOP_COUNTS,
+    GENERAL_SHOP_POOLS,
+    GENERAL_SHOP_STAPLES,
+    ITEMS,
+    MAGIC_SHOP_COUNTS,
+    MAGIC_SHOP_SPELLS,
+)
 from rpg.core.entities import Player
 from rpg.core.formulas import buy_price_multiplier, sell_ratio
 from rpg.core.inventory import InventoryFullError
@@ -64,6 +71,8 @@ class Shop:
                 pool = GENERAL_SHOP_POOLS[category]
                 for template_id in rng.sample(pool, k=min(count, len(pool))):
                     self._offer(template_id, UNLIMITED if category == "consumable" else 1)
+            for template_id in GENERAL_SHOP_STAPLES:
+                self._offer(template_id, UNLIMITED)
             for template_id in sorted(unlocks or ()):
                 if template_id in ITEMS and not any(o.item.template_id == template_id for o in self.offers):
                     self._offer(template_id, 1)

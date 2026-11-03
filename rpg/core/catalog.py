@@ -5,6 +5,10 @@ helpers below and reference its id from shops, loot tables, enemy rewards, races
 
 Requirements: leave ``requirements`` out to use the default rule for the item type (see
 ``rpg.core.items``), or pass ``req(strength=14, dexterity=13)`` for explicit, multi-attribute gates.
+
+Minigame modifiers: ``skills={"stealth": 3, "balance": -1}`` and ``traits=("keen_senses",)`` apply while
+gear is equipped or a curio is carried (skills and traits are listed in ``rpg.core.skills``). Heavy armor
+is loud, so it carries a Stealth penalty.
 """
 
 from __future__ import annotations
@@ -59,20 +63,27 @@ class ItemFactory:
 
     def weapon(self, template_id: str, name: str, damage: int, durability: int, value: int, description: str,
                weapon_class: WeaponClass = WeaponClass.MELEE, on_hit: EffectSpec | None = None,
-               requirements: Requirements | None = None, finesse: bool | None = None) -> None:
+               requirements: Requirements | None = None, finesse: bool | None = None,
+               skills: dict[str, int] | None = None, traits: tuple[str, ...] = ()) -> None:
         self.register(template_id, Weapon, name=name, damage=damage, max_durability=durability, value=value,
                       description=description, weapon_class=weapon_class, on_hit=on_hit,
-                      requirements=requirements, finesse=finesse)
+                      requirements=requirements, finesse=finesse, skill_bonuses=skills or {}, traits=traits)
 
     def armor(self, template_id: str, name: str, defense: int, durability: int, value: int, description: str,
-              requirements: Requirements | None = None) -> None:
+              requirements: Requirements | None = None, skills: dict[str, int] | None = None,
+              traits: tuple[str, ...] = ()) -> None:
         self.register(template_id, Armor, name=name, defense=defense, max_durability=durability, value=value,
-                      description=description, requirements=requirements)
+                      description=description, requirements=requirements, skill_bonuses=skills or {}, traits=traits)
 
     def consumable(self, template_id: str, name: str, effect: ConsumableEffect, potency: int, value: int,
-                   description: str) -> None:
+                   description: str, skill: str | None = None) -> None:
         self.register(template_id, Consumable, name=name, effect=effect, potency=potency, value=value,
-                      description=description)
+                      description=description, skill=skill)
+
+    def curio(self, template_id: str, name: str, value: int, description: str,
+              skills: dict[str, int] | None = None, traits: tuple[str, ...] = ()) -> None:
+        self.register(template_id, Curio, name=name, value=value, description=description,
+                      skill_bonuses=skills or {}, traits=traits)
 
     def spell(self, template_id: str, name: str, spell_type: SpellType, power: int, mana_cost: int, value: int,
               description: str, inflicts: EffectSpec | None = None, requirements: Requirements | None = None) -> None:
@@ -93,9 +104,13 @@ class ItemFactory:
             raise UnknownItemError(template_id) from None
 
     def refresh_requirements(self, item: Item) -> None:
-        """Re-apply current catalog requirements to an item loaded from a save (balance changes stick)."""
+        """Re-apply current catalog requirements and minigame modifiers to an item loaded from a save
+        (balance changes stick)."""
         if item.template_id in self._templates:
-            item.requirements = self._templates[item.template_id].create().requirements
+            fresh = self._templates[item.template_id].create()
+            item.requirements = fresh.requirements
+            item.skill_bonuses = dict(fresh.skill_bonuses)
+            item.traits = fresh.traits
 
     def find_id_by_name(self, name: str) -> str | None:
         lowered = name.strip().lower()
@@ -134,6 +149,8 @@ class ItemFactory:
         description = str(spec.get("description", ""))
         value = int(spec.get("value", 0))
         requirements = req(**spec["requires"]) if isinstance(spec.get("requires"), dict) else None
+        skills = {str(k): int(v) for k, v in (spec.get("skills") or {}).items()}
+        traits = tuple(spec.get("traits") or ())
         if kind == "weapon":
             return Weapon(template_id=template_id, name=name, damage=int(spec.get("damage", 10)),
                           max_durability=int(spec.get("durability", 100)), value=value, description=description,
@@ -141,11 +158,14 @@ class ItemFactory:
         if kind == "armor":
             return Armor(template_id=template_id, name=name, defense=int(spec.get("defense", 5)),
                          max_durability=int(spec.get("durability", 100)), value=value, description=description,
-                         requirements=requirements)
+                         requirements=requirements, skill_bonuses=skills, traits=traits)
         if kind in ("magic", "spell"):
             return Spell(template_id=template_id, name=name, description=description, value=value,
                          spell_type=SpellType(spec.get("spell_type", "damage")), power=int(spec.get("damage", 15)),
                          mana_cost=int(spec.get("mana", 8)), requirements=requirements)
+        if kind in ("curio", "charm", "tool", "misc"):
+            return Curio(template_id=template_id, name=name, description=description, value=value,
+                         skill_bonuses=skills, traits=traits)
         if kind == "consumable" and int(spec.get("heal", spec.get("potency", 0)) or 0) > 0:
             return Consumable(template_id=template_id, name=name, description=description, value=value,
                               effect=ConsumableEffect(spec.get("effect", "heal")),
@@ -165,12 +185,14 @@ _blind = lambda chance: EffectSpec(EffectKind.BLIND, 0.25, 2, chance)  # noqa: E
 
 # ------------------------------------------------------------------- racial starting gear
 ITEMS.weapon("iron_sword", "Iron Sword", 15, 100, 60, "A reliable iron sword.")
-ITEMS.weapon("elven_bow", "Elven Bow", 12, 80, 50, "A graceful elven bow.", R)
+ITEMS.weapon("elven_bow", "Elven Bow", 12, 80, 50, "A graceful elven bow.", R, skills={"precision": 1})
 ITEMS.weapon("orcish_axe", "Orcish Axe", 18, 120, 75, "A brutal orcish war axe.", on_hit=_bleed(3, 2, 0.10))
 ITEMS.weapon("dwarven_hammer", "Dwarven Hammer", 16, 150, 80, "A sturdy dwarven war hammer.")
 ITEMS.weapon("thornwood_staff", "Thornwood Staff", 12, 90, 60, "A living branch that still puts out buds.", MG)
-ITEMS.weapon("halfling_dagger", "Halfling Dagger", 14, 90, 45, "Small, sharp and always where you left it.")
-ITEMS.weapon("clockwork_crossbow", "Clockwork Crossbow", 15, 80, 70, "Self-winding, mostly.", R)
+ITEMS.weapon("halfling_dagger", "Halfling Dagger", 14, 90, 45, "Small, sharp and always where you left it.",
+             skills={"lockpicking": 1})
+ITEMS.weapon("clockwork_crossbow", "Clockwork Crossbow", 15, 80, 70, "Self-winding, mostly.", R,
+             skills={"precision": 1})
 ITEMS.weapon("dragonkin_glaive", "Dragonkin Glaive", 17, 120, 80, "A curved blade on a long haft, scaled grip.")
 ITEMS.weapon("bone_claws", "Bone Claws", 14, 110, 60, "Hooked claws lashed to the knuckles.",
              on_hit=_bleed(4, 2, 0.20))
@@ -197,7 +219,8 @@ ITEMS.weapon("greatsword", "Greatsword", 38, 180, 300, "A massive two-handed swo
 ITEMS.weapon("broadsword", "Broadsword", 28, 150, 175, "A wide-bladed sword.")
 ITEMS.weapon("rapier", "Rapier", 22, 100, 130, "A needle-thin duelling blade.", requirements=req(dexterity=13, agility=11))
 ITEMS.weapon("short_bow", "Short Bow", 12, 90, 50, "A simple wooden bow.", R)
-ITEMS.weapon("long_bow", "Long Bow", 20, 110, 180, "A powerful longbow.", R, requirements=req(dexterity=12, strength=10))
+ITEMS.weapon("long_bow", "Long Bow", 20, 110, 180, "A powerful longbow.", R, requirements=req(dexterity=12, strength=10),
+             skills={"precision": 1})
 ITEMS.weapon("crossbow", "Crossbow", 28, 100, 150, "A mechanical crossbow.", R, requirements=req(dexterity=13, strength=11))
 ITEMS.weapon("oak_staff", "Oak Staff", 12, 80, 60, "A wooden magic staff.", MG)
 ITEMS.weapon("crystal_staff", "Crystal Staff", 22, 100, 110, "A staff with a crystal orb.", MG)
@@ -218,27 +241,33 @@ ITEMS.weapon("runed_staff", "Runed Staff", 30, 150, 200, "A balanced staff etche
 
 # ------------------------------------------------------------------- armor
 ITEMS.armor("cloth_robes", "Cloth Robes", 6, 60, 30, "Basic cloth protection.")
-ITEMS.armor("leather_armor", "Leather Armor", 10, 110, 40, "Flexible leather protection.")
+ITEMS.armor("leather_armor", "Leather Armor", 10, 110, 40, "Flexible leather protection.", skills={"stealth": 1})
 ITEMS.armor("studded_leather", "Studded Leather", 14, 130, 75, "Reinforced leather armor.",
-            requirements=req(agility=11, dexterity=10))
-ITEMS.armor("chain_mail", "Chain Mail", 18, 150, 110, "Interlocked metal rings.")
+            requirements=req(agility=11, dexterity=10), skills={"stealth": 1})
+ITEMS.armor("chain_mail", "Chain Mail", 18, 150, 110, "Interlocked metal rings.", skills={"stealth": -2})
 ITEMS.armor("scale_mail", "Scale Mail", 22, 160, 150, "Overlapping metal scales.",
-            requirements=req(strength=12, vitality=11))
+            requirements=req(strength=12, vitality=11), skills={"stealth": -2})
 ITEMS.armor("plate_armor", "Plate Armor", 24, 200, 225, "Heavy metal plates.",
-            requirements=req(strength=14, vitality=12))
+            requirements=req(strength=14, vitality=12), skills={"stealth": -4, "balance": -1})
 ITEMS.armor("enchanted_robes", "Enchanted Robes", 18, 100, 140, "Magically protected robes.",
-            requirements=req(intelligence=11, wisdom=11))
+            requirements=req(intelligence=11, wisdom=11), skills={"focus": 1})
 ITEMS.armor("dragon_scale", "Dragon Scale", 28, 180, 200, "Armor made from dragon scales.",
-            requirements=req(strength=14, vitality=13))
+            requirements=req(strength=14, vitality=13), skills={"stealth": -2})
 ITEMS.armor("mithril_armor", "Mithril Armor", 32, 220, 300, "Light as silk, hard as legend.",
             requirements=req(strength=14, dexterity=13))
 ITEMS.armor("shadow_leathers", "Shadow Leathers", 20, 140, 190, "Blackened hide that drinks the light.",
-            requirements=req(agility=14, dexterity=12))
+            requirements=req(agility=14, dexterity=12), skills={"stealth": 3})
 ITEMS.armor("druidic_hide", "Druidic Hide", 16, 130, 150, "Bark-stitched hide blessed by the grove.",
-            requirements=req(wisdom=13, vitality=10))
+            requirements=req(wisdom=13, vitality=10), skills={"stealth": 2, "balance": 1})
 ITEMS.armor("cracked_iron_armor", "Cracked Iron Armor", 3, 30, 25, "Half-broken plate. Better than nothing.")
 ITEMS.armor("mage_robes", "Mage Robes", 18, 100, 180, "Robes woven with protective sigils.",
-            requirements=req(intelligence=11, wisdom=11))
+            requirements=req(intelligence=11, wisdom=11), skills={"focus": 2})
+ITEMS.armor("whisperweave_garb", "Whisperweave Garb", 12, 110, 220, "Spider-silk layers that swallow every rustle.",
+            requirements=req(agility=12, dexterity=11), skills={"stealth": 4, "balance": 1})
+ITEMS.armor("acrobats_harness", "Acrobat's Harness", 11, 120, 170, "Strapped leather built for ledges and rooftops.",
+            requirements=req(agility=13, vitality=10), skills={"balance": 3, "reflexes": 1})
+ITEMS.armor("sentinel_plate", "Sentinel Plate", 30, 220, 0, "Stone-grey plate cut from a vault guardian's shell.",
+            requirements=req(strength=13, vitality=12), skills={"stealth": -3, "balance": 1, "reflexes": 1})
 
 # ------------------------------------------------------------------- consumables
 H, MA = ConsumableEffect.HEAL, ConsumableEffect.MANA
@@ -251,6 +280,35 @@ ITEMS.consumable("greater_mana_potion", "Greater Mana Potion", MA, 60, 40, "A sw
 ITEMS.consumable("superior_mana_potion", "Superior Mana Potion", MA, 100, 75, "Bottled starlight.")
 ITEMS.consumable("antidote", "Antidote", ConsumableEffect.CURE, 0, 30, "Bitter herbs that purge afflictions.")
 ITEMS.consumable("elixir", "Elixir", ConsumableEffect.RESTORE, 75, 90, "Restores body and mind alike.")
+
+# ------------------------------------------------------------------- minigame tools and tonics
+# Lockpicks are spent by the lockpicking minigame (potency = quality). Tonics prime a skill for the next
+# trial that uses it; drink one from the inventory, in combat, or from a trial's briefing.
+LP, SB = ConsumableEffect.LOCKPICK, ConsumableEffect.SKILL_BOOST
+ITEMS.consumable("lockpick", "Lockpick", LP, 1, 12, "A bent iron pick. Snaps if you force it.")
+ITEMS.consumable("masterwork_lockpick", "Masterwork Lockpick", LP, 2, 45, "Tempered steel, springy and forgiving.")
+ITEMS.consumable("mithril_lockpick", "Mithril Lockpick", LP, 3, 120, "So fine it hums when it touches a pin.")
+ITEMS.consumable("muffling_salve", "Muffling Salve", SB, 3, 35, "Wax and wool-fat for boots and buckles.", "stealth")
+ITEMS.consumable("steadyhand_tonic", "Steadyhand Tonic", SB, 3, 35, "Calms the tremor in your fingers.", "lockpicking")
+ITEMS.consumable("quicksilver_draught", "Quicksilver Draught", SB, 3, 40, "Your heartbeat outruns your fear.", "reflexes")
+ITEMS.consumable("sage_tea", "Sage Tea", SB, 3, 30, "Bitter, clarifying, faintly minty.", "focus")
+ITEMS.consumable("catfoot_draught", "Catfoot Draught", SB, 3, 35, "Your feet find the floor before you do.", "balance")
+ITEMS.consumable("hawkeye_drops", "Hawkeye Drops", SB, 3, 35, "Stings, then the world sharpens.", "precision")
+
+# ------------------------------------------------------------------- carried tools and charms (curios)
+ITEMS.curio("thieves_tools", "Thieves' Tools", 90, "Tension wrenches, rakes and a hook in an oilcloth roll.",
+            skills={"lockpicking": 2})
+ITEMS.curio("tinkers_loupe", "Tinker's Loupe", 140, "A jeweller's lens that shows how mechanisms want to move.",
+            skills={"lockpicking": 1, "precision": 1}, traits=("tinker",))
+ITEMS.curio("owl_feather_charm", "Owl Feather Charm", 110, "Owls hear everything and are never heard.",
+            skills={"stealth": 1}, traits=("keen_senses",))
+ITEMS.curio("hourglass_pendant", "Hourglass Pendant", 160, "The sand inside falls a little too slowly.",
+            skills={"reflexes": 1}, traits=("quickened",))
+ITEMS.curio("memory_stone", "Memory Stone", 120, "A smooth river stone that holds on to what it sees.",
+            skills={"focus": 2}, traits=("eidetic",))
+ITEMS.curio("climbers_chalk", "Climber's Chalk", 40, "A pouch of chalk. Dry hands, sure feet.", skills={"balance": 1})
+ITEMS.curio("sentinel_core", "Sentinel Core", 150, "A warm stone heart that still ticks against your ribs.",
+            skills={"reflexes": 2}, traits=("steady_hands",))
 
 # ------------------------------------------------------------------- spells (general store)
 ITEMS.spell("fireball", "Fireball", D, 67, 20, 200, "A fiery ball of energy.", inflicts=_burn(8, 3, 0.25),
@@ -318,13 +376,20 @@ GENERAL_SHOP_POOLS: dict[str, list[str]] = {
                "short_bow", "long_bow", "crossbow", "oak_staff", "crystal_staff", "arcane_staff", "war_hammer",
                "battle_axe", "axe", "halberd", "spear"],
     "armor": ["cloth_robes", "leather_armor", "studded_leather", "chain_mail", "scale_mail", "plate_armor",
-              "enchanted_robes", "dragon_scale", "mithril_armor", "shadow_leathers", "druidic_hide"],
+              "enchanted_robes", "dragon_scale", "mithril_armor", "shadow_leathers", "druidic_hide",
+              "whisperweave_garb", "acrobats_harness"],
     "consumable": ["health_potion", "greater_health_potion", "superior_health_potion", "mega_health_potion",
-                   "mana_potion", "greater_mana_potion", "superior_mana_potion", "antidote", "elixir"],
+                   "mana_potion", "greater_mana_potion", "superior_mana_potion", "antidote", "elixir",
+                   "masterwork_lockpick", "muffling_salve", "steadyhand_tonic", "quicksilver_draught", "sage_tea",
+                   "catfoot_draught", "hawkeye_drops"],
+    "curio": ["thieves_tools", "tinkers_loupe", "owl_feather_charm", "hourglass_pendant", "memory_stone",
+              "climbers_chalk"],
     "spell": ["fireball", "ice_shard", "lightning_bolt", "fire_bolt", "ice_bolt", "lesser_lightning_bolt", "heal",
               "ward", "blind", "venom_spray"],
 }
-GENERAL_SHOP_COUNTS = {"weapon": 5, "armor": 4, "consumable": 5, "spell": 3}
+GENERAL_SHOP_COUNTS = {"weapon": 5, "armor": 4, "consumable": 6, "spell": 3, "curio": 2}
+# Always on the shelf, in unlimited supply.
+GENERAL_SHOP_STAPLES = ["lockpick"]
 
 MAGIC_SHOP_SPELLS = GENERAL_SHOP_POOLS["spell"] + [
     "meteor_lance", "frozen_crown", "thunder_chorus", "aegis_ward", "sun_flare", "freeze", "burn", "hemorrhage",
@@ -335,6 +400,6 @@ MAGIC_SHOP_COUNTS = {"spell": 6, "consumable": 3}
 # Random combat loot (weighted equally within a category).
 LOOT_TABLE: dict[str, list[str]] = {
     "weapon": ["steel_sword", "magic_staff", "war_hammer"],
-    "consumable": ["health_potion", "greater_health_potion", "mana_potion", "antidote"],
+    "consumable": ["health_potion", "greater_health_potion", "mana_potion", "antidote", "lockpick"],
     "armor": ["leather_armor", "chain_mail", "plate_armor", "cracked_iron_armor"],
 }

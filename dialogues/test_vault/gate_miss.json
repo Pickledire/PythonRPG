@@ -1,0 +1,12 @@
+{
+  "speaker": "The Portcullis",
+  "lines": [
+    "Your knives clatter off the wall. The rope frays a little more, but holds."
+  ],
+  "choices": [
+    {
+      "text": "Fish your knives out of the water and try again.",
+      "next": "test_vault/gate"
+    }
+  ]
+}

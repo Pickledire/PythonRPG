@@ -1,0 +1,18 @@
+{
+  "speaker": "The Drowned Hall",
+  "lines": [
+    "It stops right beside your statue. For a long moment it doesn't move. Then it grinds on.",
+    "You caught a glimpse of a crack in its chest plate, and not much else. It returns to its alcove at the end of the hall."
+  ],
+  "effects": [
+    {
+      "give_xp": 20
+    }
+  ],
+  "choices": [
+    {
+      "text": "Move on.",
+      "next": "test_vault/door"
+    }
+  ]
+}

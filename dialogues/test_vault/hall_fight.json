@@ -1,0 +1,23 @@
+{
+  "speaker": "The Drowned Hall",
+  "lines": [
+    "You splash out into the open. The Sentinel turns toward you, unhurried."
+  ],
+  "effects": [
+    {
+      "start_combat": "stone_sentinel"
+    },
+    {
+      "set_flag": [
+        "sentinel_down",
+        true
+      ]
+    }
+  ],
+  "choices": [
+    {
+      "text": "Move on.",
+      "next": "test_vault/door"
+    }
+  ]
+}

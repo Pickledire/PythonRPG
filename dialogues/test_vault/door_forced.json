@@ -1,0 +1,12 @@
+{
+  "speaker": "The Iron Door",
+  "lines": [
+    "You brace a boot on the wall and heave. The hinges shriek and give way."
+  ],
+  "choices": [
+    {
+      "text": "Keep going.",
+      "next": "test_vault/shaft"
+    }
+  ]
+}

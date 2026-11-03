@@ -1,0 +1,17 @@
+{
+  "speaker": "The Flooded Shaft",
+  "lines": [
+    "The beam twists under your boot and you plunge into the icy water. It's a long, cold climb up the chain on the far wall."
+  ],
+  "effects": [
+    {
+      "damage": 15
+    }
+  ],
+  "choices": [
+    {
+      "text": "Haul yourself out.",
+      "next": "test_vault/runes"
+    }
+  ]
+}

@@ -41,7 +41,7 @@ class CombatScreen(Screen[Phase]):
         super().__init__(classes="-boss" if combat.enemy.is_boss else "")
         self.combat = combat
         self._busy = True
-        self._remaining = float(config.TURN_TIMER_SECONDS)
+        self._remaining = 0.0
 
     def compose(self) -> ComposeResult:
         yield Header(show_clock=False)
@@ -65,15 +65,24 @@ class CombatScreen(Screen[Phase]):
         yield Footer()
 
     # ------------------------------------------------------------ lifecycle
+    @property
+    def turn_seconds(self) -> int:
+        return int(self.app.settings.turn_timer)
+
+    @property
+    def delay(self) -> float:
+        return self.app.settings.combat_delay
+
     def on_mount(self) -> None:
+        self._remaining = float(self.turn_seconds)
         log = self.query_one("#combat-log", EventLog)
         log.border_title = "Battle log"
         self.query_one("#combat-done").display = False
         timer = self.query_one("#turn-timer", ProgressBar)
-        timer.display = config.TURN_TIMER_SECONDS > 0
+        timer.display = self.turn_seconds > 0
         log.add(self.combat.start())
         self._sync()
-        if config.TURN_TIMER_SECONDS > 0:
+        if self.turn_seconds > 0:
             self.set_interval(0.1, self._tick_timer)
         if self.combat.is_over:
             self._finish()
@@ -98,7 +107,7 @@ class CombatScreen(Screen[Phase]):
         log.divider(f"Round {self.combat.round}")
         flee = f" · flee {int(self.combat.flee_chance * 100)}%" if self.combat.allow_flee else " · no escape"
         self.query_one("#turn-label", Label).update(Text.assemble(("Your turn", "bold #9FD08F"), (flee, MUTED_STYLE)))
-        self._remaining = float(config.TURN_TIMER_SECONDS)
+        self._remaining = float(self.turn_seconds)
         self._refresh_turn_timer()
         self._set_busy(False)
         self.query_one("#attack", Button).focus()
@@ -113,7 +122,7 @@ class CombatScreen(Screen[Phase]):
 
     def _refresh_turn_timer(self) -> None:
         bar = self.query_one("#turn-timer", ProgressBar)
-        bar.update(total=max(1, config.TURN_TIMER_SECONDS), progress=max(0.0, self._remaining))
+        bar.update(total=max(1, self.turn_seconds), progress=max(0.0, self._remaining))
         bar.set_class(self._remaining <= 5, "-urgent")
 
     async def _write(self, events: list[LogEvent], paced: bool = True) -> None:
@@ -122,7 +131,7 @@ class CombatScreen(Screen[Phase]):
             log.add(event)
             self._sync()
             if paced:
-                await asyncio.sleep(EVENT_DELAY)
+                await asyncio.sleep(EVENT_DELAY * self.delay)
 
     # ------------------------------------------------------------ turn handling
     def _submit(self, action: Action) -> None:
@@ -146,13 +155,28 @@ class CombatScreen(Screen[Phase]):
         self._set_busy(True)
         self.query_one("#turn-label", Label).update(Text(f"{self.combat.enemy.name}'s turn...", style="bold #E58A6F"))
         while self.combat.phase == Phase.ENEMY_TURN:
-            await asyncio.sleep(ENEMY_DELAY)
+            await asyncio.sleep(ENEMY_DELAY * self.delay)
             await self._write(self.combat.enemy_turn())
+            if self.combat.pending_qte:
+                await self._write(await self._quick_time_event())
         self.app.touch()
         if self.combat.is_over:
             self._finish()
         else:
             self._player_ready()
+
+    async def _quick_time_event(self) -> list[LogEvent]:
+        """A boss telegraphed a big move: play the QTE over the battle, then apply how it went."""
+        from rpg.ui.screens.minigames import screen_for
+
+        trigger = self.combat.pending_qte
+        session = self.app.session
+        await asyncio.sleep(0.5)  # let the warning register
+        game = session.start_minigame(session.qte_spec(trigger))
+        subtitle = trigger.telegraph.format(name=self.combat.enemy.name)
+        result = await self.app.push_screen_wait(screen_for(game, f"!! {trigger.title} !!", subtitle, auto_close=1.6))
+        events = session.finish_minigame(game)
+        return events + self.combat.resolve_qte(result.score)
 
     def _finish(self) -> None:
         self._set_busy(True)

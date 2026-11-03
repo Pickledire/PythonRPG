@@ -1,0 +1,70 @@
+{
+  "speaker": "The Iron Door",
+  "lines": [
+    "Past the hall an iron door bars the way, its lock crusted with rust and river silt.",
+    "A side passage leads to a flooded guardroom."
+  ],
+  "choices": [
+    {
+      "text": "Pick the lock.",
+      "effects": [
+        {
+          "minigame": {
+            "type": "lockpick",
+            "dc": 11,
+            "title": "The Rusted Lock",
+            "intro": "Four pins, gritty with silt. Don't force it.",
+            "success": "test_vault/shaft",
+            "failure": "test_vault/door_jammed",
+            "partial": "test_vault/shaft",
+            "retreat": "test_vault/door",
+            "flag": "vault_lock"
+          }
+        }
+      ],
+      "conditions": [
+        {
+          "has_lockpick": true
+        }
+      ]
+    },
+    {
+      "text": "Search the guardroom for tools.",
+      "next": "test_vault/door",
+      "effects": [
+        {
+          "give_item": "lockpick"
+        },
+        {
+          "give_item": "lockpick"
+        },
+        {
+          "give_item": "masterwork_lockpick"
+        },
+        {
+          "set_flag": [
+            "vault_found_picks",
+            true
+          ]
+        }
+      ],
+      "conditions": [
+        {
+          "flag_not_set": "vault_found_picks"
+        }
+      ]
+    },
+    {
+      "text": "Wrench the door off its rusted hinges. [Strength 14]",
+      "next": "test_vault/door_forced",
+      "conditions": [
+        {
+          "min_stat": [
+            "strength",
+            14
+          ]
+        }
+      ]
+    }
+  ]
+}

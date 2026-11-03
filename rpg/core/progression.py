@@ -74,6 +74,6 @@ def apply_victory(player: Player, report: VictoryReport) -> VictoryReport:
     for item, qty in report.loot:
         events.append(grant_item(player, item, qty))
     if report.levels_gained:
-        events.append(LogEvent(f"⬆ Level up! You are now level {player.level}.", Tone.REWARD))
+        events.append(LogEvent(f"Level up! You are now level {player.level}.", Tone.REWARD))
     report.events = events
     return report

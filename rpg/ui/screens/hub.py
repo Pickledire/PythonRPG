@@ -14,20 +14,21 @@ from rpg.core.events import LogEvent, Tone
 from rpg.ui.widgets import EventLog, PlayerPanel
 
 ACTIONS = [
-    ("hunt", "⚔  Hunt", "Find an enemy to fight", "h"),
-    ("quests", "✦  Quests", "Seek adventure and story", "q"),
-    ("rest", "♨  Rest", "Rest at the campfire", "r"),
-    ("inventory", "▣  Inventory", "Equip gear, use items", "i"),
-    ("character", "☰  Character", "Stats and attributes", "c"),
-    ("shop", "◆  Shop", "Merchant's Emporium", "s"),
-    ("save", "⤓  Save", "Save your progress", "ctrl+s"),
-    ("load", "⤒  Load", "Load a saved game", "l"),
-    ("title", "⏏  Title", "Return to the title screen", "escape"),
+    ("hunt", "Hunt", "Find an enemy to fight", "h"),
+    ("quests", "Quests", "Seek adventure and story", "q"),
+    ("rest", "Rest", "Rest at the campfire", "r"),
+    ("inventory", "Inventory", "Equip gear, use items", "i"),
+    ("character", "Character", "Stats and attributes", "c"),
+    ("shop", "Shop", "Merchant's Emporium", "s"),
+    ("save", "Save", "Save your progress", "ctrl+s"),
+    ("load", "Load", "Load a saved game", "l"),
+    ("settings", "Settings", "Theme, difficulty, pacing and more", "o"),
+    ("title", "Title", "Return to the title screen", "escape"),
 ]
 
 
 class HubScreen(Screen):
-    BINDINGS = [Binding(key, f"do('{action}')", label.split("  ")[-1]) for action, label, _, key in ACTIONS]
+    BINDINGS = [Binding(key, f"do('{action}')", label) for action, label, _, key in ACTIONS]
 
     def __init__(self) -> None:
         super().__init__()
@@ -123,5 +124,9 @@ class HubScreen(Screen):
             from rpg.ui.screens.save_load import SaveLoadScreen
 
             app.push_screen(SaveLoadScreen("load"))
+        elif action == "settings":
+            from rpg.ui.screens.settings import SettingsScreen
+
+            app.push_screen(SettingsScreen())
         elif action == "title":
             app.run_flow(app.quit_to_title_flow())

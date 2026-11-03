@@ -14,9 +14,11 @@ from textual.screen import Screen
 
 from rpg.core.combat import Phase
 from rpg.core.events import LogEvent, Tone
+from rpg.core.minigames import MinigameResult, MinigameSpec
 from rpg.core.session import Encounter, GameSession
 from rpg.services.persistence import SaveManager
-from rpg.ui.palette import EMBER_THEME
+from rpg.services.settings import Settings, SettingsStore
+from rpg.ui.palette import THEMES
 
 
 class RPGApp(App):
@@ -35,6 +37,8 @@ class RPGApp(App):
     def __init__(self, save_dir: Path | None = None, seed: int | None = None) -> None:
         super().__init__()
         self.saves = SaveManager(save_dir)
+        self.settings_store = SettingsStore(save_dir)
+        self.settings: Settings = self.settings_store.load()
         self.session: GameSession | None = None
         self._seed = seed
         self._hunting = False  # guards against starting two encounters at once
@@ -45,9 +49,38 @@ class RPGApp(App):
     def on_mount(self) -> None:
         from rpg.ui.screens.title import TitleScreen
 
-        self.register_theme(EMBER_THEME)
-        self.theme = "ember"
+        for theme in THEMES:
+            self.register_theme(theme)
+        self.theme = self.settings.theme if self.settings.theme in self.available_themes else "ember"
+        self.watch(self, "theme", self._theme_changed, init=False)
         self.push_screen(TitleScreen())
+
+    # ------------------------------------------------------------ settings
+    def _theme_changed(self, theme: str) -> None:
+        """Remember themes picked anywhere, including the Ctrl+P command palette."""
+        if self.settings.theme != theme:
+            self.settings.theme = theme
+            self.save_settings()
+
+    def change_setting(self, key: str, value: object) -> None:
+        self.settings.set(key, value)
+        if key == "theme" and value in self.available_themes:
+            self.theme = value
+        self.apply_settings()
+        self.save_settings()
+
+    def apply_settings(self) -> None:
+        """Push settings the rules need into the current session."""
+        if self.session is not None:
+            self.session.difficulty = self.settings.difficulty
+            self.session.reaction_time = float(self.settings.reaction_time)
+        self.touch()
+
+    def save_settings(self) -> None:
+        try:
+            self.settings_store.save(self.settings)
+        except OSError as exc:
+            self.notify(f"Couldn't save settings: {exc}", severity="error")
 
     # ------------------------------------------------------------ state & navigation
     def touch(self) -> None:
@@ -72,7 +105,7 @@ class RPGApp(App):
         from rpg.ui.screens.hub import HubScreen
 
         self.session = session
-        self.touch()
+        self.apply_settings()
 
         async def go() -> None:
             hub = HubScreen()
@@ -130,6 +163,21 @@ class RPGApp(App):
             await self.handle_defeat(combat.enemy.name)
         self.touch()
         return phase
+
+    async def minigame_flow(self, spec: MinigameSpec, allow_retreat: bool = True,
+                            briefing: bool = True) -> tuple[MinigameResult | None, list[LogEvent]]:
+        """Briefing → trial → bookkeeping. Returns (result, events); result is None if the player backed out."""
+        from rpg.ui.screens.minigames import MinigameBriefing, screen_for
+
+        session = self.session
+        assert session is not None
+        if briefing and not await self.push_screen_wait(MinigameBriefing(spec, allow_retreat)):
+            return None, []
+        game = session.start_minigame(spec)
+        result = await self.push_screen_wait(screen_for(game, spec.display_title, spec.intro))
+        events = session.finish_minigame(game)
+        self.touch()
+        return result, events
 
     async def handle_defeat(self, killer: str) -> None:
         from rpg.ui.screens.game_over import GameOverScreen

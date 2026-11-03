@@ -240,12 +240,12 @@ class GameEngine:
         end = time.time() + duration
         frames = ["  |", "  )", "  (", "  )", "  |"]
         while time.time() < end:
-            self.print_centered(random.choice(frames) + "  🕯", 120, self.colors['warning'])
+            self.print_centered(random.choice(frames) + "  ", 120, self.colors['warning'])
             time.sleep(0.08)
 
     def _effect_gears(self, duration: float):
         end = time.time() + duration
-        frames = ["[|] ⚙ ", "[/] ⚙ ", "[-] ⚙ ", "[\\] ⚙ "]
+        frames = ["[|] ", "[/] ", "[-] ", "[\\] "]
         while time.time() < end:
             self.print_centered(random.choice(frames) * 3, 120, self.colors['info'])
             time.sleep(0.08)
@@ -304,7 +304,7 @@ class GameEngine:
     def display_title(self):
         """Display the game title with enhanced styling"""
         self.print_border("═", 120)
-        self.print_centered("🗡️  EPIC RPG ADVENTURE  ⚔️", 120, self.colors['title'])
+        self.print_centered(" EPIC RPG ADVENTURE  ", 120, self.colors['title'])
         self.print_border("═", 120)
         print()
     
@@ -433,7 +433,7 @@ class GameEngine:
         
         print("\n" * 2)
         self.print_border("═", 100)
-        self.print_centered(f"🎉 Welcome, {self.player}!", 120, self.colors['success'])
+        self.print_centered(f"Welcome, {self.player}!", 120, self.colors['success'])
         self.print_border("═", 100)
         self.print_centered_block(self.player.get_status())
         input(f"\n{self.colors['menu']}Press Enter to continue...{self.colors['reset']}")
@@ -475,7 +475,7 @@ class GameEngine:
                 print(f"{self.colors['border']}║ {self.colors['reset']}", end="")
                 self.display_xp_bar(self.player.xp, self.player.xp_required(), 999)
                 
-                print(f"{self.colors['border']}║ {self.colors['gold']}Gold: {self.player.gold} 💰{self.colors['reset']}")
+                print(f"{self.colors['border']}║ {self.colors['gold']}Gold: {self.player.gold} {self.colors['reset']}")
                 self.print_border("═", 100, self.colors['border'])
                 print("\n" * 2)
             
@@ -486,15 +486,15 @@ class GameEngine:
             print()
             
             menu_options = [
-                ("1", "🗡️  Find an enemy to fight", self.colors['combat']),
-                ("2", "🔮  Go on a quest", self.colors['magic']),
-                ("3", "🔥  Rest at a campfire", self.colors['warning']),
-                ("4", "📦 Check inventory", self.colors['item']),
-                ("5", "📊 View character status", self.colors['info']),
-                ("6", "🏪 Visit shop", self.colors['gold']),
-                ("7", "💾 Save game", self.colors['warning']),
-                ("8", "📁 Load game", self.colors['info']),
-                ("9", "❌ Quit game", self.colors['error'])
+                ("1", " Find an enemy to fight", self.colors['combat']),
+                ("2", " Go on a quest", self.colors['magic']),
+                ("3", " Rest at a campfire", self.colors['warning']),
+                ("4", "Check inventory", self.colors['item']),
+                ("5", "View character status", self.colors['info']),
+                ("6", "Visit shop", self.colors['gold']),
+                ("7", "Save game", self.colors['warning']),
+                ("8", "Load game", self.colors['info']),
+                ("9", "Quit game", self.colors['error'])
             ]
 
             # Center the menu options
@@ -588,7 +588,7 @@ class GameEngine:
         print("\n" * 2)
         
         # Final warning in yellow
-        self.print_centered("⚠️  Prepare yourself, adventurer... This will be your greatest challenge yet!  ⚠️", 120, Fore.YELLOW + Style.BRIGHT)
+        self.print_centered(" Prepare yourself, adventurer... This will be your greatest challenge yet!  ", 120, Fore.YELLOW + Style.BRIGHT)
         
         print("\n" * 2)
         
@@ -633,7 +633,7 @@ class GameEngine:
         # Shadow sweep (wings) and ember shimmer
         self.play_effect("shadow_sweep", duration=0.6)
         self.play_effect("glyphs", duration=0.4)
-        self.print_centered("🔥 The elder flame will test your mettle. 🔥", 120, Fore.YELLOW + Style.BRIGHT)
+        self.print_centered("The elder flame will test your mettle. ", 120, Fore.YELLOW + Style.BRIGHT)
         print("\n")
         input(f"{self.colors['menu']}Press Enter to face the Elder Dragon...{self.colors['reset']}")
 
@@ -785,9 +785,9 @@ class GameEngine:
                 self.display_boss_intro()
         else:
             print()
-            self.print_border("⚔", 60, self.colors['combat'])
-            self.print_centered(f"{self.colors['combat']}⚔️ A wild {self.colors['enemy']}{self.current_enemy.name}{self.colors['combat']} appears!{self.colors['reset']}")
-            self.print_border("⚔", 60, self.colors['combat'])
+            self.print_border("", 60, self.colors['combat'])
+            self.print_centered(f"{self.colors['combat']}A wild {self.colors['enemy']}{self.current_enemy.name}{self.colors['combat']} appears!{self.colors['reset']}")
+            self.print_border("", 60, self.colors['combat'])
             # Show any modifiers
             if hasattr(self.current_enemy, 'affix_names') and self.current_enemy.affix_names:
                 mods = ", ".join(self.current_enemy.affix_names)
@@ -815,13 +815,13 @@ class GameEngine:
             
             # Show combat status
             self.print_border("═", 120, self.colors['combat'])
-            self.print_centered("⚔️ COMBAT ⚔️", 120, self.colors['combat'])
+            self.print_centered("COMBAT ", 120, self.colors['combat'])
             self.print_border("═", 120, self.colors['combat'])
             print("\n" * 2)
             
             # Create a side-by-side layout for player and enemy
             # Player status (left side)
-            print(f"{self.colors['player']}🛡️ {self.player.name} (Level {self.player.level}){self.colors['reset']}")
+            print(f"{self.colors['player']}{self.player.name} (Level {self.player.level}){self.colors['reset']}")
             # Shield overlay for player
             p_shield = 0.0
             try:
@@ -835,7 +835,7 @@ class GameEngine:
             print("\n" * 2)
             
             # Enemy status (right side)
-            print(f"{self.colors['enemy']}👹 {self.current_enemy.name}{self.colors['reset']}")
+            print(f"{self.colors['enemy']}{self.current_enemy.name}{self.colors['reset']}")
             e_shield = 0.0
             try:
                 e_shield = float(getattr(self.current_enemy, 'status_effects', {}).get('shield', {}).get('reduction_pct', 0.0))
@@ -875,10 +875,10 @@ class GameEngine:
         print(f"{self.colors['header']}Your turn! Choose an action:{self.colors['reset']}")
 
         combat_options = [
-            ("1", "⚔️ Attack", self.colors['combat']),
-            ("2", "🧪 Use item", self.colors['item']),
-            ("3", "🏃 Try to flee", self.colors['warning']),
-            ("4", "🔮 Cast magic", self.colors['magic'])
+            ("1", "Attack", self.colors['combat']),
+            ("2", "Use item", self.colors['item']),
+            ("3", "Try to flee", self.colors['warning']),
+            ("4", "Cast magic", self.colors['magic'])
         ]
 
         for num, text, color in combat_options:
@@ -1189,9 +1189,9 @@ class GameEngine:
                 self.in_combat = True
                 # Normal non-boss intro
                 print()
-                self.print_border("⚔", 60, self.colors['combat'])
-                self.print_centered(f"{self.colors['combat']}⚔️ A wild {self.colors['enemy']}{self.current_enemy.name}{self.colors['combat']} appears!{self.colors['reset']}")
-                self.print_border("⚔", 60, self.colors['combat'])
+                self.print_border("", 60, self.colors['combat'])
+                self.print_centered(f"{self.colors['combat']}A wild {self.colors['enemy']}{self.current_enemy.name}{self.colors['combat']} appears!{self.colors['reset']}")
+                self.print_border("", 60, self.colors['combat'])
                 self.print_centered_block(self.current_enemy.get_info(), self.colors['info'])
                 input(f"{self.colors['menu']}Press Enter to start combat...{self.colors['reset']}")
                 self.combat_loop()
@@ -1258,10 +1258,10 @@ class GameEngine:
         
         if not self.player.alive:
             print()
-            self.print_border("☠", 60, self.colors['error'])
-            print(f"{self.colors['error']}💀 GAME OVER! You have been defeated!{self.colors['reset']}")
+            self.print_border("", 60, self.colors['error'])
+            print(f"{self.colors['error']}GAME OVER! You have been defeated!{self.colors['reset']}")
             print(f"{self.colors['warning']}Better luck next time, adventurer...{self.colors['reset']}")
-            self.print_border("☠", 60, self.colors['error'])
+            self.print_border("", 60, self.colors['error'])
             # Restart flow: unwind to main_menu, which resets the run and creates a new character
             input(f"{self.colors['menu']}Press Enter to create a new character...{self.colors['reset']}")
             raise PlayerDied()
@@ -1578,7 +1578,7 @@ class GameEngine:
                 loot_color = self.colors['armor']
             
             success, message = self.player.inventory.add_item(loot)
-            self.print_centered(f"\n{self.colors['gold']}💰 Loot found: {loot_color}{loot.name}{self.colors['reset']}!")
+            self.print_centered(f"\n{self.colors['gold']}Loot found: {loot_color}{loot.name}{self.colors['reset']}!")
             self.print_centered(f"{self.colors['info']}{message}{self.colors['reset']}")
             # Show item stats and requirements
             if hasattr(loot, 'damage'):
@@ -1607,15 +1607,15 @@ class GameEngine:
             input(f"{self.colors['menu']}Press Enter to continue...{self.colors['reset']}")
 
             quest_options = [
-                ("1", "🔍 Ask the tavern keeper if he has heard about something interesting", self.colors['info']),
-                ("2", "🔍 Ask the blacksmith if he knows about a strange artifact", self.colors['weapon']),
-                ("3", "🔍 Go to the mages academy in search of a powerful wizard", self.colors['magic']),
-                ("4", "🔍 Head to the dark forest blindly", self.colors['enemy']),
-                ("5", "🔍 Start a fighting competition with the local fighters", self.colors['combat']),
-                ("6", "🔍 Climb Mt. Aegis in search of something strange", self.colors['header']),
-                ("7", "🔍 Explore the ruins of the ancient city of Valoria", self.colors['info']),
-                ("8", "🔍 Visit the local graveyard in search of a lost soul", self.colors['enemy']),
-                ("9", "🔙 Back to main menu", self.colors['warning'])
+                ("1", "Ask the tavern keeper if he has heard about something interesting", self.colors['info']),
+                ("2", "Ask the blacksmith if he knows about a strange artifact", self.colors['weapon']),
+                ("3", "Go to the mages academy in search of a powerful wizard", self.colors['magic']),
+                ("4", "Head to the dark forest blindly", self.colors['enemy']),
+                ("5", "Start a fighting competition with the local fighters", self.colors['combat']),
+                ("6", "Climb Mt. Aegis in search of something strange", self.colors['header']),
+                ("7", "Explore the ruins of the ancient city of Valoria", self.colors['info']),
+                ("8", "Visit the local graveyard in search of a lost soul", self.colors['enemy']),
+                ("9", "Back to main menu", self.colors['warning'])
             ]
 
             for num, text, color in quest_options:
@@ -1661,11 +1661,11 @@ class GameEngine:
             self.print_border("─", 50, self.colors['header'])
             
             inventory_options = [
-                ("1", "⚔️ Equip weapon", self.colors['weapon']),
-                ("2", "🛡️ Equip armor", self.colors['armor']),
-                ("3", "🔮 Equip magic", self.colors['magic']),
-                ("4", "🧪 Use item", self.colors['item']),
-                ("5", "🔙 Back to main menu", self.colors['warning'])
+                ("1", "Equip weapon", self.colors['weapon']),
+                ("2", "Equip armor", self.colors['armor']),
+                ("3", "Equip magic", self.colors['magic']),
+                ("4", "Use item", self.colors['item']),
+                ("5", "Back to main menu", self.colors['warning'])
             ]
             
             for num, text, color in inventory_options:
@@ -1837,14 +1837,14 @@ class GameEngine:
             self.clear_screen()
             self.display_title()
             
-            self.print_centered(f"{self.colors['gold']}🏪 Welcome to Merchant's Emporium!{self.colors['reset']}")
+            self.print_centered(f"{self.colors['gold']}Welcome to Merchant's Emporium!{self.colors['reset']}")
             self.play_effect("banner", duration=0.6)
             # Rotate inventory each visit based on world time
             try:
                 self.shop.rotate(self.world_bells)
             except Exception:
                 pass
-            self.print_centered(f"{self.colors['gold']}Your gold: {self.player.gold} 💰{self.colors['reset']}")
+            self.print_centered(f"{self.colors['gold']}Your gold: {self.player.gold} {self.colors['reset']}")
             print()
             
             self.print_border("─", 50, self.colors['header'])
@@ -1852,13 +1852,13 @@ class GameEngine:
             self.print_border("─", 50, self.colors['header'])
             
             shop_options = [
-                ("1", "🗡️  Browse weapons", self.colors['weapon']),
-                ("2", "🛡️  Browse armor", self.colors['armor']),
-                ("3", "🔮 Browse magic", self.colors['magic']),
-                ("4", "🧪 Browse consumables", self.colors['item']),
-                ("5", "📋 View all items", self.colors['info']),
-                ("6", "💰 Sell items", self.colors['warning']),
-                ("7", "🚪 Leave shop", self.colors['error'])
+                ("1", " Browse weapons", self.colors['weapon']),
+                ("2", " Browse armor", self.colors['armor']),
+                ("3", "Browse magic", self.colors['magic']),
+                ("4", "Browse consumables", self.colors['item']),
+                ("5", "View all items", self.colors['info']),
+                ("6", "Sell items", self.colors['warning']),
+                ("7", "Leave shop", self.colors['error'])
             ]
             
             for num, text, color in shop_options:
@@ -1892,7 +1892,7 @@ class GameEngine:
             self.clear_screen()
             self.display_title()
             
-            print(f"{self.colors['gold']}🏪 Merchant's Emporium - Your gold: {self.player.gold} 💰{self.colors['reset']}")
+            print(f"{self.colors['gold']}Merchant's Emporium - Your gold: {self.player.gold} {self.colors['reset']}")
             print()
             
             available_items = self.shop.display_items(item_type)
@@ -1932,7 +1932,7 @@ class GameEngine:
             self.clear_screen()
             self.display_title()
             
-            print(f"{self.colors['gold']}🏪 Sell Items - Your gold: {self.player.gold} 💰{self.colors['reset']}")
+            print(f"{self.colors['gold']}Sell Items - Your gold: {self.player.gold} {self.colors['reset']}")
             print()
             
             sellable_items = self.shop.get_sellable_items(self.player)
@@ -1959,7 +1959,7 @@ class GameEngine:
                     item_color = self.colors['item']
                 
                 print(f"{self.colors['menu']}{i}. {item_color}{item.name}{self.colors['reset']} x{quantity} - "
-                      f"{self.colors['gold']}Sell for {sell_price}💰 each{self.colors['reset']}")
+                      f"{self.colors['gold']}Sell for {sell_price}each{self.colors['reset']}")
                 if item.description:
                     print(f"    {self.colors['info']}{item.description}{self.colors['reset']}")
             
@@ -2196,9 +2196,9 @@ class GameEngine:
         while True:
             self.clear_screen()
             self.display_title()
-            self.print_centered(f"{self.colors['magic']}🏪 Collegium Arcana — Spellwright's Stall{self.colors['reset']}")
+            self.print_centered(f"{self.colors['magic']}Collegium Arcana — Spellwright's Stall{self.colors['reset']}")
             self.play_effect("glyphs", duration=0.5)
-            self.print_centered(f"{self.colors['gold']}Your gold: {self.player.gold} 💰{self.colors['reset']}")
+            self.print_centered(f"{self.colors['gold']}Your gold: {self.player.gold} {self.colors['reset']}")
             print()
             try:
                 magic_shop.rotate(self.world_bells + self.player.level)
@@ -2208,9 +2208,9 @@ class GameEngine:
             print(f"{self.colors['magic']}What would you like to do?{self.colors['reset']}")
             self.print_border("─", 50, self.colors['magic'])
 
-            self.print_centered(f"{self.colors['menu']}1. {self.colors['magic']}🔮 Browse spells{self.colors['reset']}")
-            self.print_centered(f"{self.colors['menu']}2. {self.colors['item']}🧪 Browse consumables{self.colors['reset']}")
-            self.print_centered(f"{self.colors['menu']}3. {self.colors['error']}🚪 Leave stall{self.colors['reset']}")
+            self.print_centered(f"{self.colors['menu']}1. {self.colors['magic']}Browse spells{self.colors['reset']}")
+            self.print_centered(f"{self.colors['menu']}2. {self.colors['item']}Browse consumables{self.colors['reset']}")
+            self.print_centered(f"{self.colors['menu']}3. {self.colors['error']}Leave stall{self.colors['reset']}")
 
             choice = input(f"\n{self.colors['menu']}Enter your choice: {self.colors['reset']}").strip()
             if choice == "1":
@@ -2295,7 +2295,7 @@ class GameEngine:
         
         print("\n" * 2)
         self.print_border("═", 120)
-        self.print_centered("⚔️  A D V E N T U R E  A W A I T S  ⚔️", 120, self.colors['header'])
+        self.print_centered(" A D V E N T U R E  A W A I T S  ", 120, self.colors['header'])
         self.print_border("═", 120)
         print("\n" * 2)
         

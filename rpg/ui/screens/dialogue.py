@@ -11,7 +11,14 @@ from textual.screen import Screen
 from textual.widgets import Button, Footer, Header, Label, Static
 
 from rpg.core.combat import Phase
-from rpg.core.dialogue import DialogueRunner, OpenShopRequest, StartCombatRequest, StepResult, VisualRequest
+from rpg.core.dialogue import (
+    DialogueRunner,
+    MinigameRequest,
+    OpenShopRequest,
+    StartCombatRequest,
+    StepResult,
+    VisualRequest,
+)
 from rpg.core.session import Encounter
 from rpg.ui.palette import MUTED_STYLE
 from rpg.ui.screens.modals import ConfirmModal
@@ -60,6 +67,9 @@ class DialogueScreen(Screen[None]):
         self._render_node()
         if not await self._process(result):
             return
+        if self.runner.redirected:  # a minigame on this node decided where the story goes
+            await self._after_enter(self.runner.proceed())
+            return
         await self._render_choices()
 
     def _close(self) -> None:
@@ -71,6 +81,10 @@ class DialogueScreen(Screen[None]):
         if index == LEAVE:
             self._close()
             return
+        # Outcomes of the choice (and of the node it leads to) replace the previous node's outcomes.
+        log = self.query_one("#dialogue-outcomes", EventLog)
+        log.clear()
+        log.display = False
         if index != CONTINUE:
             result = self.runner.choose(index)
             if not await self._process(result):
@@ -89,9 +103,13 @@ class DialogueScreen(Screen[None]):
             if isinstance(request, StartCombatRequest):
                 enemy, notes = app.session.create_story_enemy(request.enemy_id)
                 self._show_outcomes(StepResult(notes))
-                phase = await app.run_encounter(Encounter(enemy))
+                phase = await app.run_encounter(Encounter(enemy, ambush=request.ambush, opener=request.opener))
                 if phase == Phase.DEFEAT:
                     return False
+            elif isinstance(request, MinigameRequest):
+                outcome, events = await app.minigame_flow(request.spec, request.allow_retreat)
+                self._show_outcomes(StepResult(events))
+                self.runner.resolve_minigame(request, outcome.outcome if outcome else None)
             elif isinstance(request, OpenShopRequest):
                 from rpg.ui.screens.shop import ShopScreen
 
@@ -123,8 +141,6 @@ class DialogueScreen(Screen[None]):
             text.append(line, style="#EDE4D3")
         self.query_one("#dialogue-lines", Static).update(text)
         self.query_one("#dialogue-scroll", VerticalScroll).scroll_home(animate=False)
-        self.query_one("#dialogue-outcomes", EventLog).clear()
-        self.query_one("#dialogue-outcomes", EventLog).display = False
 
     async def _render_choices(self) -> None:
         box = self.query_one("#dialogue-choices", Vertical)

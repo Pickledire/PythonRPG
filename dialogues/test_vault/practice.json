@@ -1,0 +1,138 @@
+{
+  "speaker": "Practice hall",
+  "lines": [
+    "A dry corner of the mill set up by some bored treasure hunter: a padlock on a post, a plank over a ditch, painted runes, a swinging sack and a curtain to hide behind.",
+    "Pick a trial. Nothing here can hurt you. (Lockpicks you break are still gone.)"
+  ],
+  "choices": [
+    {
+      "text": "Hide behind the curtain (Stealth).",
+      "effects": [
+        {
+          "minigame": {
+            "type": "stealth",
+            "dc": 12,
+            "title": "Behind the Curtain",
+            "intro": "Someone is pacing the mill floor. Keep still.",
+            "success": "test_vault/practice",
+            "failure": "test_vault/practice",
+            "retreat": "test_vault/practice",
+            "creature": "The miller",
+            "duration": 18
+          }
+        }
+      ]
+    },
+    {
+      "text": "Pick the padlock (Lockpicking).",
+      "effects": [
+        {
+          "minigame": {
+            "type": "lockpick",
+            "dc": 11,
+            "title": "The Padlock",
+            "intro": "A cheap padlock. Feel for each pin.",
+            "success": "test_vault/practice",
+            "failure": "test_vault/practice",
+            "retreat": "test_vault/practice"
+          }
+        }
+      ],
+      "conditions": [
+        {
+          "has_lockpick": true
+        }
+      ]
+    },
+    {
+      "text": "Grab the practice lockpicks from the post (+3).",
+      "next": "test_vault/practice",
+      "effects": [
+        {
+          "give_item": "lockpick"
+        },
+        {
+          "give_item": "lockpick"
+        },
+        {
+          "give_item": "lockpick"
+        }
+      ]
+    },
+    {
+      "text": "Walk the plank (Balance).",
+      "effects": [
+        {
+          "minigame": {
+            "type": "balance",
+            "dc": 11,
+            "title": "The Plank",
+            "intro": "A wobbly plank over a muddy ditch.",
+            "success": "test_vault/practice",
+            "failure": "test_vault/practice",
+            "retreat": "test_vault/practice",
+            "duration": 14
+          }
+        }
+      ]
+    },
+    {
+      "text": "Trace the painted runes (Focus, mouse only).",
+      "effects": [
+        {
+          "minigame": {
+            "type": "memory",
+            "dc": 12,
+            "title": "Painted Runes",
+            "intro": "The runes are lit by a lantern swung in a pattern.",
+            "success": "test_vault/practice",
+            "failure": "test_vault/practice",
+            "retreat": "test_vault/practice"
+          }
+        }
+      ]
+    },
+    {
+      "text": "Throw knives at the swinging sack (Precision).",
+      "effects": [
+        {
+          "minigame": {
+            "type": "timing",
+            "dc": 11,
+            "title": "The Sack",
+            "intro": "Hit the painted circle as the sack swings past.",
+            "success": "test_vault/practice",
+            "failure": "test_vault/practice",
+            "retreat": "test_vault/practice",
+            "action": "Throw"
+          }
+        }
+      ]
+    },
+    {
+      "text": "Dodge the swinging sandbag (Quick-time event).",
+      "effects": [
+        {
+          "minigame": {
+            "type": "qte",
+            "dc": 12,
+            "title": "Sandbag!",
+            "intro": "A sandbag on a rope swings straight at your head!",
+            "success": "test_vault/practice",
+            "failure": "test_vault/practice",
+            "retreat": "test_vault/practice",
+            "prompts": 5,
+            "window": 1.4
+          }
+        }
+      ]
+    },
+    {
+      "text": "Head down into the vault.",
+      "next": "test_vault/hall"
+    },
+    {
+      "text": "Leave."
+    }
+  ]
+}

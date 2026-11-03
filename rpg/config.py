@@ -54,6 +54,31 @@ RACES: dict[str, dict] = {
     "Revenant": _race("11 10  8 12 10 13  5", 50, "Risen from the grave with unfinished business. People "
                       "tend to stare.", ["grave_blade", "wither"]),
 }
+# Racial skill bonuses and traits for minigames (see rpg/core/skills.py for what each skill and trait does).
+_ALL_SKILLS = ("stealth", "lockpicking", "reflexes", "focus", "balance", "precision")
+RACE_SKILLS: dict[str, dict[str, int]] = {
+    "Human": {skill: 1 for skill in _ALL_SKILLS},  # adaptable: a little better at everything
+    "Elf": {"balance": 2, "focus": 2, "precision": 1},
+    "Orc": {"reflexes": 1, "stealth": -2, "lockpicking": -1},
+    "Dwarf": {"lockpicking": 2, "balance": 2, "stealth": -1},
+    "Druid": {"stealth": 2, "focus": 1},
+    "Halfling": {"stealth": 5, "balance": 1, "lockpicking": 1},  # small, quiet, overlooked
+    "Gnome": {"lockpicking": 4, "precision": 2, "focus": 1},
+    "Dragonkin": {"stealth": -3, "balance": -1, "reflexes": 1},
+    "Beastkin": {"reflexes": 3, "balance": 2, "stealth": 1},
+    "Revenant": {"stealth": 2, "focus": 1, "reflexes": -1},  # no heartbeat, stiff joints
+}
+RACE_TRAITS: dict[str, tuple[str, ...]] = {
+    "Elf": ("keen_senses",),
+    "Orc": ("heavy_step",),
+    "Dwarf": ("stoneborn",),
+    "Halfling": ("small_frame",),
+    "Gnome": ("small_frame", "tinker"),
+    "Dragonkin": ("smoldering",),
+    "Beastkin": ("keen_senses",),
+    "Revenant": ("breathless",),
+}
+
 STARTING_CONSUMABLES = {"health_potion": 3}
 STARTING_GOLD = 100
 
@@ -86,6 +111,17 @@ ENEMY_SPELL_CHANCE = 0.35
 # Seconds the player has to act before hesitating (0 disables the timer).
 TURN_TIMER_SECONDS = 20
 
+# --------------------------------------------------------------------------- difficulty (settings screen)
+# Applied to every enemy when it is created, to combat rewards and to trial difficulty (dc).
+DIFFICULTIES: dict[str, dict] = {
+    "story": {"label": "Story", "blurb": "Gentler foes and easier trials. For the tale, not the struggle.",
+              "enemy_hp": 0.7, "enemy_damage": 0.7, "rewards": 1.0, "trial_dc": -2},
+    "normal": {"label": "Normal", "blurb": "The intended balance.",
+               "enemy_hp": 1.0, "enemy_damage": 1.0, "rewards": 1.0, "trial_dc": 0},
+    "hard": {"label": "Hard", "blurb": "Tougher, harder-hitting foes and stricter trials, for 30% more rewards.",
+             "enemy_hp": 1.3, "enemy_damage": 1.2, "rewards": 1.3, "trial_dc": 2},
+}
+
 # --------------------------------------------------------------------------- hunts & scaling
 RISKY_HUNT_ENEMY_SCALE = 1.2
 RISKY_HUNT_REWARD_MULTIPLIER = 1.5
@@ -116,3 +152,9 @@ HAUNT_MESSAGES = {
 INVENTORY_SIZE = 50
 SELL_RATIO = 0.5
 REPAIR_COST_RATIO = 0.5  # fraction of item value to fully repair from 0 durability
+
+# --------------------------------------------------------------------------- minigames
+# Each point of skill above (below) a minigame's difficulty widens (narrows) its windows by this much.
+SKILL_EASE_PER_POINT = 0.06
+# Boss quick-time events: share of max HP lost on a failed prompt sequence (partial success halves it).
+QTE_FAIL_DAMAGE = 0.22

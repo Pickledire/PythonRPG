@@ -1,0 +1,36 @@
+{
+  "speaker": "The Sanctum",
+  "lines": [
+    "The chest isn't locked. Inside, wrapped in oilcloth, are a burglar's prized possessions and a purse of old coin.",
+    "",
+    "[End of the trial run. Play it again from the quest board any time.]"
+  ],
+  "effects": [
+    {
+      "give_item": "thieves_tools"
+    },
+    {
+      "give_item": "muffling_salve"
+    },
+    {
+      "give_item": "hawkeye_drops"
+    },
+    {
+      "add_gold": 120
+    },
+    {
+      "give_xp": 120
+    },
+    {
+      "set_flag": [
+        "vault_cleared",
+        true
+      ]
+    }
+  ],
+  "choices": [
+    {
+      "text": "Climb back up to the mill."
+    }
+  ]
+}

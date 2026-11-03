@@ -10,7 +10,7 @@ from textual.app import ComposeResult
 from textual.containers import Vertical
 from textual.widgets import Label, Static
 
-from rpg.ui.palette import GOLD_STYLE, MUTED_STYLE, effect_badges
+from rpg.ui.palette import ATTRIBUTE_COLORS, GOLD_STYLE, MUTED_STYLE, effect_badges
 from rpg.ui.widgets.stat_bar import StatBar
 
 
@@ -47,7 +47,7 @@ class PlayerPanel(Vertical):
         for i, (attribute, value) in enumerate(p.attributes.items()):
             if i:
                 attrs.append("\n" if i == 4 else "  ")
-            attrs.append(f"{attribute.short} ", style=MUTED_STYLE)
+            attrs.append(f"{attribute.short} ", style=ATTRIBUTE_COLORS[attribute])
             attrs.append(f"{value:<2}", style="bold")
         self.query_one("#pp-attrs", Static).update(attrs)
 

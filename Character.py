@@ -115,32 +115,32 @@ class Character:
         
         # Build status string with colors
         status = f"\n{self.colors['border']}{'═' * 50}{self.colors['reset']}\n"
-        status += f"{self.colors['name']}🛡️  {self.name}{self.colors['reset']} - {self.colors['race']}{self.race}{self.colors['reset']} {self.colors['level']}(Level {self.level}){self.colors['reset']}\n"
+        status += f"{self.colors['name']} {self.name}{self.colors['reset']} - {self.colors['race']}{self.race}{self.colors['reset']} {self.colors['level']}(Level {self.level}){self.colors['reset']}\n"
         status += f"{self.colors['border']}{'═' * 50}{self.colors['reset']}\n"
         
         # Health display
-        status += f"{health_color}❤️  Health: [{health_bar}] {self.health}/{self.max_health}{self.colors['reset']}\n"
+        status += f"{health_color} Health: [{health_bar}] {self.health}/{self.max_health}{self.colors['reset']}\n"
         
         # Mana display
         mana_bar = create_bar(self.mana, self.max_mana)
-        status += f"{self.colors['magic']}🔮 Mana: [{mana_bar}] {self.mana}/{self.max_mana}{self.colors['reset']}\n"
+        status += f"{self.colors['magic']}Mana: [{mana_bar}] {self.mana}/{self.max_mana}{self.colors['reset']}\n"
         
         # XP display
-        status += f"{self.colors['xp']}⭐ XP: [{xp_bar}] {self.xp}/{xp_required}{self.colors['reset']}\n"
+        status += f"{self.colors['xp']}XP: [{xp_bar}] {self.xp}/{xp_required}{self.colors['reset']}\n"
         
         # Gold
-        status += f"{self.colors['gold']}💰 Gold: {self.gold}{self.colors['reset']}\n"
+        status += f"{self.colors['gold']}Gold: {self.gold}{self.colors['reset']}\n"
         
         # Stats
-        status += f"{self.colors['stats']}📊 Stats: STR:{self.stats['strength']} AGI:{self.stats['agility']} INT:{self.stats['intelligence']}{self.colors['reset']}\n"
+        status += f"{self.colors['stats']}Stats: STR:{self.stats['strength']} AGI:{self.stats['agility']} INT:{self.stats['intelligence']}{self.colors['reset']}\n"
         
         # Equipment
         magic_items = self.inventory.get_magic()
         weapon = self.inventory.equipped_weapon
         armor = self.inventory.equipped_armor
-        status += f"{self.colors['weapon']}⚔️  Weapon: {weapon.name if weapon else 'None'}{self.colors['reset']}\n"
-        status += f"{self.colors['armor']}🛡️  Armor: {armor.name if armor else 'None'}{self.colors['reset']}\n"
-        status += f"{self.colors['magic']}🔮  Spells Known: {len(magic_items)}{self.colors['reset']}\n"
+        status += f"{self.colors['weapon']} Weapon: {weapon.name if weapon else 'None'}{self.colors['reset']}\n"
+        status += f"{self.colors['armor']} Armor: {armor.name if armor else 'None'}{self.colors['reset']}\n"
+        status += f"{self.colors['magic']} Spells Known: {len(magic_items)}{self.colors['reset']}\n"
         
         status += f"{self.colors['border']}{'═' * 50}{self.colors['reset']}"
         
@@ -168,7 +168,7 @@ class Character:
             self.mana += 10
         
         if levels_gained > 0:
-            print(f"\n{self.colors['level']}🎉 {self.name} leveled up {levels_gained} time(s)! Now level {self.level}{self.colors['reset']}")
+            print(f"\n{self.colors['level']}{self.name} leveled up {levels_gained} time(s)! Now level {self.level}{self.colors['reset']}")
             print(f"{self.colors['health']}Health increased to {self.max_health}! Choose a stat each level.{self.colors['reset']}")
 
     def _choose_stat_increase(self):
@@ -302,7 +302,7 @@ class Character:
         
         # XP/gold for the kill are granted once, in GameEngine.end_combat
         if not target.alive:
-            result += f"\n{Fore.RED + Style.BRIGHT}💀 {target.name} has been defeated!{self.colors['reset']}"
+            result += f"\n{Fore.RED + Style.BRIGHT}{target.name} has been defeated!{self.colors['reset']}"
         
         return result
 
@@ -418,12 +418,12 @@ class Character:
     def add_gold(self, amount):
         """Add gold to the character"""
         self.gold += amount
-        return f"{self.colors['gold']}Gained {amount} gold! Total: {self.gold} 💰{self.colors['reset']}"
+        return f"{self.colors['gold']}Gained {amount} gold! Total: {self.gold} {self.colors['reset']}"
     
     def spend_gold(self, amount):
         """Spend gold if the character has enough"""
         if self.gold >= amount:
             self.gold -= amount
-            return True, f"{self.colors['gold']}Spent {amount} gold. Remaining: {self.gold} 💰{self.colors['reset']}"
+            return True, f"{self.colors['gold']}Spent {amount} gold. Remaining: {self.gold} {self.colors['reset']}"
         else:
             return False, f"{Fore.RED}Not enough gold! You have {self.gold} but need {amount}.{self.colors['reset']}" 

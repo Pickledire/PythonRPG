@@ -1,0 +1,19 @@
+{
+  "speaker": "The Drowned Hall",
+  "lines": [
+    "You hold your breath as it passes close enough to touch. Up close you see it: a crack in the plate over its chest, and behind it a core that ticks like a slow heart.",
+    "At the end of the hall it raises a hand to a door of nine runes, and they light one after another in a slow, deliberate rhythm. Then it walks back into its alcove and goes still.",
+    "You know where to strike, and you saw how the runes open."
+  ],
+  "effects": [
+    {
+      "give_xp": 40
+    }
+  ],
+  "choices": [
+    {
+      "text": "Move on while it rests.",
+      "next": "test_vault/door"
+    }
+  ]
+}

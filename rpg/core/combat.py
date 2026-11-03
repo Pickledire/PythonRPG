@@ -6,6 +6,8 @@ The UI drives a ``CombatSession`` one step at a time so it can pace the log and 
     session.act(Attack())                 -> ActionResult; rejected actions don't spend the turn
     while session.phase is ENEMY_TURN:
         session.enemy_turn()              -> events; ends at the start of the player's next turn
+        if session.pending_qte:           -> a boss telegraphed a big move (see ``QTETrigger``):
+            session.resolve_qte(score)       play the quick-time event, then report how it went (0..1)
     session.phase in (VICTORY, DEFEAT, FLED) -> combat is over
 """
 
@@ -16,8 +18,8 @@ from dataclasses import dataclass, field
 from enum import Enum
 
 from rpg import config
-from rpg.core.effects import DAMAGE_OVER_TIME, EFFECT_INFO, END_OF_TURN_DECAY, EffectKind, EffectSpec
-from rpg.core.enemies import Enemy
+from rpg.core.effects import DAMAGE_OVER_TIME, EFFECT_INFO, END_OF_TURN_DECAY, EffectKind, EffectSpec, StatusEffect
+from rpg.core.enemies import Enemy, QTETrigger
 from rpg.core.entities import Combatant, DamageType, Player
 from rpg.core.events import LogEvent, Tone
 from rpg.core.formulas import (
@@ -95,6 +97,22 @@ class CombatSession:
         self.round = 0
         self.log: list[LogEvent] = []
         self._started = False
+        self.pending_qte: QTETrigger | None = None
+        self._opening: list[LogEvent] = []  # shown at the top of the log by start()
+        self._fired_qtes: set[int] = set()
+        self.ambushed = False
+
+    def ambush(self) -> None:
+        """The enemy acts first (the player was discovered while hiding). Call before ``start``."""
+        self.ambushed = True
+
+    def opening_strike(self, fraction: float) -> list[LogEvent]:
+        """Sneak attack: the enemy starts the fight missing ``fraction`` of its health."""
+        dealt = self.enemy.lose_hp(int(self.enemy.max_hp * max(0.0, min(0.9, fraction))))
+        events = [LogEvent(f"You strike from hiding! {self.enemy.name} takes {dealt} damage before it can react.",
+                           Tone.CRIT)] if dealt else []
+        self._opening += events
+        return events
 
     # ------------------------------------------------------------ public API
     @property
@@ -105,7 +123,11 @@ class CombatSession:
         if self._started:
             raise CombatError("Combat already started")
         self._started = True
-        events = [LogEvent(f"⚔ {self.enemy.name} engages you!", Tone.SYSTEM)]
+        if self.ambushed:
+            self.phase = Phase.ENEMY_TURN
+            return self._record(self._opening + [LogEvent(f"{self.enemy.name} catches you off guard and strikes "
+                                                          "first!", Tone.WARNING)])
+        events = self._opening + [LogEvent(f"{self.enemy.name} engages you!", Tone.SYSTEM)]
         events += self._begin_player_turn()
         return self._record(events)
 
@@ -135,18 +157,65 @@ class CombatSession:
     def enemy_turn(self) -> list[LogEvent]:
         if self.phase != Phase.ENEMY_TURN:
             raise CombatError(f"Not the enemy's turn ({self.phase.value})")
+        if self.pending_qte:
+            raise CombatError("Resolve the pending quick-time event first")
         events, skip = self._tick(self.enemy)
         if not self.enemy.alive:
             return self._record(events + self._victory())
         if not skip:
-            events += self._enemy_act()
-            if not self.player.alive:
-                self.phase = Phase.DEFEAT
-                events.append(LogEvent(f"💀 {self.enemy.name} has struck you down.", Tone.DAMAGE))
+            trigger = self._next_qte()
+            if trigger:
+                # The telegraphed move *is* the enemy's action this turn; the UI plays it, then resolve_qte().
+                self.pending_qte = trigger
+                events.append(LogEvent(f"{trigger.telegraph.format(name=self.enemy.name)}", Tone.WARNING))
                 return self._record(events)
-        events += self._decay(self.enemy)
-        events += self._begin_player_turn()
-        return self._record(events)
+            events += self._enemy_act()
+        return self._record(events + self._end_enemy_turn())
+
+    def resolve_qte(self, score: float) -> list[LogEvent]:
+        """Apply a quick-time event's outcome (``score`` 0..1 from the minigame) and finish the enemy turn."""
+        trigger = self.pending_qte
+        if trigger is None:
+            raise CombatError("No quick-time event is pending")
+        self.pending_qte = None
+        p, e = self.player, self.enemy
+        events: list[LogEvent] = []
+        if score >= trigger.success_score:
+            events.append(LogEvent(trigger.success_text.format(name=e.name), Tone.PLAYER))
+            if trigger.counter_damage:
+                dealt = e.lose_hp(max(1, int(e.max_hp * trigger.counter_damage)))
+                events.append(LogEvent(f"You punish the opening for {dealt} damage!", Tone.CRIT))
+            if trigger.stagger and e.alive:
+                e.add_effect(StatusEffect(EffectKind.FROZEN, 1, 0, "Staggered"))
+                events.append(LogEvent(f"{e.name} is staggered and loses its next turn!", Tone.STATUS))
+        else:
+            partial = score >= trigger.partial_score
+            share = trigger.fail_damage * (0.5 if partial else 1.0)
+            dealt = p.lose_hp(max(1, int(p.max_hp * share)))
+            text = trigger.partial_text if partial else trigger.fail_text
+            events.append(LogEvent(f"{text.format(name=e.name)} You take {dealt} damage!", Tone.DAMAGE))
+            if trigger.fail_effect and not partial and p.alive:
+                events += self._apply(p, trigger.fail_effect, e.name, roll=False)
+        if not e.alive:
+            return self._record(events + self._victory())
+        if not p.alive:
+            self.phase = Phase.DEFEAT
+            events.append(LogEvent(f"{e.name} has struck you down.", Tone.DAMAGE))
+            return self._record(events)
+        return self._record(events + self._end_enemy_turn())
+
+    def _next_qte(self) -> QTETrigger | None:
+        for index, trigger in enumerate(self.enemy.template.qte_triggers):
+            if index not in self._fired_qtes and self.enemy.hp_ratio <= trigger.hp_below:
+                self._fired_qtes.add(index)
+                return trigger
+        return None
+
+    def _end_enemy_turn(self) -> list[LogEvent]:
+        if not self.player.alive:
+            self.phase = Phase.DEFEAT
+            return [LogEvent(f"{self.enemy.name} has struck you down.", Tone.DAMAGE)]
+        return self._decay(self.enemy) + self._begin_player_turn()
 
     def castable_spells(self) -> list[tuple[Spell, bool, str]]:
         """Every known spell with whether it can be cast right now and why not."""
@@ -159,7 +228,8 @@ class CombatSession:
         return options
 
     def usable_items(self) -> list[tuple[Consumable, int]]:
-        return [(s.item, s.quantity) for s in self.player.inventory.consumables()]  # type: ignore[misc]
+        return [(s.item, s.quantity) for s in self.player.inventory.consumables()  # type: ignore[misc]
+                if s.item.usable_in_combat]
 
     @property
     def flee_chance(self) -> float:
@@ -175,7 +245,7 @@ class CombatSession:
         events, skip = self._tick(self.player)
         if not self.player.alive:
             self.phase = Phase.DEFEAT
-            events.append(LogEvent("💀 Your wounds overcome you.", Tone.DAMAGE))
+            events.append(LogEvent("Your wounds overcome you.", Tone.DAMAGE))
             return events
         if skip:
             events += self._decay(self.player)
@@ -201,7 +271,7 @@ class CombatSession:
                 events.append(LogEvent(f"{who.name} is no longer {effect.info.label.lower()}ed."
                                        if kind != EffectKind.BLEED else f"{who.name}'s bleeding stops.", Tone.INFO))
             if not who.alive:
-                events.append(LogEvent(f"💀 {who.name} succumbs to {effect.info.label.lower()}!", Tone.DAMAGE))
+                events.append(LogEvent(f"{who.name} succumbs to {effect.info.label.lower()}!", Tone.DAMAGE))
                 return events, True
 
         regen = who.effects.get(EffectKind.REGEN)
@@ -221,7 +291,7 @@ class CombatSession:
             frozen.turns -= 1
             if frozen.turns <= 0:
                 who.remove_effect(EffectKind.FROZEN)
-            events.append(LogEvent(f"❄ {who.name} is frozen solid and cannot act!", Tone.STATUS))
+            events.append(LogEvent(f"{who.name} is frozen solid and cannot act!", Tone.STATUS))
             return events, True
         return events, False
 
@@ -240,7 +310,7 @@ class CombatSession:
 
     def _victory(self) -> list[LogEvent]:
         self.phase = Phase.VICTORY
-        return [LogEvent(f"🏆 {self.enemy.name} has been defeated!", Tone.REWARD)]
+        return [LogEvent(f"{self.enemy.name} has been defeated!", Tone.REWARD)]
 
     # ------------------------------------------------------------ effects
     def _apply(self, target: Combatant, spec: EffectSpec, source: str, roll: bool = True) -> list[LogEvent]:
@@ -259,7 +329,7 @@ class CombatSession:
             EffectKind.REGEN: f"{target.name} begins to regenerate.",
             EffectKind.SHIELD: f"A ward shimmers around {target.name} ({int(effect.potency * 100)}% for {effect.turns} turns).",
             EffectKind.BLIND: f"{target.name} staggers, vision clouded!",
-            EffectKind.FROZEN: f"❄ {target.name} is frozen in place!",
+            EffectKind.FROZEN: f"{target.name} is frozen in place!",
         }[spec.kind]
         return [LogEvent(text, Tone.STATUS)]
 
@@ -402,6 +472,10 @@ def consumable_blocker(player: Player, item: Consumable) -> str | None:
         return "You're already fully restored."
     if item.effect == ConsumableEffect.CURE and not any(k in player.effects for k in CLEANSABLE):
         return "You have no afflictions to cure."
+    if item.effect == ConsumableEffect.LOCKPICK:
+        return "Lockpicks are used when you pick a lock."
+    if item.effect == ConsumableEffect.SKILL_BOOST and player.skill_primes.get(item.skill or "", 0) >= item.potency:
+        return "You're already primed for that."
     return None
 
 
@@ -414,6 +488,13 @@ def apply_consumable(player: Player, item: Consumable) -> list[LogEvent]:
     if item.effect == ConsumableEffect.RESTORE:
         hp, mp = player.heal(item.potency), player.restore_mana(item.potency)
         return [LogEvent(f"You drink the {item.name}: +{hp} HP, +{mp} mana.", Tone.HEAL)]
+    if item.effect == ConsumableEffect.SKILL_BOOST and item.skill:
+        from rpg.core.skills import Skill
+
+        label = Skill(item.skill).label
+        amount = player.prime_skill(item.skill, item.potency)
+        return [LogEvent(f"You use the {item.name}: +{amount} {label} for your next {label.lower()} trial.",
+                         Tone.REWARD)]
     removed = player.cleanse()
     names = ", ".join(k.value for k in removed) or "nothing"
     return [LogEvent(f"You take the {item.name}. Cured: {names}.", Tone.HEAL)]

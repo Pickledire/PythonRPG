@@ -1,0 +1,25 @@
+{
+  "speaker": "The Portcullis",
+  "lines": [
+    "A portcullis seals the inner chamber. High above, its counterweight hangs from a fraying rope that sways in the draught. Cut the rope and the weight drops and the gate rises."
+  ],
+  "choices": [
+    {
+      "text": "Throw your knife at the swaying rope.",
+      "effects": [
+        {
+          "minigame": {
+            "type": "timing",
+            "dc": 11,
+            "title": "The Fraying Rope",
+            "intro": "Throw when the rope crosses the mark. Three good hits should do it.",
+            "success": "test_vault/collapse",
+            "failure": "test_vault/gate_miss",
+            "partial": "test_vault/collapse",
+            "action": "Throw"
+          }
+        }
+      ]
+    }
+  ]
+}

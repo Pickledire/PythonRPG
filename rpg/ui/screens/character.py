@@ -27,7 +27,8 @@ from rpg.core.formulas import (
     status_resist_chance,
     weapon_attribute_bonus,
 )
-from rpg.ui.palette import MUTED_STYLE
+from rpg.core.skills import TRAITS, Skill, player_traits, skill_check
+from rpg.ui.palette import ATTRIBUTE_COLORS, MUTED_STYLE, attribute_bar
 from rpg.ui.widgets import PlayerPanel
 
 
@@ -78,7 +79,9 @@ class CharacterScreen(Screen):
         table.add_row("", "")
         section("Attributes")
         for attribute, value in p.attributes.items():
-            table.add_row(attribute.label, Text.assemble((f"{value:<4}", "bold"), (attribute.description, MUTED_STYLE)))
+            table.add_row(Text(attribute.label, style=ATTRIBUTE_COLORS[attribute]),
+                          Text.assemble((f"{value:<4}", "bold"), attribute_bar(attribute, value, 10),
+                                        (f"  {attribute.description}", MUTED_STYLE)))
         table.add_row("Unspent points", str(p.stat_points))
         table.add_row("", "")
         section("Combat")
@@ -99,6 +102,20 @@ class CharacterScreen(Screen):
             table.add_row("Equipped spell", f"{p.spell.name}  (power {power}, {p.spell.mana_cost} MP)")
         multiplier = buy_price_multiplier(a.charisma)
         table.add_row("Shop prices", f"×{multiplier:.2f} when buying · sell for {sell_ratio(a.charisma) * 100:.0f}% of value")
+        table.add_row("", "")
+        section("Skills")
+        for skill in Skill:
+            check = skill_check(p, skill, 0)
+            sources = ", ".join(f"{src.label} {src.amount:+d}" for src in check.sources)
+            table.add_row(skill.label, Text.assemble((f"{check.rating:<4}", "bold"),
+                                                     (sources or skill.description, MUTED_STYLE)))
+        traits = sorted(player_traits(p))
+        if traits:
+            table.add_row("Traits", Text(", ".join(TRAITS[t].label if t in TRAITS else t for t in traits),
+                                         style="#C99BE8"))
+        if p.skill_primes:
+            primes = ", ".join(f"{Skill(k).label} +{v}" for k, v in p.skill_primes.items())
+            table.add_row("Primed", Text(primes + " (next trial)", style="#9FD08F"))
         table.add_row("", "")
         section("World")
         table.add_row("Time", world.time_label)

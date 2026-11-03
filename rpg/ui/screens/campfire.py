@@ -15,10 +15,9 @@ from textual.widgets import Button, Footer, Header, Label
 from rpg.core.campfire import CampfireReport
 from rpg.core.combat import Phase
 from rpg.core.session import Encounter
-from rpg.ui.widgets import EventLog, VisualEffect
+from rpg.ui.widgets import AsciiAnimation, EventLog
 
 REST_SECONDS = 2.5
-EMBERS = "\n".join(["   )   ", "  ) (  ", " ( ) ) ", "\\_|_|_/"])
 
 
 class CampfireScreen(Screen[None]):
@@ -33,8 +32,9 @@ class CampfireScreen(Screen[None]):
         yield Header(show_clock=False)
         with Vertical(id="campfire-root"):
             yield Label("You set up a small camp and rest by the fire...", classes="screen-title")
-            yield VisualEffect(id="campfire-fx")
-            yield EventLog(id="campfire-log")
+            with Horizontal(id="campfire-scene"):
+                yield AsciiAnimation("campfire", id="campfire-art")
+                yield EventLog(id="campfire-log")
             with Center():
                 with Horizontal(id="campfire-buttons"):
                     yield Button("Fight!", variant="error", id="fight")
@@ -49,9 +49,8 @@ class CampfireScreen(Screen[None]):
 
     async def _rest(self) -> None:
         log = self.query_one("#campfire-log", EventLog)
-        fx = self.query_one("#campfire-fx", VisualEffect)
-        await fx.play("campfire", REST_SECONDS, rows=5)
-        fx.update(Text(EMBERS, style="#FF8C42", justify="center"))
+        log.add_text(Text("You feed the fire and settle in for the night...", style="#C9BFAE"))
+        await asyncio.sleep(REST_SECONDS)
         log.add_text(Text("Warmth seeps into your bones...", style="#E3B85C"))
         await asyncio.sleep(0.3)
         self.report = self.app.session.rest()

@@ -1,0 +1,24 @@
+{
+  "speaker": "The Drowned Hall",
+  "lines": [
+    "Its head snaps toward your hiding place. Water explodes from the floor as it charges."
+  ],
+  "effects": [
+    {
+      "start_combat": "stone_sentinel",
+      "ambush": true
+    },
+    {
+      "set_flag": [
+        "sentinel_down",
+        true
+      ]
+    }
+  ],
+  "choices": [
+    {
+      "text": "Catch your breath and move on.",
+      "next": "test_vault/door"
+    }
+  ]
+}

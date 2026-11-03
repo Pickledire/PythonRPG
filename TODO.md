@@ -20,6 +20,9 @@ request, the UI fulfils it.
 - [ ] Optional high-resolution path via `textual-image` (Kitty / Sixel / iTerm2 protocols) with half-block
       fallback.
 
+- [ ] Replace the generated boss portraits (`tools/make_boss_art.py`) with Aseprite sprites as they're drawn;
+      keep the generated ones as fallbacks.
+
 ## 2. Combat feel
 - [ ] Screen shake on big hits/crits (animate the arena's `offset`).
 - [ ] Hit flash: sprite briefly tinted white/red (auto-generated tinted frames, no extra art needed).
@@ -33,26 +36,34 @@ request, the UI fulfils it.
 - [ ] Cinematic intros: sprite fades in from black while story text types out, then the name slams in.
 - [ ] Boss phases in the rules (`EnemyTemplate.phases`): at HP thresholds switch animation tag, gain moves
       or affixes, change music-less "mood" (border color, effects); log line + screen shake on transition.
-- [ ] Telegraphed big attacks ("The Titan raises its fist...") one turn ahead, giving the player a chance
-      to ward or dodge.
+- [x] Telegraphed big attacks answered with quick-time events (`QTETrigger` on `EnemyTemplate`): the Titan,
+      Elder Dragon, Earth Eater Worm, Rat King and the Stone Sentinel each have two.
+- [ ] Telegraph one turn *ahead* as an alternative (time to ward or drink a Quicksilver Draught first).
 - [ ] Unique death animations per boss.
 
 ## 4. Pop-ups and timed events
 - [ ] Styled toast cards (item pickup, level up, achievement) that slide in and fade.
 - [ ] Timed dialogue choices: `"timeout": 5, "on_timeout": "node_id"` on a node, with a visible countdown.
-- [ ] Quick-time events: "Press SPACE to dodge!" during boss attacks; success halves damage.
-      Rules side: `QuickTimeRequest(key, window_seconds)`; result feeds back into the combat step.
+- [x] Quick-time events during boss attacks (`CombatSession.pending_qte` / `resolve_qte`) and in dialogue
+      (`{"minigame": {"type": "qte", ...}}`).
 
 ## 5. Minigame framework
-- [ ] `rpg/core/minigames/`: pure-rules minigames (state machine + difficulty + attribute modifiers), tested.
-- [ ] Dialogue effect: `{"start_minigame": "lockpick", "difficulty": 3, "on_success": "id", "on_failure": "id"}`
-      handled like `start_combat` (a request the UI fulfils, then the runner branches).
-- [ ] **Lockpicking** (first): pin sweeps across a bar, press SPACE in the sweet spot; each tumbler faster and
-      narrower; Dexterity widens the zone; failures can break lockpicks (new consumable sold in shops).
-- [ ] Forge hammer timing for the blacksmith questline.
-- [ ] Rune memory sequence for the mages' forbidden vault.
-- [ ] Balance meter for the Mt. Aegis ice bridge.
-- [ ] Tavern card game with unique NPC decks; rare cards drop from bosses/factions.
+- [x] `rpg/core/minigames/`: pure state machines, tested, driven by a `SkillCheck` (attributes + race + gear +
+      primed tonics, plus traits). Six kinds: quick-time event, lockpicking, precision timing, memory (mouse
+      only), balance, stealth (silence meter).
+- [x] Dialogue effect `{"minigame": {...}}` with success / partial / failure / retreat routing and a story flag.
+- [x] Skills, race bonuses and traits (`rpg/core/skills.py`, `RACE_SKILLS` / `RACE_TRAITS` in config).
+- [x] Gear and items: lockpicks (3 qualities), skill tonics, carried tools and charms, stealthy and
+      acrobatic armor, loud heavy armor.
+- [x] Briefing screen (odds, where every point comes from, drink a tonic first) and a test quest
+      (*The Sunken Vault (trial run)* with a practice hall).
+- [ ] Replace the trial run with real placements: lockpicking in Valoria, rune memory for the mages'
+      forbidden vault, balance on the Mt. Aegis ice bridge, stealth in the graveyard, precision for the
+      fighters' archery contest.
+- [ ] Clothing / accessory slots (cloak, boots, gloves, ring): add a `Slot` and an item class; skill bonuses
+      and traits already apply to anything in `inventory.equipped`.
+- [ ] Minigame sprites once the Aseprite pipeline exists (lock face, rune tiles, the hunter in stealth).
+- [ ] Tavern card game with unique NPC decks; rare cards drop from bosses/factions (needs deck rules).
 
 ## 6. World and exploration
 - [ ] Exploration mode (ASCII map): fog-of-war over zones, hazards, secrets; lightweight movement and
@@ -62,9 +73,18 @@ request, the UI fulfils it.
 ## 7. Characters
 - [ ] Druid companions: tame or befriend creatures (wolf, hawk, bear, sprite) that fight alongside you
       with their own card in combat and a simple AI; companion stats scale with Wisdom/Charisma.
-- [ ] Racial traits (e.g. Revenant resists poison, Dragonkin resists burn, Halfling luck, Beastkin
-      bleed-on-crit) as small passives on races.
+- [x] Racial minigame traits (Halfling small frame, Revenant breathless, Gnome tinker, Dwarf stoneborn...).
+- [ ] Racial *combat* passives (e.g. Revenant resists poison, Dragonkin resists burn, Halfling luck,
+      Beastkin bleed-on-crit), using the same trait channel.
 - [ ] Use Charisma more in dialogue (`{"min_stat": ["charisma", 12]}` checks for persuasion branches).
+
+## 8. Presentation and settings
+- [x] Settings screen: themes, difficulty, turn timer, trial reaction time, pacing, skip intros, reduced motion.
+- [ ] Font size and style: ship a Windows Terminal profile fragment (font, size, colors, maybe a background
+      image) and have `run_game.bat` launch the game with it.
+- [ ] Ironman difficulty (save deleted on death), autosave after resting or finishing a quest, key remapping
+      for trials (arrows vs WASD), a colorblind-safe palette for stat colors and meters.
+- [ ] Rework the stealth trial (feedback: "slightly iffy").
 
 ## Content gaps
 - [ ] Write `forest/woman_help_take_key`, `forest/woman_help_try_to_escape`, `forest/woman_help_wait_for_help`.

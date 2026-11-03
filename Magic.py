@@ -84,7 +84,7 @@ class Magic(Item):
             actual_damage = target.take_damage(self.damage, attacker=caster, damage_type='magic')
             result = f"{caster.name} casts {self.name} on {target.name} for {actual_damage} damage!"
             if not target.alive:
-                result += f"\n💀 {self.name} has killed {target.name}!"
+                result += f"\n{self.name} has killed {target.name}!"
             return result, actual_damage 
 
     def get_requirement(self):

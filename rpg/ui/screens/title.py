@@ -21,18 +21,20 @@ TITLE_ART = r"""
 
 
 class TitleScreen(Screen):
-    BINDINGS = [Binding("n", "new", "New game"), Binding("l", "load", "Load"), Binding("q", "quit_game", "Quit")]
+    BINDINGS = [Binding("n", "new", "New game"), Binding("l", "load", "Load"), Binding("o", "settings", "Settings"),
+                Binding("q", "quit_game", "Quit")]
 
     def compose(self) -> ComposeResult:
         with Vertical(id="title-root"):
             yield Static(Text(TITLE_ART, style="bold #E0A458"), id="title-art")
-            yield Static("⚔  A D V E N T U R E   A W A I T S  ⚔", id="title-tagline")
+            yield Static("═══  A D V E N T U R E   A W A I T S  ═══", id="title-tagline")
             yield Static("Choose your race, master weapon and spell, and carve your legend through\n"
                          "goblin warrens, haunted graveyards and the lairs of ancient Titans.", id="title-blurb")
             with Center():
                 with Vertical(id="title-menu"):
                     yield Button("New Game", variant="primary", id="new")
                     yield Button("Load Game", id="load")
+                    yield Button("Settings", id="settings")
                     yield Button("Quit", id="quit", variant="error")
         yield Footer()
 
@@ -55,6 +57,12 @@ class TitleScreen(Screen):
 
         if self.app.saves.any_saves():
             self.app.push_screen(SaveLoadScreen("load"))
+
+    @on(Button.Pressed, "#settings")
+    def action_settings(self) -> None:
+        from rpg.ui.screens.settings import SettingsScreen
+
+        self.app.push_screen(SettingsScreen())
 
     @on(Button.Pressed, "#quit")
     def action_quit_game(self) -> None:

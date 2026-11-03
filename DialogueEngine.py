@@ -213,9 +213,9 @@ def _apply_effects(engine, effects: list):
                     engine.display_boss_intro()
             else:
                 print()
-                engine.print_border("⚔", 60, engine.colors['combat'])
-                engine.print_centered(f"{engine.colors['combat']}⚔️ A wild {engine.colors['enemy']}{engine.current_enemy.name}{engine.colors['combat']} appears!{engine.colors['reset']}")
-                engine.print_border("⚔", 60, engine.colors['combat'])
+                engine.print_border("", 60, engine.colors['combat'])
+                engine.print_centered(f"{engine.colors['combat']}A wild {engine.colors['enemy']}{engine.current_enemy.name}{engine.colors['combat']} appears!{engine.colors['reset']}")
+                engine.print_border("", 60, engine.colors['combat'])
                 if hasattr(engine, 'print_centered_block'):
                     engine.print_centered_block(engine.current_enemy.get_info(), engine.colors['info'])
                 else:

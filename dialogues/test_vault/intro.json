@@ -1,0 +1,36 @@
+{
+  "speaker": "Ferryman Odo",
+  "lines": [
+    "[TRIAL RUN: a temporary quest that shows off every minigame. Rewrite or delete it freely.]",
+    "",
+    "\"The old mill's cellar broke through into something older last spring,\" the ferryman says, poling you across the flooded millpond. \"A vault. Drowned halls, rune doors, and a stone thing that walks.\"",
+    "He spits over the side. \"Nobody who went down came back up rich. You might be the first.\""
+  ],
+  "effects": [
+    {
+      "remove_flag": "vault_hide"
+    },
+    {
+      "remove_flag": "sentinel_down"
+    },
+    {
+      "remove_flag": "vault_found_picks"
+    },
+    {
+      "remove_flag": "vault_lock"
+    }
+  ],
+  "choices": [
+    {
+      "text": "Descend into the vault.",
+      "next": "test_vault/hall"
+    },
+    {
+      "text": "Visit the practice hall first (try any single trial).",
+      "next": "test_vault/practice"
+    },
+    {
+      "text": "Not today."
+    }
+  ]
+}

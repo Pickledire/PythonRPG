@@ -17,7 +17,7 @@ from rpg.core.formulas import (
     status_resist_chance,
 )
 from rpg.core.inventory import Inventory
-from rpg.core.items import Armor, Item, Spell, Weapon
+from rpg.core.items import Armor, Consumable, ConsumableEffect, Curio, Item, Spell, Weapon
 
 
 class DamageType(str, Enum):
@@ -126,6 +126,7 @@ class Player(Combatant):
         self.inventory = Inventory()
         self.kills = 0
         self.stat_points = 0
+        self.skill_primes: dict[str, int] = {}  # skill -> bonus for the next minigame that uses it
 
     @classmethod
     def create(cls, name: str, race: str) -> "Player":
@@ -251,6 +252,38 @@ class Player(Combatant):
         self.inventory.equip(item)
         return f"Equipped {item.name}."
 
+    # ------------------------------------------------------------ skills (minigames)
+    def skill_items(self) -> list[Item]:
+        """Items whose minigame modifiers apply: equipped gear plus one of each carried curio.
+
+        New equipment slots (cloaks, boots, rings...) only need to appear in ``inventory.equipped``.
+        """
+        items: list[Item] = [item for item in self.inventory.equipped.values() if item is not None]
+        seen: set[str] = set()
+        for stack in self.inventory:
+            item = stack.item
+            if isinstance(item, Curio) and (item.skill_bonuses or item.traits) and item.template_id not in seen:
+                seen.add(item.template_id)
+                items.append(item)
+        return items
+
+    def prime_skill(self, skill: str, amount: int) -> int:
+        """Prime a skill for the next trial that uses it. Primes don't stack; the strongest one wins."""
+        self.skill_primes[skill] = max(self.skill_primes.get(skill, 0), int(amount))
+        return self.skill_primes[skill]
+
+    def consume_prime(self, skill: str) -> int:
+        return self.skill_primes.pop(skill, 0)
+
+    def lockpicks(self) -> list[Consumable]:
+        """Lockpicks carried, one entry per pick, best quality first."""
+        picks: list[Consumable] = []
+        for stack in self.inventory.consumables():
+            item = stack.item
+            if isinstance(item, Consumable) and item.effect == ConsumableEffect.LOCKPICK:
+                picks += [item] * stack.quantity
+        return sorted(picks, key=lambda pick: -pick.potency)
+
     # ------------------------------------------------------------ defense
     def effective_defense(self, damage_type: DamageType, penetration: float = 0.0) -> float:
         armor = self.armor
@@ -279,6 +312,7 @@ class Player(Combatant):
             "attributes": self.attributes.to_dict(),
             "stat_points": self.stat_points,
             "kills": self.kills,
+            "skill_primes": dict(self.skill_primes),
             "effects": [e.to_dict() for e in self.effects.values()],
             "inventory": self.inventory.to_dict(),
         }
@@ -297,6 +331,7 @@ class Player(Combatant):
         player.mana = int(data.get("mana", player.max_mana))
         player.stat_points = int(data.get("stat_points", 0))
         player.kills = int(data.get("kills", 0))
+        player.skill_primes = {str(k): int(v) for k, v in (data.get("skill_primes") or {}).items()}
         for raw in data.get("effects", []):
             effect = StatusEffect.from_dict(raw)
             player.effects[effect.kind] = effect

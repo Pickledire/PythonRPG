@@ -13,14 +13,26 @@ Dialogue nodes are JSON files under ``dialogues/``; a node id is its path withou
       ]
     }
 
-Conditions: flag_set, flag_not_set, min_kills, min_level, min_gold, min_stat [stat, value]
-(e.g. ["charisma", 12] for a persuasion branch), has_item, time_at, time_gte, time_between [a, b]
-(wraps midnight).
+Conditions: flag_set, flag_not_set, flag_is [k, v], min_kills, min_level, min_gold, min_stat [stat, value]
+(e.g. ["charisma", 12] for a persuasion branch), min_skill [skill, value] (e.g. ["stealth", 14]),
+has_item, has_lockpick (true), time_at, time_gte, time_between [a, b] (wraps midnight).
 Effects: set_flag [k, v], remove_flag, set_health, heal, set_mana, set_<stat> for any attribute
 (set_strength, set_dexterity, set_agility, set_vitality, set_intelligence, set_wisdom, set_charisma),
 stat_change [stat, delta], add_gold, give_xp, advance_time, set_time,
 give_item (id, name or spec dict), unlock_shop (item id), open_shop ("general"/"magic"),
-start_combat (enemy id or name), visual (+ "duration").
+start_combat (enemy id or name; add "ambush": true if the enemy strikes first, or "opener": 0.2 to start it
+missing 20% of its health), damage (HP lost, never below 1), visual (+ "duration"),
+minigame (see below).
+
+Minigames::
+
+    {"minigame": {"type": "stealth", "dc": 12, "title": "Hide!", "intro": "...",
+                  "success": "vault/overheard", "partial": "vault/half_heard", "failure": "vault/discovered",
+                  "retreat": "vault/hall", "flag": "vault_hide", "duration": 20}}
+
+``type`` is qte, lockpick, timing, memory, balance or stealth (tuning keys for each are the keyword
+arguments of its class in ``rpg/core/minigames``). The outcome picks the next node (``partial`` falls back to
+``success``); ``retreat`` lets the player back out at the briefing; ``flag`` stores the outcome as a story flag.
 
 UI-facing effects (combat, shops, visuals) are returned as *requests*; the UI fulfils them and
 then calls ``proceed()``.
@@ -39,7 +51,9 @@ from rpg.core.catalog import ITEMS, UnknownItemError
 from rpg.core.enemies import ENEMIES, UnknownEnemyError
 from rpg.core.entities import Player
 from rpg.core.events import LogEvent, Tone
+from rpg.core.minigames import MinigameSpec, MinigameSpecError, Outcome
 from rpg.core.progression import grant_item
+from rpg.core.skills import Skill, skill_rating
 from rpg.core.world import WorldState
 
 
@@ -90,6 +104,8 @@ class DialogueNode:
 @dataclass(frozen=True)
 class StartCombatRequest:
     enemy_id: str
+    ambush: bool = False
+    opener: float = 0.0
 
 
 @dataclass(frozen=True)
@@ -103,7 +119,33 @@ class VisualRequest:
     duration: float = 1.2
 
 
-Request = StartCombatRequest | OpenShopRequest | VisualRequest
+@dataclass(frozen=True)
+class MinigameRequest:
+    spec: MinigameSpec
+    success: str | None = None
+    partial: str | None = None
+    failure: str | None = None
+    retreat: str | None = None
+    flag: str | None = None
+
+    @property
+    def allow_retreat(self) -> bool:
+        return self.retreat is not None
+
+    def next_node(self, outcome: Outcome | None) -> str | None:
+        if outcome is None:
+            return self.retreat
+        if outcome == Outcome.PARTIAL:
+            return self.partial or self.success
+        return self.success if outcome == Outcome.SUCCESS else self.failure
+
+    @classmethod
+    def from_dict(cls, data: dict) -> "MinigameRequest":
+        return cls(MinigameSpec.from_dict(data), data.get("success"), data.get("partial"), data.get("failure"),
+                   data.get("retreat"), data.get("flag"))
+
+
+Request = StartCombatRequest | OpenShopRequest | VisualRequest | MinigameRequest
 
 
 @dataclass
@@ -182,6 +224,15 @@ class DialogueRepository:
                             problems.append(f"{node_id}: unknown enemy '{value}'")
                     elif key == "unlock_shop" and value not in ITEMS:
                         problems.append(f"{node_id}: unlock_shop names unknown item id '{value}'")
+                    elif key == "minigame":
+                        if not isinstance(value, dict):
+                            problems.append(f"{node_id}: minigame must be an object")
+                            continue
+                        problems += [f"{node_id}: minigame {p}" for p in MinigameSpec.problems(value)]
+                        for outcome in ("success", "partial", "failure", "retreat"):
+                            target = value.get(outcome)
+                            if target and not self.exists(target):
+                                problems.append(f"{node_id}: minigame {outcome} points to missing '{target}'")
         return problems
 
 
@@ -190,7 +241,7 @@ SET_STAT_EFFECTS = {f"set_{attribute.value}": attribute for attribute in Attribu
 KNOWN_EFFECTS = {
     "set_flag", "remove_flag", "set_health", "heal", "set_mana", "set_stamina", *SET_STAT_EFFECTS,
     "stat_change", "add_gold", "give_xp", "advance_time", "set_time", "give_item",
-    "unlock_shop", "open_shop", "start_combat", "visual", "duration",
+    "unlock_shop", "open_shop", "start_combat", "ambush", "opener", "visual", "duration", "damage", "minigame",
 }
 
 
@@ -217,6 +268,16 @@ def _check_one(ctx: DialogueContext, cond: dict) -> bool:
             stat, minimum = cond["min_stat"]
             if player.attributes.get(str(stat).lower()) < int(minimum):
                 return False
+        if "min_skill" in cond:
+            skill, minimum = cond["min_skill"]
+            if skill_rating(player, Skill(str(skill).lower())) < int(minimum):
+                return False
+        if "flag_is" in cond:
+            key, value = cond["flag_is"]
+            if flags.get(str(key)) != value:
+                return False
+        if "has_lockpick" in cond and bool(player.lockpicks()) != bool(cond["has_lockpick"]):
+            return False
         if "min_gold" in cond and player.gold < int(cond["min_gold"]):
             return False
         if "has_item" in cond and player.inventory.find_by_name(str(cond["has_item"])) is None:
@@ -290,7 +351,7 @@ def _apply_one(ctx: DialogueContext, effect: dict, out: StepResult) -> None:
         levels = player.gain_xp(amount)
         say(LogEvent(f"+{amount} XP.", Tone.XP))
         if levels:
-            say(LogEvent(f"⬆ Level up! You are now level {player.level}.", Tone.REWARD))
+            say(LogEvent(f"Level up! You are now level {player.level}.", Tone.REWARD))
     elif "advance_time" in effect:
         world.advance(int(effect["advance_time"]))
     elif "set_time" in effect:
@@ -311,7 +372,16 @@ def _apply_one(ctx: DialogueContext, effect: dict, out: StepResult) -> None:
     elif "visual" in effect:
         out.requests.append(VisualRequest(str(effect["visual"]), float(effect.get("duration", 1.2))))
     elif "start_combat" in effect:
-        out.requests.append(StartCombatRequest(str(effect["start_combat"])))
+        out.requests.append(StartCombatRequest(str(effect["start_combat"]), bool(effect.get("ambush", False)),
+                                               float(effect.get("opener", 0.0))))
+    elif "damage" in effect:
+        lost = player.lose_hp(min(int(effect["damage"]), player.hp - 1))
+        say(LogEvent(f"You lose {lost} HP.", Tone.DAMAGE))
+    elif "minigame" in effect:
+        try:
+            out.requests.append(MinigameRequest.from_dict(dict(effect["minigame"])))
+        except MinigameSpecError as exc:
+            say(LogEvent(f"(Broken minigame: {exc})", Tone.SYSTEM))
     else:
         say(LogEvent(f"(Unknown dialogue effect: {', '.join(effect)})", Tone.SYSTEM))
 
@@ -328,6 +398,7 @@ class DialogueRunner:
         self.finished = False
         self.blocked_reason: str | None = None
         self._pending_next: str | None = None
+        self._redirected = False
 
     def start(self) -> StepResult:
         return self._enter(self.start_id)
@@ -350,9 +421,24 @@ class DialogueRunner:
         self._pending_next = choice.next_id
         return apply_effects(self.ctx, choice.effects)
 
+    def resolve_minigame(self, request: MinigameRequest, outcome: Outcome | None) -> None:
+        """Route the conversation by a minigame's outcome (``None`` = the player backed out)."""
+        if request.flag:
+            self.ctx.world.flags[request.flag] = outcome.value if outcome else "retreat"
+        target = request.next_node(outcome)
+        if target:
+            self._pending_next = target
+            self._redirected = True
+
+    @property
+    def redirected(self) -> bool:
+        """A minigame on the current node chose where to go next; call ``proceed()``."""
+        return self._redirected
+
     def proceed(self) -> StepResult:
         """Move to the chosen node (or end the conversation)."""
         next_id, self._pending_next = self._pending_next, None
+        self._redirected = False
         if not next_id:
             self.finished = True
             return StepResult()
