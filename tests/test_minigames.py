@@ -41,7 +41,9 @@ class SkillTests(unittest.TestCase):
         self.assertGreater(skill_rating(halfling, Skill.STEALTH), skill_rating(orc, Skill.STEALTH) + 5)
         before = skill_rating(halfling, Skill.STEALTH)
         halfling.inventory.equip(halfling.inventory.add(ITEMS.create("shadow_leathers")).item)
-        halfling.inventory.add(ITEMS.create("owl_feather_charm"), 2)  # carried charms count once
+        charm = halfling.inventory.add(ITEMS.create("owl_feather_charm"), 2).item
+        self.assertEqual(skill_rating(halfling, Skill.STEALTH), before + 3)  # trinkets only count when equipped
+        halfling.equip(charm)
         halfling.prime_skill("stealth", 3)
         result = skill_check(halfling, Skill.STEALTH, 12)
         self.assertEqual(result.rating, before + 3 + 1 + 3)
@@ -430,6 +432,7 @@ class ToolAndTonicTests(unittest.TestCase):
         session = GameSession.new_game("T", "Gnome", rng=random.Random(1))
         session.player.prime_skill("focus", 3)
         tools = session.player.inventory.add(ITEMS.create("thieves_tools")).item
+        session.player.equip(tools)
         data = session.to_dict()
         for stack in data["player"]["inventory"]["stacks"]:
             stack["item"].pop("skill_bonuses", None)  # older saves had none; the catalog refills them

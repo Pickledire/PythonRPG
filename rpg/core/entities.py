@@ -10,14 +10,16 @@ from rpg.core.catalog import ITEMS
 from rpg.core.effects import CLEANSABLE, EffectKind, StatusEffect
 from rpg.core.formulas import (
     armor_mitigation,
+    xp_to_next,
     dodge_chance,
     dot_resistance,
     max_hp_for,
     max_mana_for,
     status_resist_chance,
 )
-from rpg.core.inventory import Inventory
-from rpg.core.items import Armor, Consumable, ConsumableEffect, Curio, Item, Spell, Weapon
+from rpg.core.inventory import Inventory, SlotError
+from rpg.core.items import Armor, Consumable, ConsumableEffect, Item, Spell, Weapon
+from rpg.core.passives import clamp_total, immunity_key
 
 
 class DamageType(str, Enum):
@@ -100,7 +102,18 @@ class Combatant:
         blind = self.effects.get(EffectKind.BLIND)
         return blind.potency if blind else 0.0
 
-    # Defensive traits (enemies have none of these by default; the player gets them from attributes)
+    # Defensive traits (enemies have none of these by default; the player gets them from attributes and gear)
+    def passive(self, key: str) -> float:
+        """Summed equipment passive (see rpg.core.passives); enemies have none."""
+        return 0.0
+
+    def immune(self, kind: EffectKind) -> bool:
+        return False
+
+    def resist(self, damage_type: "DamageType") -> float:
+        """Share of incoming damage of this type that is ignored."""
+        return 0.0
+
     def dot_multiplier(self) -> float:
         """Multiplier on poison/burn/bleed damage taken."""
         return 1.0
@@ -127,6 +140,11 @@ class Player(Combatant):
         self.kills = 0
         self.stat_points = 0
         self.skill_primes: dict[str, int] = {}  # skill -> bonus for the next minigame that uses it
+        # What worn gear currently adds on top of the base character (kept so removal is exact).
+        self._gear_attrs: dict[str, int] = {}
+        self._gear_hp = 0
+        self._gear_mana = 0
+        self._passives: dict[str, float] = {}
 
     @classmethod
     def create(cls, name: str, race: str) -> "Player":
@@ -143,12 +161,13 @@ class Player(Combatant):
                 player.inventory.equip(item)
         for template_id, qty in config.STARTING_CONSUMABLES.items():
             player.inventory.add(ITEMS.create(template_id), qty)
+        player.refresh_gear()
         return player
 
     # ------------------------------------------------------------ progression
     @property
     def xp_required(self) -> int:
-        return config.BASE_XP_REQUIREMENT + (self.level - 1) * config.XP_INCREASE_PER_LEVEL
+        return xp_to_next(self.level)
 
     def gain_xp(self, amount: int) -> int:
         """Add XP and level up as many times as earned. Returns levels gained (points go to stat_points)."""
@@ -163,6 +182,8 @@ class Player(Combatant):
             self.max_mana += config.MANA_GAIN_PER_LEVEL
             self.mana += config.MANA_GAIN_PER_LEVEL
             self.stat_points += config.STAT_POINTS_PER_LEVEL
+            if config.BONUS_STAT_POINT_EVERY and self.level % config.BONUS_STAT_POINT_EVERY == 0:
+                self.stat_points += 1
         return gained
 
     def spend_stat_point(self, attribute: Attribute) -> int:
@@ -188,15 +209,68 @@ class Player(Combatant):
     def set_attribute(self, attribute: Attribute | str, value: int) -> int:
         return self.change_attribute(attribute, int(value) - self.attributes.get(attribute))
 
+    # ------------------------------------------------------------ worn gear
+    def refresh_gear(self, keep_current: bool = False) -> None:
+        """Re-sum attribute bonuses, pool bonuses and passives from everything worn and apply the difference.
+
+        Call after equipping or removing gear. ``keep_current`` leaves HP/mana alone (used when loading a save).
+        """
+        attrs: dict[str, int] = {}
+        passives: dict[str, float] = {}
+        for item in self.inventory.worn():
+            for key, value in item.attribute_bonuses.items():
+                attrs[key] = attrs.get(key, 0) + value
+            for key, value in item.passives.items():
+                passives[key] = passives.get(key, 0.0) + value
+        hp, mana = self.hp, self.mana
+        for attribute in Attribute:
+            delta = attrs.get(attribute.value, 0) - self._gear_attrs.get(attribute.value, 0)
+            if delta:
+                self.change_attribute(attribute, delta)
+        hp_delta = int(passives.get("max_hp", 0)) - self._gear_hp
+        mana_delta = int(passives.get("max_mana", 0)) - self._gear_mana
+        self.max_hp = max(1, self.max_hp + hp_delta)
+        self.max_mana = max(0, self.max_mana + mana_delta)
+        if keep_current:
+            self.hp, self.mana = hp, mana
+        else:
+            self.hp += max(0, hp_delta)
+            self.mana += max(0, mana_delta)
+        self.hp = max(1, min(self.hp, self.max_hp))
+        self.mana = max(0, min(self.mana, self.max_mana))
+        self._gear_attrs = attrs
+        self._gear_hp, self._gear_mana = int(passives.get("max_hp", 0)), int(passives.get("max_mana", 0))
+        self._passives = {key: clamp_total(key, value) for key, value in passives.items()}
+
+    def passive(self, key: str) -> float:
+        return self._passives.get(key, 0.0)
+
+    @property
+    def passives(self) -> dict[str, float]:
+        return dict(self._passives)
+
+    def immune(self, kind: EffectKind) -> bool:
+        return self.passive(immunity_key(kind)) > 0
+
+    def resist(self, damage_type: "DamageType") -> float:
+        return self.passive(f"resist_{damage_type.value}")
+
+    def base_attributes(self) -> Attributes:
+        """Attributes without worn bonuses (what level-ups and saves work with)."""
+        base = Attributes.from_dict(self.attributes.to_dict())
+        for key, value in self._gear_attrs.items():
+            base.add(key, -value)
+        return base
+
     # ------------------------------------------------------------ attribute-driven defenses
     def dot_multiplier(self) -> float:
-        return 1.0 - dot_resistance(self.attributes.vitality)
+        return max(0.2, 1.0 - dot_resistance(self.attributes.vitality) - self.passive("dot_resist"))
 
     def status_resist(self) -> float:
-        return status_resist_chance(self.attributes.wisdom)
+        return min(0.75, status_resist_chance(self.attributes.wisdom) + self.passive("status_resist"))
 
     def dodge(self) -> float:
-        return dodge_chance(self.attributes.agility)
+        return min(0.4, dodge_chance(self.attributes.agility) + self.passive("dodge"))
 
     # ------------------------------------------------------------ resources
     def restore_mana(self, amount: int) -> int:
@@ -249,23 +323,25 @@ class Player(Combatant):
         ok, reason = self.meets_requirement(item)
         if not ok:
             raise ValueError(reason)
-        self.inventory.equip(item)
+        try:
+            self.inventory.equip(item)
+        except SlotError as exc:
+            raise ValueError(str(exc)) from None
+        self.refresh_gear()
         return f"Equipped {item.name}."
+
+    def unequip(self, item: Item) -> str:
+        self.inventory.unequip_item(item)
+        self.refresh_gear()
+        return f"Removed {item.name}."
 
     # ------------------------------------------------------------ skills (minigames)
     def skill_items(self) -> list[Item]:
-        """Items whose minigame modifiers apply: equipped gear plus one of each carried curio.
+        """Items whose minigame modifiers apply: everything equipped, including jewelry and trinkets.
 
-        New equipment slots (cloaks, boots, rings...) only need to appear in ``inventory.equipped``.
+        New equipment slots (cloaks, boots...) only need to appear in ``inventory.equipped``.
         """
-        items: list[Item] = [item for item in self.inventory.equipped.values() if item is not None]
-        seen: set[str] = set()
-        for stack in self.inventory:
-            item = stack.item
-            if isinstance(item, Curio) and (item.skill_bonuses or item.traits) and item.template_id not in seen:
-                seen.add(item.template_id)
-                items.append(item)
-        return items
+        return [item for item in self.inventory.equipped.values() if item is not None]
 
     def prime_skill(self, skill: str, amount: int) -> int:
         """Prime a skill for the next trial that uses it. Primes don't stack; the strongest one wins."""
@@ -287,18 +363,21 @@ class Player(Combatant):
     # ------------------------------------------------------------ defense
     def effective_defense(self, damage_type: DamageType, penetration: float = 0.0) -> float:
         armor = self.armor
-        defense = armor.effective_defense if armor else 0.0
+        defense = (armor.effective_defense if armor else 0.0) + self.passive("armor")
         defense *= 1.0 - penetration
         if damage_type == DamageType.MAGIC:
             defense *= 0.5  # magic slips past half of your armor
         return defense
 
     def mitigate(self, raw: int, damage_type: DamageType, penetration: float = 0.0) -> int:
-        multiplier = armor_mitigation(self.effective_defense(damage_type, penetration))
+        multiplier = armor_mitigation(self.effective_defense(damage_type, penetration)) * (1 - self.resist(damage_type))
         return int(max(1, round(raw * multiplier)))
 
     # ------------------------------------------------------------ serialization
     def to_dict(self) -> dict:
+        # Saves hold the *base* character; worn bonuses are re-applied from the equipped gear on load.
+        gear_vit = self._gear_attrs.get("vitality", 0)
+        gear_wis = self._gear_attrs.get("wisdom", 0)
         return {
             "name": self.name,
             "race": self.race,
@@ -306,10 +385,10 @@ class Player(Combatant):
             "xp": self.xp,
             "gold": self.gold,
             "hp": self.hp,
-            "max_hp": self.max_hp,
+            "max_hp": self.max_hp - self._gear_hp - gear_vit * config.HP_PER_VITALITY,
             "mana": self.mana,
-            "max_mana": self.max_mana,
-            "attributes": self.attributes.to_dict(),
+            "max_mana": self.max_mana - self._gear_mana - gear_wis * config.MANA_PER_WISDOM,
+            "attributes": self.base_attributes().to_dict(),
             "stat_points": self.stat_points,
             "kills": self.kills,
             "skill_primes": dict(self.skill_primes),
@@ -336,4 +415,5 @@ class Player(Combatant):
             effect = StatusEffect.from_dict(raw)
             player.effects[effect.kind] = effect
         player.inventory = Inventory.from_dict(data.get("inventory", {}))
+        player.refresh_gear(keep_current=True)
         return player

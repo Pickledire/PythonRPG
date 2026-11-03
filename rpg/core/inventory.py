@@ -6,20 +6,46 @@ from dataclasses import dataclass
 from enum import Enum
 
 from rpg.config import INVENTORY_SIZE
-from rpg.core.items import Armor, Consumable, Item, ItemKind, Spell, Weapon, item_from_dict
+from rpg.core.items import (
+    Accessory,
+    AccessorySlot,
+    Armor,
+    Consumable,
+    Curio,
+    Item,
+    ItemKind,
+    Spell,
+    Weapon,
+    item_from_dict,
+)
 
 
 class InventoryFullError(Exception):
     pass
 
 
+class SlotError(ValueError):
+    """The item can't go in (all trinket slots are full, or it isn't wearable)."""
+
+
 class Slot(str, Enum):
     WEAPON = "weapon"
     ARMOR = "armor"
     SPELL = "spell"
+    AMULET = "amulet"
+    RING = "ring"
+    TRINKET1 = "trinket1"
+    TRINKET2 = "trinket2"
+    TRINKET3 = "trinket3"
+
+    @property
+    def label(self) -> str:
+        return "Trinket" if self.value.startswith("trinket") else self.value.capitalize()
 
 
 SLOT_TYPES: dict[Slot, type[Item]] = {Slot.WEAPON: Weapon, Slot.ARMOR: Armor, Slot.SPELL: Spell}
+TRINKET_SLOTS = (Slot.TRINKET1, Slot.TRINKET2, Slot.TRINKET3)
+GEAR_SLOTS = (Slot.WEAPON, Slot.ARMOR, Slot.AMULET, Slot.RING, *TRINKET_SLOTS)  # slots whose bonuses apply
 
 
 @dataclass
@@ -125,17 +151,44 @@ class Inventory:
                     self.equipped[slot] = None
         return stack.item
 
-    def equip(self, item: Item) -> Slot:
-        if self.find(item.uid) is None:
-            raise KeyError(item.uid)
+    def slot_for(self, item: Item) -> Slot:
+        if isinstance(item, Accessory):
+            return Slot.AMULET if item.slot == AccessorySlot.AMULET else Slot.RING
+        if isinstance(item, Curio):
+            if not item.equippable:
+                raise SlotError(f"{item.name} can't be worn.")
+            free = next((slot for slot in TRINKET_SLOTS if self.equipped[slot] is None), None)
+            if free is None:
+                raise SlotError("All three trinket slots are full. Remove a trinket first.")
+            return free
         for slot, cls in SLOT_TYPES.items():
             if isinstance(item, cls):
-                self.equipped[slot] = item
                 return slot
         raise TypeError(f"{item.name} cannot be equipped")
 
+    def equip(self, item: Item) -> Slot:
+        if self.find(item.uid) is None:
+            raise KeyError(item.uid)
+        if self.is_equipped(item):
+            return next(slot for slot, eq in self.equipped.items() if eq is item)
+        slot = self.slot_for(item)
+        self.equipped[slot] = item
+        return slot
+
     def unequip(self, slot: Slot) -> None:
         self.equipped[slot] = None
+
+    def unequip_item(self, item: Item) -> None:
+        for slot, equipped in self.equipped.items():
+            if equipped is item:
+                self.equipped[slot] = None
+
+    def worn(self) -> list[Item]:
+        """Equipped gear whose bonuses apply (weapon, armor, jewelry, trinkets; not the readied spell)."""
+        return [self.equipped[slot] for slot in GEAR_SLOTS if self.equipped[slot] is not None]
+
+    def accessories(self) -> list[Item]:
+        return [s.item for s in self.stacks if isinstance(s.item, Accessory)]
 
     # ------------------------------------------------------------ serialization
     def to_dict(self) -> dict:
@@ -157,6 +210,6 @@ class Inventory:
         for slot_name, uid in (data.get("equipped") or {}).items():
             if uid:
                 stack = inv.find(uid)
-                if stack:
+                if stack and slot_name in Slot._value2member_map_:
                     inv.equipped[Slot(slot_name)] = stack.item
         return inv

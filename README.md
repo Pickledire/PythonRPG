@@ -30,7 +30,7 @@ For the best look use a modern terminal (Windows Terminal, iTerm2, kitty, WezTer
 | Combat | `1` attack · `2` cast · `3` item · `4` flee |
 | Dialogue | `1`–`9` choose · `esc` walk away |
 | Trials | see each trial's briefing; the memory trial is mouse-only |
-| Inventory | `e` equip · `u` use · `d` discard |
+| Inventory | `e` equip / remove · `u` use · `d` discard |
 | Shop | `b` buy / sell / repair · `esc` leave |
 | Anywhere | `ctrl+q` quit · `ctrl+p` command palette (themes) |
 
@@ -51,25 +51,37 @@ Mouse clicks work everywhere too.
   | Wisdom | +5 max mana per point, healing power, chance to resist harmful effects |
   | Charisma | shop prices (discounts or markups, better sell prices), persuasion checks in quests |
 
-  Many weapons, armor pieces and spells need **two** attributes, e.g. Mithril Armor needs Strength 14 and
-  Dexterity 13.
+  Many weapons, armor pieces and spells need **two** attributes, e.g. Mithril Armor needs Strength 15 and
+  Dexterity 15. Weapons gain +3.5% damage per point of their main attribute above 10.
 - **Turn-based combat** with accuracy, critical hits, armor mitigation and armor penetration,
   weapon and armor durability, and a turn timer: hesitate and the enemy strikes.
-- **Status effects** that tick each turn: poison, burn and bleed damage over time, regeneration,
-  wards (damage shields), blindness (lower accuracy) and freezing (lose a turn).
-  Weapons, spells and enemies can inflict them; antidotes cure them.
-- **Spells**: damage, healing, wards, blinding, freezing, burning, poisoning and bleeding.
-  Spell power scales with Intelligence.
-- **Level-scaled hunts** with weighted enemy pools, risky hunts (stronger foes, +50% rewards) and
-  random modifiers: *Enraged, Armored, Shielded, Swift, Venomous* and *Searing*.
-- **Bosses**: a Titan at level 10, the Elder Dragon at 15, the Earth Eater Worm at 20 and the Rat King
-  at 25, each with a cinematic intro and a choice of three legendary trophies. Story bosses appear in quests.
-- **Progression**: XP, levels, +HP and +mana each level, and stat points you spend on any attribute.
-  Gear has attribute requirements.
+- **Status effects** that tick each turn: poison, burn and bleed (different kinds stack), regeneration,
+  wards, blindness, freezing, **haste** (act twice), **weaken** (deal less), **expose** (take more) and
+  **silence** (no spells). Weapons, spells and enemies inflict them; antidotes and Purify cure them.
+  Fire stops regeneration.
+- **Spells** (about 50): damage, drains, damage-over-time, debuffs, haste, wards, and a healing line from Mend
+  to Divine Light. Intelligence adds +3% spell damage per point above 10, Wisdom +4% healing. The Collegium
+  Arcana sells the strongest.
+- **Level-scaled hunts**: enemies are built at your level from designed stat ranges, in pools that change
+  every few levels. Some resist physical or magic damage or are immune to effects. Elites carry modifiers
+  (*Enraged, Armored, Shielded, Swift, Venomous, Searing, Vampiric, Thorned, Frenzied, Regenerating,
+  Hulking, Ethereal, Hexing*), and from level 15 they can carry two.
+- **Bosses**: a Titan at level 10 (one of eight elements, immune to its own), the Elder Dragon at 15, the
+  Earth Eater Worm at 20 and the Rat King at 25. Each has a cinematic intro, telegraphed quick-time attacks
+  and a choice of three legendary trophies. Story bosses appear in quests.
+- **Progression**: XP and gold come from how dangerous a foe is (no XP farming far below your level).
+  You get HP and mana each level, a stat point per level and a bonus point every fifth level.
+- **Equipment**: weapon, armor, a readied spell, an **amulet**, a **ring** and **three trinkets**. Gear
+  carries attribute bonuses and passives (regeneration, lifesteal, thorns, immunities, resistances, spell
+  power, crit, execute, opening ward or haste, gold and XP find...) that apply while worn. About 50 weapons,
+  50 armors and 30 rings and amulets.
 - **Trials (minigames)**: stealth, lockpicking, quick-time events, precision timing, rune memory and balance,
   started from dialogue, plus boss quick-time events mid-combat. See [Trials](#trials-minigames).
-- **Economy**: a rotating Merchant's Emporium (buy, sell, repair) and the Collegium Arcana spell stall
-  reached through the Mages Academy questline.
+- **Economy**: a rotating Merchant's Emporium that stocks gear for your level (buy, sell, repair) and the
+  Collegium Arcana (spells, staves, robes and jewelry) reached through the Mages Academy questline. Every
+  item is priced from its power.
+- **Balance**: tuned with bot playthroughs. See [docs/BALANCE_AUDIT.md](docs/BALANCE_AUDIT.md) and
+  `tools/balance_sim.py`.
 - **Eight quest lines** written as JSON dialogue with conditions, effects, fights and rewards.
 - **Campfire rest**: full recovery, time passes, and the night may bring ambushes, thieves, gifts
   or visitors.
@@ -99,7 +111,7 @@ difficulty and where every point comes from.
 **Tonics** (Muffling Salve, Steadyhand Tonic, Quicksilver Draught, Sage Tea, Catfoot Draught, Hawkeye
 Drops) prime a skill by +3 for your next trial of that kind. Drink one from the inventory, in combat or on
 the briefing screen. **Lockpicks** come in three qualities and are spent as they break. **Tools and
-charms** work while carried. Weapons and armor work while equipped.
+charms** are trinkets: equip up to three. Weapons, armor and jewelry work while equipped.
 
 Try them all in the temporary quest *The Sunken Vault (trial run)*. Its practice hall lets you replay
 any single trial.
@@ -139,6 +151,7 @@ rpg/
     attributes.py      The seven attributes and equipment requirements
     skills.py          Skills, traits and skill checks for trials
     effects.py         Status effects and their timing rules
+    passives.py        Equipment passives (regeneration, lifesteal, immunities...)
     items.py           Weapon, Armor, Consumable, Spell, Curio models
     catalog.py         Item definitions + ItemFactory, shop pools and loot tables
     inventory.py       Stacking inventory and equipment slots
@@ -166,7 +179,9 @@ rpg/
                        character sheet, shop, quests, dialogue, campfire, save/load, game over, modals
       minigames/       One screen per trial + the briefing
 dialogues/             Quest and encounter content (JSON)
-tools/                 import_ascii_motion.py (bring in ASCII Motion exports), make_boss_art.py (boss portraits)
+tools/                 balance_sim.py (bot playthroughs for balancing), import_ascii_motion.py (ASCII Motion
+                       exports), make_boss_art.py (boss portraits)
+docs/                  BALANCE_AUDIT.md (balance findings, targets and how to keep it balanced)
 saves/                 Save slots (slot1.json ... slot3.json)
 tests/                 Unit tests for every core system + a headless UI test
 ```
@@ -185,12 +200,16 @@ tests/                 Unit tests for every core system + a headless UI test
 
 **Add an item**: one line in `rpg/core/catalog.py`:
 ```python
-ITEMS.weapon("frost_brand", "Frost Brand", 34, 150, 260, "A blade rimed in frost.",
+ITEMS.weapon("frost_brand", "Frost Brand", 34, "A blade rimed in frost.",
              on_hit=EffectSpec(EffectKind.FROZEN, 0, 1, 0.15),
-             requirements=req(strength=13, wisdom=11))
+             requirements=req(strength=15, wisdom=11), passives={"immune_frozen": 1})
+ITEMS.jewelry("ring_of_embers", "Ring of Embers", RING, "Warm, always.",
+              attributes={"strength": 1}, passives={"dot_power": 0.15, "immune_burn": 1})
 ```
-Add `skills={"stealth": 2}` or `traits=("keen_senses",)` to make gear matter in trials (`ITEMS.curio(...)`
-makes a carried tool or charm). Leave out `requirements` to use the default rule for the item type (melee → Strength, ranged/finesse →
+Leave out `value` and the item is priced from its power. Keep damage, defense and requirements inside the tier
+table at the top of `catalog.py`. `passives` keys are listed in `rpg/core/passives.py`. Add
+`skills={"stealth": 2}` or `traits=("keen_senses",)` to make gear matter in trials (`ITEMS.curio(...)`
+makes an equippable trinket). Leave out `requirements` to use the default rule for the item type (melee → Strength, ranged/finesse →
 Dexterity, staves and attack spells → Intelligence, heal/ward spells → Wisdom, light armor → Agility).
 Then add its id to a shop pool or loot table, or hand it out from dialogue with `{"give_item": "frost_brand"}`.
 

@@ -86,6 +86,16 @@ request, the UI fulfils it.
       for trials (arrows vs WASD), a colorblind-safe palette for stat colors and meters.
 - [ ] Rework the stealth trial (feedback: "slightly iffy").
 
+## 9. Balance follow-ups (see docs/BALANCE_AUDIT.md)
+- [x] Threat-based XP/gold, steeper XP curve, level-aware shops, priced-by-power items, durability softened.
+- [x] Designed enemy stats, 10 new hunt enemies, 13 affixes, resistances/immunities, boss retune.
+- [x] Amulet, ring and 3 trinket slots with passives; 25 weapons, 25 armors, 25 spells, 30 jewelry.
+- [ ] Martial abilities (stamina techniques: cleave, shield bash, aimed shot) so non-casters have a toolkit
+      as deep as spells. Bots show mages are still the strongest build.
+- [ ] Late-game gold sinks: enchanting/upgrading gear, Collegium tuition, rare merchant stock.
+- [ ] More level 25+ hunt enemies as the story adds regions.
+- [ ] Teach the simulator to visit the Collegium and use quests, then re-run the sweep.
+
 ## Content gaps
 - [ ] Write `forest/woman_help_take_key`, `forest/woman_help_try_to_escape`, `forest/woman_help_wait_for_help`.
 - [ ] Decide on orphaned nodes: `fighters/sand_oath_ending`, `forest/woman`, `tavern/rumors`, `tavern/work`.

@@ -101,7 +101,8 @@ class GameSession:
     def create_hunt(self, risky: bool = False) -> Encounter:
         boss_id = self.pending_boss()
         if boss_id:
-            return Encounter(self._prepare(ENEMIES.create(boss_id, self.rng)), 1.0, is_milestone_boss=True)
+            boss = ENEMIES.create(boss_id, self.rng, self.player.level)
+            return Encounter(self._prepare(boss), 1.0, is_milestone_boss=True)
         enemy = ENEMIES.random_for_level(self.player.level, self.rng)
         multiplier = 1.0
         if risky:
@@ -113,17 +114,22 @@ class GameSession:
 
     def create_story_enemy(self, enemy_id: str) -> tuple[Enemy, list[LogEvent]]:
         try:
-            return self._prepare(ENEMIES.create(enemy_id, self.rng)), []
+            return self._prepare(self._story_enemy(enemy_id)), []
         except UnknownEnemyError:
             note = LogEvent(f"(Unknown enemy '{enemy_id}' — a goblin appears instead.)", Tone.SYSTEM)
-            return self._prepare(ENEMIES.create("goblin", self.rng)), [note]
+            return self._prepare(self._story_enemy("goblin")), [note]
+
+    def _story_enemy(self, enemy_id: str) -> Enemy:
+        """Story enemies keep their designed strength but grow with you if you arrive over-levelled."""
+        template = ENEMIES.templates[ENEMIES.resolve(enemy_id)]
+        return ENEMIES.create(enemy_id, self.rng, max(template.level, self.player.level))
 
     def ghost_horror_available(self) -> bool:
         return not self.world.ghost_horror_seen
 
     def summon_ghost_horror(self) -> Encounter:
         self.world.ghost_horror_seen = True
-        return Encounter(self._prepare(ENEMIES.create("ghost_horror", self.rng)))
+        return Encounter(self._prepare(ENEMIES.create("ghost_horror", self.rng, self.player.level)))
 
     def begin_combat(self, encounter: Encounter, allow_flee: bool = True) -> CombatSession:
         rewards = encounter.reward_multiplier * self.difficulty_rules["rewards"]
@@ -142,7 +148,7 @@ class GameSession:
         enemy = combat.enemy
         if enemy.is_boss:
             self.world.bosses_defeated.add(enemy.template_id)
-        report = roll_victory(enemy, self.rng, combat.reward_multiplier)
+        report = roll_victory(enemy, self.rng, combat.reward_multiplier, self.player.level)
         return apply_victory(self.player, report)
 
     def claim_trophy(self, item: Item) -> LogEvent:
@@ -222,7 +228,7 @@ class GameSession:
             mode = ShopMode.GENERAL
         shop = self.shops[mode]
         seed = self.world.bell if mode == ShopMode.GENERAL else self.world.bell + self.player.level * 31
-        shop.rotate(seed, self.world.shop_unlocks if mode == ShopMode.GENERAL else None)
+        shop.rotate(seed, self.world.shop_unlocks if mode == ShopMode.GENERAL else None, self.player.level)
         return shop
 
     def quest_start(self, quest: Quest) -> str:

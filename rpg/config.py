@@ -83,29 +83,33 @@ STARTING_CONSUMABLES = {"health_potion": 3}
 STARTING_GOLD = 100
 
 # --------------------------------------------------------------------------- progression
+# XP to go from level L to L+1 = BASE_XP_REQUIREMENT * L ** XP_EXPONENT
 BASE_XP_REQUIREMENT = 100
-XP_INCREASE_PER_LEVEL = 15
+XP_EXPONENT = 1.15
 HEALTH_GAIN_PER_LEVEL = 10
-MANA_GAIN_PER_LEVEL = 10
+MANA_GAIN_PER_LEVEL = 6
 STAT_POINTS_PER_LEVEL = 1
+BONUS_STAT_POINT_EVERY = 5  # an extra point at levels 5, 10, 15...
 
-MIN_XP_REWARD = 25
-MAX_XP_REWARD = 150
-MIN_GOLD_REWARD = 10
-MAX_GOLD_REWARD = 50
-BOSS_REWARD_MULTIPLIER = 2.0
-LOOT_CHANCE = 0.5
+# Rewards come from an enemy's threat (rpg.core.formulas.threat): sqrt(effective HP x damage).
+XP_PER_THREAT = 3.5
+GOLD_PER_THREAT = 0.6
+REWARD_VARIANCE = 0.15
+BOSS_REWARD_MULTIPLIER = 3.0
+UNDERLEVEL_PENALTY = 0.12  # -12% XP per level the enemy is more than 2 levels below you (min 25%)
+LOOT_CHANCE = 0.45
 
 # --------------------------------------------------------------------------- combat
-PLAYER_DAMAGE_VARIANCE = 0.50
+PLAYER_DAMAGE_VARIANCE = 0.35
 ENEMY_DAMAGE_VARIANCE = 0.30
 CRIT_MULTIPLIER = 1.5
 FLEE_CHANCE = 0.70
 BOSS_FLEE_CHANCE = 0.25
 UNARMED_DAMAGE = 4
-SPELL_INT_SCALING = 0.01  # +1% spell power per point of intelligence
-HEAL_WIS_SCALING = 2  # flat bonus HP per wisdom point
+SPELL_INT_SCALING = 0.03  # +3% spell damage (and spell DoT strength) per point of Intelligence above 10
+HEAL_WIS_SCALING = 0.04  # +4% healing per point of Wisdom above 10
 DEFAULT_HEAL_POTENCY = 60
+ENEMY_SPELL_GROWTH = 0.06  # enemy spells +6% per enemy level
 ENEMY_SPELL_CHANCE = 0.35
 
 # Seconds the player has to act before hesitating (0 disables the timer).
@@ -125,9 +129,8 @@ DIFFICULTIES: dict[str, dict] = {
 # --------------------------------------------------------------------------- hunts & scaling
 RISKY_HUNT_ENEMY_SCALE = 1.2
 RISKY_HUNT_REWARD_MULTIPLIER = 1.5
-AFFIX_CHANCE = 0.40
-LEVEL_HP_SCALING = 0.05  # enemy HP +5% per player level above 1 (non-bosses)
-LEVEL_DAMAGE_SCALING = 0.03  # enemy damage +3% per player level above 1 (non-bosses)
+AFFIX_CHANCE = 0.25  # +1% per enemy level, up to 50%
+DOUBLE_AFFIX_CHANCE = 0.3  # level 15+ elites may roll a second affix
 
 # Story bosses forced on the next hunt once the player reaches the level (checked highest first).
 MILESTONE_BOSSES: list[tuple[int, str]] = [

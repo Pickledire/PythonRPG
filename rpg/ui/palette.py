@@ -66,6 +66,10 @@ EFFECT_STYLES: dict[EffectKind, str] = {
     EffectKind.SHIELD: "bold #7FA8E0",
     EffectKind.BLIND: "bold #A99FBF",
     EffectKind.FROZEN: "bold #9EDCF2",
+    EffectKind.HASTE: "bold #F2C46D",
+    EffectKind.WEAKEN: "bold #C98A4B",
+    EffectKind.VULNERABLE: "bold #E58AA0",
+    EffectKind.SILENCE: "bold #8F8574",
 }
 
 # One color per attribute so lists and bars of stats are easy to tell apart.

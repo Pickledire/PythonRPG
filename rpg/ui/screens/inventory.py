@@ -17,8 +17,8 @@ from rpg.ui.widgets import ItemTable, PlayerPanel
 from rpg.ui.widgets.item_table import ItemRow
 
 FILTERS = [("all", "All", None), ("weapon", "Weapons", ItemKind.WEAPON), ("armor", "Armor", ItemKind.ARMOR),
-           ("spell", "Spells", ItemKind.SPELL), ("consumable", "Consumables", ItemKind.CONSUMABLE),
-           ("misc", "Curios", ItemKind.MISC)]
+           ("spell", "Spells", ItemKind.SPELL), ("accessory", "Jewelry", ItemKind.ACCESSORY),
+           ("consumable", "Consumables", ItemKind.CONSUMABLE), ("misc", "Trinkets & curios", ItemKind.MISC)]
 
 
 def item_details(item, player) -> Text:
@@ -40,7 +40,7 @@ def item_details(item, player) -> Text:
 
 
 class InventoryScreen(Screen):
-    BINDINGS = [Binding("escape", "app.pop_screen", "Back"), Binding("e", "equip", "Equip"),
+    BINDINGS = [Binding("escape", "app.pop_screen", "Back"), Binding("e", "equip", "Equip/remove"),
                 Binding("u", "use", "Use"), Binding("d", "drop", "Discard")]
 
     def compose(self) -> ComposeResult:
@@ -92,8 +92,10 @@ class InventoryScreen(Screen):
             return
         item = row.item
         detail.update(item_details(item, self.player))
-        equippable = item.kind in (ItemKind.WEAPON, ItemKind.ARMOR, ItemKind.SPELL)
-        equip.disabled = not equippable or self.player.inventory.is_equipped(item)
+        worn = self.player.inventory.is_equipped(item)
+        removable = worn and item.kind in (ItemKind.ACCESSORY, ItemKind.MISC, ItemKind.ARMOR)
+        equip.label = "Remove" if worn else "Equip"
+        equip.disabled = not item.equippable or (worn and not removable)
         use.disabled = not isinstance(item, Consumable)
         drop.disabled = self.player.inventory.is_equipped(item)
 
@@ -114,10 +116,15 @@ class InventoryScreen(Screen):
     @on(Button.Pressed, "#equip")
     def action_equip(self) -> None:
         row = self.query_one(ItemTable).selected_row
-        if row is None or row.item.kind not in (ItemKind.WEAPON, ItemKind.ARMOR, ItemKind.SPELL):
+        if row is None or not row.item.equippable:
             return
         try:
-            self.notify(self.app.session.equip(row.item))
+            if self.player.inventory.is_equipped(row.item):
+                if row.item.kind in (ItemKind.WEAPON, ItemKind.SPELL):
+                    return
+                self.notify(self.player.unequip(row.item))
+            else:
+                self.notify(self.app.session.equip(row.item))
         except (ValueError, TypeError, KeyError) as exc:
             self.notify(str(exc), severity="error")
         self.reload()

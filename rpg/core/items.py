@@ -24,11 +24,13 @@ class ItemKind(str, Enum):
     ARMOR = "armor"
     CONSUMABLE = "consumable"
     SPELL = "spell"
+    ACCESSORY = "accessory"
     MISC = "misc"
 
     @property
     def label(self) -> str:
-        return {"weapon": "Weapon", "armor": "Armor", "consumable": "Consumable", "spell": "Spell", "misc": "Curio"}[self.value]
+        return {"weapon": "Weapon", "armor": "Armor", "consumable": "Consumable", "spell": "Spell",
+                "accessory": "Jewelry", "misc": "Curio"}[self.value]
 
 
 class WeaponClass(str, Enum):
@@ -55,6 +57,16 @@ class SpellType(str, Enum):
     BURN = "burn"
     BLEED = "bleed"
     FREEZE = "freeze"
+    REGEN = "regen"  # healing over time on yourself
+    HASTE = "haste"  # act twice per turn
+    WEAKEN = "weaken"  # enemy deals less damage
+    VULNERABLE = "vulnerable"  # enemy takes more damage ("Expose")
+    SILENCE = "silence"  # enemy can't cast
+    CLEANSE = "cleanse"  # remove your harmful effects
+
+
+SELF_TARGETED = {SpellType.HEAL, SpellType.SHIELD, SpellType.REGEN, SpellType.HASTE, SpellType.CLEANSE}
+WISDOM_SPELLS = {SpellType.HEAL, SpellType.SHIELD, SpellType.REGEN, SpellType.CLEANSE}
 
 
 # ---------------------------------------------------------------- default requirement rules
@@ -95,7 +107,7 @@ def default_armor_requirements(name: str, defense: int) -> Requirements:
 
 
 def default_spell_requirements(power: int, spell_type: "SpellType") -> Requirements:
-    attribute = Attribute.WISDOM if spell_type in (SpellType.HEAL, SpellType.SHIELD) else Attribute.INTELLIGENCE
+    attribute = Attribute.WISDOM if spell_type in WISDOM_SPELLS else Attribute.INTELLIGENCE
     return (Requirement(attribute, _tier(power, ((20, 10), (35, 12)), 14)),)
 
 
@@ -110,6 +122,9 @@ class Item:
     # Minigame modifiers (see rpg.core.skills). Equipped gear and carried curios apply them.
     skill_bonuses: dict[str, int] = field(default_factory=dict)
     traits: tuple[str, ...] = ()
+    # Worn bonuses (see rpg.core.passives): attributes like {"strength": 2} and passives like {"regen_pct": 0.03}.
+    attribute_bonuses: dict[str, int] = field(default_factory=dict)
+    passives: dict[str, float] = field(default_factory=dict)
     uid: str = field(default_factory=new_uid)
 
     kind: ClassVar[ItemKind] = ItemKind.MISC
@@ -121,12 +136,26 @@ class Item:
             self.requirements = tuple(self.requirements)
         self.skill_bonuses = {str(k): int(v) for k, v in (self.skill_bonuses or {}).items() if int(v)}
         self.traits = tuple(self.traits or ())
+        self.attribute_bonuses = {str(k): int(v) for k, v in (self.attribute_bonuses or {}).items() if int(v)}
+        self.passives = {str(k): float(v) for k, v in (self.passives or {}).items() if float(v)}
+
+    @property
+    def equippable(self) -> bool:
+        return False
+
+    def worn_text(self) -> str:
+        """``STR +2 · Regenerate HP/turn +3%`` for attribute bonuses and passives."""
+        from rpg.core.passives import passive_text
+
+        parts = [f"{Attribute(k).short} {v:+d}" for k, v in self.attribute_bonuses.items()]
+        parts += [passive_text(k, v) for k, v in self.passives.items()]
+        return " · ".join(parts)
 
     def bonus_text(self) -> str:
         """``Stealth +3 · Balance -1 · Keen senses`` (empty when the item has no minigame modifiers)."""
         from rpg.core.skills import SKILL_INFO, TRAITS, Skill
 
-        parts = []
+        parts = [self.worn_text()] if self.worn_text() else []
         for key, amount in self.skill_bonuses.items():
             try:
                 label = SKILL_INFO[Skill(key)].label
@@ -161,7 +190,7 @@ class Item:
         """Multi-line description for detail panes."""
         lines = [f"{self.kind.label}", self.description] if self.description else [self.kind.label]
         if self.bonus_text():
-            lines.append(("Carried: " if self.kind == ItemKind.MISC else "") + self.bonus_text())
+            lines.append(("Trinket: " if self.kind == ItemKind.MISC else "") + self.bonus_text())
         if self.requirements:
             lines.append(f"Requires {describe_requirements(self.requirements)}")
         lines.append(f"Value {self.value}g · sells for {self.sell_price}g")
@@ -183,6 +212,8 @@ class Item:
             "requirements": [r.to_dict() for r in self.requirements or ()],
             **({"skill_bonuses": dict(self.skill_bonuses)} if self.skill_bonuses else {}),
             **({"traits": list(self.traits)} if self.traits else {}),
+            **({"attribute_bonuses": dict(self.attribute_bonuses)} if self.attribute_bonuses else {}),
+            **({"passives": dict(self.passives)} if self.passives else {}),
         }
 
     @classmethod
@@ -199,6 +230,8 @@ class Item:
                              if "requirements" in data else None),
             "skill_bonuses": dict(data.get("skill_bonuses") or {}),
             "traits": tuple(data.get("traits") or ()),
+            "attribute_bonuses": dict(data.get("attribute_bonuses") or {}),
+            "passives": dict(data.get("passives") or {}),
         }
 
     @classmethod
@@ -217,6 +250,10 @@ class Weapon(Item):
 
     kind: ClassVar[ItemKind] = ItemKind.WEAPON
 
+    @property
+    def equippable(self) -> bool:
+        return True
+
     def __post_init__(self) -> None:
         if self.durability < 0:
             self.durability = self.max_durability
@@ -233,11 +270,11 @@ class Weapon(Item):
 
     @property
     def effective_damage(self) -> int:
-        """Damage falls with durability, down to 10% before the weapon breaks."""
+        """A worn weapon loses up to 30% of its damage; a broken one does nothing until repaired."""
         if self.is_broken:
             return 0
         ratio = self.durability / self.max_durability if self.max_durability else 1
-        return int(self.damage * max(0.1, ratio))
+        return int(self.damage * (0.7 + 0.3 * ratio))
 
     def wear(self, amount: int = 1) -> bool:
         """Spend durability; returns True if this use broke the weapon."""
@@ -309,6 +346,10 @@ class Armor(Item):
 
     kind: ClassVar[ItemKind] = ItemKind.ARMOR
 
+    @property
+    def equippable(self) -> bool:
+        return True
+
     def __post_init__(self) -> None:
         if self.durability < 0:
             self.durability = self.max_durability
@@ -323,11 +364,11 @@ class Armor(Item):
 
     @property
     def effective_defense(self) -> float:
-        """Battered armor still protects, down to a quarter of its rating; broken armor does nothing."""
+        """Battered armor loses up to 30% of its rating; broken armor does nothing until repaired."""
         if self.is_broken:
             return 0.0
         ratio = self.durability / self.max_durability if self.max_durability else 1
-        return self.defense * max(0.25, ratio)
+        return self.defense * (0.7 + 0.3 * ratio)
 
     def wear(self, amount: int = 1) -> bool:
         was_intact = not self.is_broken
@@ -427,38 +468,58 @@ class Spell(Item):
     spell_type: SpellType
     power: int = 0  # damage for damage spells, potency for support/status spells
     mana_cost: int = 10
-    inflicts: EffectSpec | None = None  # optional secondary effect on damage spells
+    inflicts: EffectSpec | None = None  # optional secondary effect on the target
+    effect: EffectSpec | None = None  # overrides the spell type's default status effect
+    self_effect: EffectSpec | None = None  # a buff on the caster as well (Sanctuary: heal + ward)
+    drain: float = 0.0  # damage spells: heal the caster for this share of damage dealt
 
     kind: ClassVar[ItemKind] = ItemKind.SPELL
+
+    @property
+    def equippable(self) -> bool:
+        return True
 
     def default_requirements(self) -> Requirements:
         return default_spell_requirements(self.power, self.spell_type)
 
     @property
     def targets_self(self) -> bool:
-        return self.spell_type in (SpellType.HEAL, SpellType.SHIELD)
+        return self.spell_type in SELF_TARGETED
 
     def primary_effect(self) -> EffectSpec | None:
-        """The status a status-type spell applies (damage/heal spells have none)."""
+        """The status a status-type spell applies (damage/heal spells have none unless ``effect`` is set)."""
+        if self.effect:
+            return self.effect
         return {
-            SpellType.SHIELD: EffectSpec(EffectKind.SHIELD, 0.35, 3),
+            SpellType.SHIELD: EffectSpec(EffectKind.SHIELD, 0.3, 3),
             SpellType.BLIND: EffectSpec(EffectKind.BLIND, 0.25, 3),
             SpellType.FREEZE: EffectSpec(EffectKind.FROZEN, 0, 1),
-            SpellType.BURN: EffectSpec(EffectKind.BURN, max(5, self.power or 10), 3),
-            SpellType.POISON: EffectSpec(EffectKind.POISON, max(6, self.power or 12), 3),
-            SpellType.BLEED: EffectSpec(EffectKind.BLEED, max(5, self.power or 10), 3),
+            SpellType.BURN: EffectSpec(EffectKind.BURN, max(5, self.power or 10), 4),
+            SpellType.POISON: EffectSpec(EffectKind.POISON, max(6, self.power or 12), 4),
+            SpellType.BLEED: EffectSpec(EffectKind.BLEED, max(5, self.power or 10), 4),
+            SpellType.REGEN: EffectSpec(EffectKind.REGEN, max(6, self.power or 10), 4),
+            SpellType.HASTE: EffectSpec(EffectKind.HASTE, 1, 2),
+            SpellType.WEAKEN: EffectSpec(EffectKind.WEAKEN, 0.3, 3),
+            SpellType.VULNERABLE: EffectSpec(EffectKind.VULNERABLE, 0.25, 3),
+            SpellType.SILENCE: EffectSpec(EffectKind.SILENCE, 0, 2),
         }.get(self.spell_type)
 
     def summary(self) -> str:
         if self.spell_type == SpellType.DAMAGE:
             text = f"DMG {self.power} · {self.mana_cost} MP"
+            if self.drain:
+                text += f" · heals {int(self.drain * 100)}% of damage"
         elif self.spell_type == SpellType.HEAL:
             text = f"Heal {self.power or 'base'} · {self.mana_cost} MP"
+        elif self.spell_type == SpellType.CLEANSE:
+            text = f"Purge harmful effects · {self.mana_cost} MP"
         else:
             effect = self.primary_effect()
             text = f"{effect.describe() if effect else self.spell_type.value} · {self.mana_cost} MP"
         if self.inflicts:
             text += f" · {self.inflicts.describe()}"
+        if self.self_effect:
+            text += f" · you gain {self.self_effect.describe()}"
         return text
 
     def details(self) -> list[str]:
@@ -475,6 +536,9 @@ class Spell(Item):
             "power": self.power,
             "mana_cost": self.mana_cost,
             "inflicts": self.inflicts.to_dict() if self.inflicts else None,
+            "effect": self.effect.to_dict() if self.effect else None,
+            "self_effect": self.self_effect.to_dict() if self.self_effect else None,
+            "drain": self.drain,
         }
 
     @classmethod
@@ -485,17 +549,66 @@ class Spell(Item):
             power=int(data.get("power", 0)),
             mana_cost=int(data.get("mana_cost", 10)),
             inflicts=EffectSpec.from_dict(data.get("inflicts")),
+            effect=EffectSpec.from_dict(data.get("effect")),
+            self_effect=EffectSpec.from_dict(data.get("self_effect")),
+            drain=float(data.get("drain", 0.0)),
         )
+
+
+class AccessorySlot(str, Enum):
+    AMULET = "amulet"
+    RING = "ring"
+
+
+@dataclass(kw_only=True)
+class Accessory(Item):
+    """Amulets and rings: worn for their attribute bonuses and passives (see rpg.core.passives)."""
+
+    slot: AccessorySlot = AccessorySlot.RING
+
+    kind: ClassVar[ItemKind] = ItemKind.ACCESSORY
+
+    def __post_init__(self) -> None:
+        self.slot = AccessorySlot(self.slot)
+        super().__post_init__()
+
+    @property
+    def equippable(self) -> bool:
+        return True
+
+    def summary(self) -> str:
+        return f"{self.slot.value.capitalize()} · {self.worn_text() or self.description}"
+
+    def details(self) -> list[str]:
+        lines = [self.slot.value.capitalize(), self.description]
+        if self.worn_text():
+            lines.append(f"When worn: {self.worn_text()}")
+        if self.requirements:
+            lines.append(f"Requires {describe_requirements(self.requirements)}")
+        lines.append(f"Value {self.value}g · sells for {self.sell_price}g")
+        return [line for line in lines if line]
+
+    def to_dict(self) -> dict:
+        return {**super().to_dict(), "slot": self.slot.value}
+
+    @classmethod
+    def from_dict(cls, data: dict) -> "Accessory":
+        return cls(**cls._base_kwargs(data), slot=AccessorySlot(data.get("slot", "ring")))
 
 
 @dataclass(kw_only=True)
 class Curio(Item):
     """Quest trinkets, tools and charms. They stack, can be sold, and do nothing in combat.
 
-    A curio's ``skill_bonuses`` and ``traits`` apply while it is carried (once per kind, however many you hold).
+    Curios with bonuses (tools and charms) are *trinkets*: equip up to three for their ``skill_bonuses``,
+    ``traits`` and passives. Plain story curios can't be equipped.
     """
 
     kind: ClassVar[ItemKind] = ItemKind.MISC
+
+    @property
+    def equippable(self) -> bool:
+        return bool(self.skill_bonuses or self.traits or self.passives or self.attribute_bonuses)
 
     @property
     def stackable(self) -> bool:
@@ -505,7 +618,7 @@ class Curio(Item):
         return (self.kind.value, self.name)
 
     def summary(self) -> str:
-        return f"Carried: {self.bonus_text()}" if self.bonus_text() else self.description
+        return f"Trinket: {self.bonus_text()}" if self.bonus_text() else self.description
 
 
 ITEM_CLASSES: dict[str, type[Item]] = {
@@ -513,6 +626,7 @@ ITEM_CLASSES: dict[str, type[Item]] = {
     ItemKind.ARMOR.value: Armor,
     ItemKind.CONSUMABLE.value: Consumable,
     ItemKind.SPELL.value: Spell,
+    ItemKind.ACCESSORY.value: Accessory,
     ItemKind.MISC.value: Curio,
 }
 

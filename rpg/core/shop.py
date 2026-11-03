@@ -13,6 +13,7 @@ from rpg.core.catalog import (
     GENERAL_SHOP_STAPLES,
     ITEMS,
     MAGIC_SHOP_COUNTS,
+    MAGIC_SHOP_EXTRAS,
     MAGIC_SHOP_SPELLS,
 )
 from rpg.core.entities import Player
@@ -59,8 +60,12 @@ class Shop:
     def name(self) -> str:
         return SHOP_NAMES[self.mode]
 
-    def rotate(self, seed: int, unlocks: set[str] | None = None) -> bool:
-        """Restock from the pools. Only happens when the seed (world time) changes, so purchases stick."""
+    def rotate(self, seed: int, unlocks: set[str] | None = None, level: int | None = None) -> bool:
+        """Restock from the pools. Only happens when the seed (world time) changes, so purchases stick.
+
+        With ``level``, gear is drawn from what suits that level (see ``stock_ceiling``): mostly affordable
+        upgrades, with a little aspirational stock above.
+        """
         if seed == self._seed:
             return False
         self._seed = seed
@@ -68,21 +73,48 @@ class Shop:
         self.offers = []
         if self.mode == ShopMode.GENERAL:
             for category, count in GENERAL_SHOP_COUNTS.items():
-                pool = GENERAL_SHOP_POOLS[category]
-                for template_id in rng.sample(pool, k=min(count, len(pool))):
-                    self._offer(template_id, UNLIMITED if category == "consumable" else 1)
+                stock = UNLIMITED if category == "consumable" else 1
+                for template_id in self._pick(GENERAL_SHOP_POOLS[category], count, rng, level, category):
+                    self._offer(template_id, stock)
             for template_id in GENERAL_SHOP_STAPLES:
-                self._offer(template_id, UNLIMITED)
+                if not any(o.item.template_id == template_id for o in self.offers):
+                    self._offer(template_id, UNLIMITED)
             for template_id in sorted(unlocks or ()):
                 if template_id in ITEMS and not any(o.item.template_id == template_id for o in self.offers):
                     self._offer(template_id, 1)
         else:
-            for template_id in rng.sample(MAGIC_SHOP_SPELLS, k=min(MAGIC_SHOP_COUNTS["spell"], len(MAGIC_SHOP_SPELLS))):
+            for template_id in self._pick(MAGIC_SHOP_SPELLS, MAGIC_SHOP_COUNTS["spell"], rng, level, "spell"):
                 self._offer(template_id, 1)
             pool = GENERAL_SHOP_POOLS["consumable"]
             for template_id in rng.sample(pool, k=min(MAGIC_SHOP_COUNTS["consumable"], len(pool))):
                 self._offer(template_id, UNLIMITED)
+            for category, pool in MAGIC_SHOP_EXTRAS.items():
+                for template_id in self._pick(pool, MAGIC_SHOP_COUNTS[category], rng, level, category):
+                    self._offer(template_id, 1)
         return True
+
+    @staticmethod
+    def stock_ceiling(level: int) -> int:
+        """Most expensive gear a shop usually stocks at this level (about two tiers of headroom)."""
+        return 80 + level * 40
+
+    def _pick(self, pool: list[str], count: int, rng: random.Random, level: int | None, category: str) -> list[str]:
+        if level is None or category == "consumable":
+            return rng.sample(pool, k=min(count, len(pool)))
+        ceiling = self.stock_ceiling(level)
+        fitting = [t for t in pool if ITEMS.create(t).value <= ceiling]
+        if len(fitting) < count:
+            fitting = sorted(pool, key=lambda t: ITEMS.create(t).value)[:max(count, len(fitting))]
+        # Favour pieces near the top of what fits: that's where upgrades live.
+        weights = [1 + ITEMS.create(t).value / ceiling * 3 for t in fitting]
+        chosen: list[str] = []
+        while fitting and len(chosen) < count:
+            pick = rng.choices(fitting, weights=weights, k=1)[0]
+            index = fitting.index(pick)
+            fitting.pop(index)
+            weights.pop(index)
+            chosen.append(pick)
+        return chosen
 
     def _offer(self, template_id: str, stock: int) -> None:
         item = ITEMS.create(template_id)

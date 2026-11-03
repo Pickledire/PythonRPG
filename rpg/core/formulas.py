@@ -30,24 +30,47 @@ def enemy_crit_chance(strength: int) -> float:
     return min(0.4, 0.08 + strength * 0.0015)
 
 
+WEAPON_SCALING = 0.035  # +3.5% weapon damage per point of the weapon's main attribute above 10
+
+
 def weapon_attribute_bonus(attributes: Attributes, weapon: Weapon | None) -> float:
-    """Flat damage added to a weapon hit, depending on what kind of weapon it is (unarmed = melee)."""
+    """Damage an attribute adds to a weapon hit: a small flat part plus a share of the weapon's own damage.
+
+    Melee uses Strength, finesse blades and bows use Dexterity, staves use Intelligence (unarmed = melee).
+    """
     a = attributes
+    damage = weapon.effective_damage if weapon else config.UNARMED_DAMAGE
     if weapon is None or weapon.weapon_class == WeaponClass.MELEE and not weapon.finesse:
-        return a.strength * 0.6 + a.dexterity * 0.1 + a.agility * 0.1
-    if weapon.finesse:
-        return a.dexterity * 0.5 + a.agility * 0.3
-    if weapon.weapon_class == WeaponClass.RANGED:
-        return a.dexterity * 0.6 + a.strength * 0.2
-    return a.intelligence * 0.6 + a.wisdom * 0.2  # staves
+        primary, flat = a.strength, a.strength * 0.35 + a.dexterity * 0.05 + a.agility * 0.05
+    elif weapon.finesse:
+        primary, flat = a.dexterity, a.dexterity * 0.4 + a.agility * 0.2
+    elif weapon.weapon_class == WeaponClass.RANGED:
+        primary, flat = a.dexterity, a.dexterity * 0.45 + a.strength * 0.1
+    else:  # staves
+        primary, flat = a.intelligence, a.intelligence * 0.35 + a.wisdom * 0.1
+    return flat + damage * max(-0.3, (primary - 10) * WEAPON_SCALING)
+
+
+def spell_multiplier(intelligence: int) -> float:
+    """Spell damage and spell damage-over-time scale with Intelligence above 10 (and shrink a little below)."""
+    return max(0.6, 1 + (intelligence - 10) * config.SPELL_INT_SCALING)
 
 
 def spell_power(base: int, intelligence: int) -> int:
-    return int(round(base * (1 + intelligence * config.SPELL_INT_SCALING)))
+    return int(round(base * spell_multiplier(intelligence)))
+
+
+def heal_multiplier(wisdom: int) -> float:
+    return max(0.6, 1 + (wisdom - 10) * config.HEAL_WIS_SCALING)
 
 
 def heal_power(base: int, wisdom: int) -> int:
-    return (base if base > 0 else config.DEFAULT_HEAL_POTENCY) + wisdom * config.HEAL_WIS_SCALING
+    return int(round((base if base > 0 else config.DEFAULT_HEAL_POTENCY) * heal_multiplier(wisdom)))
+
+
+def enemy_spell_multiplier(level: int) -> float:
+    """Enemies have no Intelligence; their spells grow with their level instead."""
+    return 1 + max(0, level - 1) * config.ENEMY_SPELL_GROWTH
 
 
 # ------------------------------------------------------------------ defense
@@ -71,15 +94,9 @@ def flee_chance(agility: int, against_boss: bool) -> float:
     return max(0.05, min(0.95, base + (agility - 10) * 0.01))
 
 
-def armor_penetration(attacker_base_damage: int, attacker_strength: int, attacker_is_boss: bool) -> float:
-    """Heavy hitters and bosses ignore part of the player's armor (max 50%)."""
-    pen = 0.0
-    if attacker_base_damage >= 40:
-        pen += 0.25
-    pen += min(0.15, attacker_strength * 0.01)
-    if attacker_is_boss:
-        pen += 0.10
-    return min(0.5, max(0.0, pen))
+def armor_penetration(attacker_level: int, attacker_is_boss: bool) -> float:
+    """Stronger enemies ignore part of the player's armor: 1% per level, +10% for bosses (max 40%)."""
+    return min(0.4, max(0.0, attacker_level * 0.01 + (0.10 if attacker_is_boss else 0.0)))
 
 
 def armor_mitigation(effective_defense: float) -> float:
@@ -98,6 +115,17 @@ def buy_price_multiplier(charisma: int) -> float:
 def sell_ratio(charisma: int) -> float:
     """Fraction of an item's value a merchant pays (50% at 10 CHA, up to 65%)."""
     return max(0.35, min(0.65, config.SELL_RATIO + (charisma - 10) * 0.01))
+
+
+def threat(max_hp: int, damage: int, defense: float = 0.0) -> float:
+    """How dangerous an enemy is: the geometric mean of its staying power and its punch. Drives XP and gold."""
+    staying = max_hp / armor_mitigation(defense)
+    return (max(1.0, staying) * max(1.0, damage)) ** 0.5
+
+
+def xp_to_next(level: int) -> int:
+    """XP needed to go from ``level`` to ``level + 1``."""
+    return int(round(config.BASE_XP_REQUIREMENT * level ** config.XP_EXPONENT))
 
 
 def max_hp_for(base_hp: int, vitality: int) -> int:

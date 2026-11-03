@@ -76,7 +76,8 @@ class DialogueEngineTests(unittest.TestCase):
         ])
         self.assertTrue(self.session.world.flags["arena_created"])
         self.assertEqual(p.hp, p.max_hp)
-        self.assertEqual((p.mana, p.max_mana), (310, 310))  # 300 from set_mana, +10 from the level-up
+        gain = config.MANA_GAIN_PER_LEVEL
+        self.assertEqual((p.mana, p.max_mana), (300 + gain, 300 + gain))  # set_mana, then the level-up
         self.assertEqual(p.attributes.strength, 12)
         self.assertEqual(p.gold, config.STARTING_GOLD + 15)
         self.assertIsNotNone(p.inventory.find_by_name("Spark"))

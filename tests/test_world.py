@@ -6,7 +6,8 @@ import unittest
 from rpg import config
 from rpg.core import campfire
 from rpg.core.attributes import Attribute
-from rpg.core.catalog import ITEMS
+from rpg.core.catalog import GENERAL_SHOP_COUNTS, ITEMS
+from rpg.core.formulas import xp_to_next
 from rpg.core.combat import CombatSession, Hesitate, Phase
 from rpg.core.effects import EffectKind, StatusEffect
 from rpg.core.enemies import AFFIXES, ENEMIES, UnknownEnemyError, apply_affix
@@ -22,7 +23,7 @@ class ProgressionTests(unittest.TestCase):
     def test_gain_xp_levels_multiple_times(self):
         player = make_player()
         hp, mana = player.max_hp, player.max_mana
-        levels = player.gain_xp(100 + 115 + 10)
+        levels = player.gain_xp(xp_to_next(1) + xp_to_next(2) + 10)
         self.assertEqual(levels, 2)
         self.assertEqual(player.level, 3)
         self.assertEqual(player.xp, 10)
@@ -71,11 +72,15 @@ class EnemyTests(unittest.TestCase):
             self.assertGreater(goblin_lvl12.max_hp, base)
 
     def test_affixes_modify_enemy(self):
+        def signature(e):
+            return (e.base_damage, e.defense, e.attributes.agility, len(e.on_hit), len(e.effects), e.max_hp,
+                    e.lifesteal, e.thorns, e.regen_pct, dict(e.resistances), len(e.spellbook))
+
         for affix in AFFIXES:
             enemy = make_enemy("orc")
-            before = (enemy.base_damage, enemy.defense, enemy.attributes.agility, len(enemy.on_hit), len(enemy.effects))
+            before = signature(enemy)
             apply_affix(enemy, affix)
-            after = (enemy.base_damage, enemy.defense, enemy.attributes.agility, len(enemy.on_hit), len(enemy.effects))
+            after = signature(enemy)
             self.assertNotEqual(before, after, affix.name)
             self.assertTrue(enemy.name.startswith(affix.name))
 
@@ -131,9 +136,9 @@ class ShopTests(unittest.TestCase):
 
     def test_stock_composition(self):
         kinds = [o.item.kind for o in self.shop.offers]
-        self.assertEqual(kinds.count(ItemKind.WEAPON), 5)
-        self.assertEqual(kinds.count(ItemKind.ARMOR), 4)
-        self.assertEqual(kinds.count(ItemKind.SPELL), 3)
+        for kind, count in GENERAL_SHOP_COUNTS.items():
+            if kind != "consumable":
+                self.assertEqual(kinds.count(ItemKind(kind if kind != "curio" else "misc")), count, kind)
 
     def test_buy_gives_clone_and_reduces_stock(self):
         offer = self.shop.offers_of_kind(ItemKind.WEAPON)[0]
@@ -195,7 +200,8 @@ class ShopTests(unittest.TestCase):
         shop = Shop(ShopMode.MAGIC)
         shop.rotate(5)
         kinds = {o.item.kind for o in shop.offers}
-        self.assertEqual(kinds, {ItemKind.SPELL, ItemKind.CONSUMABLE})
+        self.assertTrue({ItemKind.SPELL, ItemKind.CONSUMABLE, ItemKind.ACCESSORY} <= kinds)
+        self.assertFalse(kinds & {ItemKind.MISC})
 
 
 class CampfireTests(unittest.TestCase):

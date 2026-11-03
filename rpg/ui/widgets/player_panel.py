@@ -10,6 +10,7 @@ from textual.app import ComposeResult
 from textual.containers import Vertical
 from textual.widgets import Label, Static
 
+from rpg.core.inventory import TRINKET_SLOTS, Slot
 from rpg.ui.palette import ATTRIBUTE_COLORS, GOLD_STYLE, MUTED_STYLE, effect_badges
 from rpg.ui.widgets.stat_bar import StatBar
 
@@ -52,13 +53,20 @@ class PlayerPanel(Vertical):
         self.query_one("#pp-attrs", Static).update(attrs)
 
         gear = Text()
-        for label, item in (("Weapon", p.weapon), ("Armor", p.armor), ("Spell", p.spell)):
-            gear.append(f"{label:<7}", style=MUTED_STYLE)
+        equipped = p.inventory.equipped
+        trinkets = [equipped[s] for s in TRINKET_SLOTS if equipped[s] is not None]
+        slots = (("Weapon", p.weapon), ("Armor", p.armor), ("Spell", p.spell), ("Amulet", equipped[Slot.AMULET]),
+                 ("Ring", equipped[Slot.RING]))
+        for label, item in slots:
+            gear.append(f"{label:<8}", style=MUTED_STYLE)
             if item is None:
                 gear.append("—\n", style=MUTED_STYLE)
             else:
                 broken = getattr(item, "is_broken", False)
                 gear.append(item.name + (" (broken)" if broken else "") + "\n", style="bold red" if broken else "")
+        gear.append(f"{'Trinket':<8}", style=MUTED_STYLE)
+        gear.append(", ".join(t.name for t in trinkets) + "\n" if trinkets else "—\n",
+                    style="" if trinkets else MUTED_STYLE)
         gear.rstrip()
         self.query_one("#pp-gear", Static).update(gear)
         self.query_one("#pp-effects", Static).update(effect_badges(p.effects))

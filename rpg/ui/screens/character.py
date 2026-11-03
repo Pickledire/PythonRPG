@@ -27,6 +27,7 @@ from rpg.core.formulas import (
     status_resist_chance,
     weapon_attribute_bonus,
 )
+from rpg.core.passives import passive_text
 from rpg.core.skills import TRAITS, Skill, player_traits, skill_check
 from rpg.ui.palette import ATTRIBUTE_COLORS, MUTED_STYLE, attribute_bar
 from rpg.ui.widgets import PlayerPanel
@@ -102,6 +103,19 @@ class CharacterScreen(Screen):
             table.add_row("Equipped spell", f"{p.spell.name}  (power {power}, {p.spell.mana_cost} MP)")
         multiplier = buy_price_multiplier(a.charisma)
         table.add_row("Shop prices", f"×{multiplier:.2f} when buying · sell for {sell_ratio(a.charisma) * 100:.0f}% of value")
+        table.add_row("", "")
+        section("Worn bonuses")
+        if p.passives:
+            for key, value in sorted(p.passives.items()):
+                if key not in ("max_hp", "max_mana"):
+                    table.add_row("", Text(passive_text(key, value), style="#9FD08F"))
+        gear_attrs = {a: v for a, v in p.base_attributes().items()}
+        bonus = ", ".join(f"{a.short} {p.attributes.get(a) - v:+d}" for a, v in gear_attrs.items()
+                          if p.attributes.get(a) != v)
+        if bonus:
+            table.add_row("Attributes", Text(bonus, style="#9FD08F"))
+        if not p.passives and not bonus:
+            table.add_row("", Text("Nothing worn grants a bonus. Try rings, amulets and trinkets.", style=MUTED_STYLE))
         table.add_row("", "")
         section("Skills")
         for skill in Skill:

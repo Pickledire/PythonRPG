@@ -25,18 +25,18 @@ class ItemTests(unittest.TestCase):
     def test_multi_attribute_requirements(self):
         mithril = ITEMS.create("mithril_armor")
         self.assertEqual({(r.attribute, r.minimum) for r in mithril.requirements},
-                         {(Attribute.STRENGTH, 14), (Attribute.DEXTERITY, 13)})
+                         {(Attribute.STRENGTH, 15), (Attribute.DEXTERITY, 15)})
         player = make_player("Human")
         player.inventory.add(mithril)
         ok, reason = player.meets_requirement(mithril)
         self.assertFalse(ok)
-        self.assertIn("Strength 14", reason)
-        self.assertIn("Dexterity 13", reason)
-        player.attributes.strength, player.attributes.dexterity = 14, 12
+        self.assertIn("Strength 15", reason)
+        self.assertIn("Dexterity 15", reason)
+        player.attributes.strength, player.attributes.dexterity = 15, 14
         ok, reason = player.meets_requirement(mithril)
         self.assertFalse(ok)
         self.assertNotIn("Strength", reason)
-        player.attributes.dexterity = 13
+        player.attributes.dexterity = 15
         self.assertTrue(player.meets_requirement(mithril)[0])
         self.assertEqual(player.equip(mithril), "Equipped Mithril Armor.")
 
@@ -56,9 +56,9 @@ class ItemTests(unittest.TestCase):
 
     def test_weapon_durability_reduces_damage_and_breaks(self):
         sword = ITEMS.create("iron_sword")
-        self.assertEqual(sword.effective_damage, 15)
-        sword.durability = 50
-        self.assertEqual(sword.effective_damage, 7)
+        self.assertEqual(sword.effective_damage, sword.damage)
+        sword.durability = sword.max_durability // 2
+        self.assertEqual(sword.effective_damage, int(sword.damage * 0.85))  # worn: down to 70% at 0 durability
         sword.durability = 1
         self.assertTrue(sword.wear())
         self.assertTrue(sword.is_broken)

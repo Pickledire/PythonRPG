@@ -6,8 +6,9 @@ import random
 from dataclasses import dataclass, field
 
 from rpg import config
-from rpg.core.catalog import ITEMS, LOOT_TABLE
+from rpg.core.catalog import ITEMS, LOOT_TABLE, LOOT_WEIGHTS
 from rpg.core.enemies import Enemy
+from rpg.core.formulas import threat
 from rpg.core.entities import Player
 from rpg.core.events import LogEvent, Tone
 from rpg.core.inventory import InventoryFullError
@@ -25,28 +26,53 @@ class VictoryReport:
     events: list[LogEvent] = field(default_factory=list)
 
 
-def xp_reward(enemy: Enemy, rng: random.Random) -> int:
-    xp = rng.randint(config.MIN_XP_REWARD, config.MAX_XP_REWARD) * (1 + enemy.attributes.strength / 20)
-    return int(xp * (config.BOSS_REWARD_MULTIPLIER if enemy.is_boss else 1))
+def enemy_threat(enemy: Enemy) -> float:
+    damage = enemy.base_damage + enemy.attributes.strength * 0.3 + enemy.attributes.agility * 0.2
+    return threat(enemy.max_hp, int(damage), enemy.defense)
+
+
+def _variance(rng: random.Random) -> float:
+    return 1 + rng.uniform(-config.REWARD_VARIANCE, config.REWARD_VARIANCE)
+
+
+def xp_reward(enemy: Enemy, rng: random.Random, player_level: int | None = None) -> int:
+    xp = enemy_threat(enemy) * config.XP_PER_THREAT * _variance(rng)
+    if enemy.is_boss:
+        xp *= config.BOSS_REWARD_MULTIPLIER
+    if player_level is not None and enemy.level < player_level - 2:  # farming far weaker foes pays less
+        xp *= max(0.25, 1 - config.UNDERLEVEL_PENALTY * (player_level - 2 - enemy.level))
+    return max(1, int(xp))
 
 
 def gold_reward(enemy: Enemy, rng: random.Random) -> int:
-    gold = rng.randint(config.MIN_GOLD_REWARD, config.MAX_GOLD_REWARD) * (1 + enemy.attributes.strength / 30)
-    return int(gold * (config.BOSS_REWARD_MULTIPLIER if enemy.is_boss else 1))
+    gold = enemy_threat(enemy) * config.GOLD_PER_THREAT * _variance(rng)
+    return max(1, int(gold * (config.BOSS_REWARD_MULTIPLIER if enemy.is_boss else 1)))
+
+
+def loot_value_target(level: int) -> int:
+    """Roughly what a dropped piece of gear is worth at this enemy level."""
+    return 40 + level * 28
 
 
 def roll_loot(enemy: Enemy, rng: random.Random) -> list[tuple[Item, int]]:
+    """Guaranteed drops, plus (sometimes, always for bosses) one item from a loot pool at the enemy's tier."""
     drops: list[tuple[Item, int]] = [(ITEMS.create(tid), qty) for tid, qty in enemy.template.guaranteed_drops]
     if enemy.is_boss or rng.random() < config.LOOT_CHANCE:
-        category = rng.choice(list(LOOT_TABLE))
-        drops.append((ITEMS.create(rng.choice(LOOT_TABLE[category])), 1))
+        categories = list(LOOT_TABLE)
+        category = rng.choices(categories, weights=[LOOT_WEIGHTS.get(c, 1) for c in categories], k=1)[0]
+        candidates = [ITEMS.create(tid) for tid in LOOT_TABLE[category]]
+        target = loot_value_target(enemy.level)
+        in_band = [i for i in candidates if target * 0.45 <= i.value <= target * 1.5]
+        pick = rng.choice(in_band) if in_band else min(candidates, key=lambda i: abs(i.value - target))
+        drops.append((pick, 1))
     return drops
 
 
-def roll_victory(enemy: Enemy, rng: random.Random, multiplier: float = 1.0) -> VictoryReport:
+def roll_victory(enemy: Enemy, rng: random.Random, multiplier: float = 1.0,
+                 player_level: int | None = None) -> VictoryReport:
     return VictoryReport(
         enemy_name=enemy.name,
-        xp=int(xp_reward(enemy, rng) * multiplier),
+        xp=int(xp_reward(enemy, rng, player_level) * multiplier),
         gold=int(gold_reward(enemy, rng) * multiplier),
         loot=roll_loot(enemy, rng),
         trophy_choices=[ITEMS.create(tid) for tid in enemy.template.reward_choices],
@@ -64,6 +90,8 @@ def grant_item(player: Player, item: Item, quantity: int = 1) -> LogEvent:
 
 def apply_victory(player: Player, report: VictoryReport) -> VictoryReport:
     """Grant XP, gold and loot (trophy choice is granted separately once the player picks)."""
+    report.xp = int(report.xp * (1 + player.passive("xp_gain")))
+    report.gold = int(report.gold * (1 + player.passive("gold_find")))
     events = [
         LogEvent(f"+{report.xp} XP", Tone.XP),
         LogEvent(f"+{report.gold} gold", Tone.GOLD),
