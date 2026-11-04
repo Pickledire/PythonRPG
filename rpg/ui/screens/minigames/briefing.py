@@ -13,6 +13,7 @@ from textual.widgets import Button, Label, Static
 
 from rpg.core.minigames import MinigameKind, MinigameSpec
 from rpg.core.skills import SKILL_INFO, TRAITS
+from rpg.ui.menus import ARROW_BINDINGS, cycle_focus
 from rpg.ui.palette import MUTED_STYLE
 
 ODDS_STYLES = {"Trivial": "bold #7FD1A8", "Favorable": "bold #9FD08F", "Even": "bold #E3B85C",
@@ -28,7 +29,10 @@ RELEVANT_TRAITS = {
 
 
 class MinigameBriefing(ModalScreen[bool]):
-    BINDINGS = [Binding("escape", "back", "Back out"), Binding("enter", "begin", "Begin", show=False)]
+    BINDINGS = ARROW_BINDINGS + [Binding("escape", "back", "Back out"), Binding("enter", "begin", "Begin", show=False)]
+
+    def action_menu_move(self, step: int) -> None:
+        cycle_focus(self, step)
 
     def __init__(self, spec: MinigameSpec, allow_retreat: bool = True) -> None:
         super().__init__()

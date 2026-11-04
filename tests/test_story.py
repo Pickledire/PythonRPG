@@ -464,7 +464,17 @@ class HouseEndingUITest(unittest.TestCase):
 
             app.push_screen(DialogueScreen(session.dialogue("emberwick/cottage/ask"), "The Banked Fire"))
             await wait_for(pilot, lambda: screen_name(app) == "DialogueScreen" and app.screen.query("#choice-0"))
-            await pilot.press("1")  # buy the cottage
+            focused = lambda: app.screen.focused.id  # noqa: E731
+            self.assertEqual(focused(), "choice-0")
+            await pilot.press("down")  # arrows cycle the choices, wrapping round both ways
+            self.assertEqual(focused(), "choice-1")
+            await pilot.press("down")
+            self.assertEqual(focused(), "choice-0")
+            await pilot.press("up")
+            self.assertEqual(focused(), "choice-1")
+            await pilot.press("left")
+            self.assertEqual(focused(), "choice-0")
+            await pilot.press("enter")  # buy the cottage
             for _ in range(2):  # the key, then the house: Continue each time
                 await wait_for(pilot, lambda: app.screen.query("#choice-continue, #choice-end")
                                and not app.screen._busy)

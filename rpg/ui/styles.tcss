@@ -167,17 +167,24 @@ PlayerPanel .panel-section {
     border-title-color: $text-muted;
     background: $surface;
 }
-#hub-quests {
-    height: auto;
-    max-height: 60%;
-    padding: 0 1 1 1;
-    overflow-y: auto;
+#hub-quests-col, #hub-log-col {
+    width: 1fr;
+    height: 100%;
 }
-#hub-log-label {
+#hub-quests-col {
+    border-right: solid $panel-lighten-1;
+}
+.hub-col-label {
     width: 100%;
     color: $text-muted;
     padding: 0 1;
-    border-top: solid $panel-lighten-1;
+}
+#hub-quests-scroll {
+    height: 1fr;
+    scrollbar-size-vertical: 1;
+}
+#hub-quests {
+    padding: 0 1;
 }
 #hub-log {
     height: 1fr;

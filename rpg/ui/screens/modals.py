@@ -18,6 +18,7 @@ from rpg.core.attributes import Attribute
 from rpg.core.entities import Player
 from rpg.core.items import Item
 from rpg.core.progression import VictoryReport
+from rpg.ui.menus import ARROW_BINDINGS, cycle_focus
 from rpg.ui.palette import ATTRIBUTE_COLORS, GOLD_STYLE, MUTED_STYLE, event_text, requirements_text
 
 T = TypeVar("T")
@@ -71,7 +72,10 @@ class ChoiceModal(ModalScreen[Any]):
 
 
 class ConfirmModal(ModalScreen[bool]):
-    BINDINGS = [Binding("escape", "no", "No"), Binding("y", "yes", "Yes"), Binding("n", "no", "No")]
+    BINDINGS = ARROW_BINDINGS + [Binding("escape", "no", "No"), Binding("y", "yes", "Yes"), Binding("n", "no", "No")]
+
+    def action_menu_move(self, step: int) -> None:
+        cycle_focus(self, step)
 
     def __init__(self, question: str, yes: str = "Yes", no: str = "No") -> None:
         super().__init__()

@@ -12,6 +12,7 @@ from textual.widgets import Button, Static
 
 from rpg import config
 from rpg.core.endings import Ending
+from rpg.ui.menus import ARROW_BINDINGS, cycle_focus
 from rpg.ui.palette import MUTED_STYLE
 
 BLACK_SECONDS = 2.2  # the cut to black before anything appears
@@ -20,7 +21,11 @@ LINE_SECONDS = 1.6
 
 
 class EndingScreen(Screen[None]):
-    BINDINGS = [Binding("space", "skip", "Skip", show=False), Binding("enter", "skip", "Skip", show=False)]
+    BINDINGS = ARROW_BINDINGS + [Binding("space", "skip", "Skip", show=False),
+                                 Binding("enter", "skip", "Skip", show=False)]
+
+    def action_menu_move(self, step: int) -> None:
+        cycle_focus(self, step)
 
     def __init__(self, ending: Ending, hero: str, first_time: bool, endings_found: int, autosaved: bool) -> None:
         super().__init__()

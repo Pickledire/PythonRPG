@@ -5,7 +5,7 @@ from __future__ import annotations
 from textual import events, on
 from textual.app import ComposeResult
 from textual.binding import Binding
-from textual.containers import Grid, Horizontal, Vertical
+from textual.containers import Grid, Horizontal, Vertical, VerticalScroll
 from textual.screen import Screen
 from textual.widgets import Button, Footer, Header, Label, Static
 
@@ -46,11 +46,15 @@ class HubScreen(Screen):
                         button = Button(label, id=f"act-{action}", classes="hub-button")
                         button.tooltip = hint
                         yield button
-                # One box for the journal: quests on top, the event log underneath.
-                with Vertical(id="hub-journal"):
-                    yield Static(id="hub-quests")
-                    yield Label("Log", id="hub-log-label")
-                    yield EventLog(id="hub-log")
+                # One box for the journal: quests on the left, the event log on the right.
+                with Horizontal(id="hub-journal"):
+                    with Vertical(id="hub-quests-col"):
+                        yield Label("Quests", classes="hub-col-label")
+                        with VerticalScroll(id="hub-quests-scroll"):
+                            yield Static(id="hub-quests")
+                    with Vertical(id="hub-log-col"):
+                        yield Label("Log", classes="hub-col-label")
+                        yield EventLog(id="hub-log")
         yield Footer()
 
     def on_mount(self) -> None:

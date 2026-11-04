@@ -9,10 +9,16 @@ from textual.containers import Center, Vertical
 from textual.screen import Screen
 from textual.widgets import Button, Footer, Static
 
+from rpg.ui.menus import ARROW_BINDINGS, cycle_focus
 from rpg.ui.palette import MUTED_STYLE
 
 
 class GameOverScreen(Screen[None]):
+    BINDINGS = ARROW_BINDINGS
+
+    def action_menu_move(self, step: int) -> None:
+        cycle_focus(self, step)
+
     def __init__(self, name: str, level: int, kills: int, killer: str) -> None:
         super().__init__()
         self.summary = (name, level, kills, killer)

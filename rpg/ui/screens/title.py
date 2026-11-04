@@ -10,6 +10,8 @@ from textual.containers import Center, Vertical
 from textual.screen import Screen
 from textual.widgets import Button, Footer, Static
 
+from rpg.ui.menus import ARROW_BINDINGS, cycle_focus
+
 TITLE_ART = r"""
 ███████╗██████╗ ██╗ ██████╗    ██████╗ ██████╗  ██████╗
 ██╔════╝██╔══██╗██║██╔════╝    ██╔══██╗██╔══██╗██╔════╝
@@ -21,8 +23,11 @@ TITLE_ART = r"""
 
 
 class TitleScreen(Screen):
-    BINDINGS = [Binding("n", "new", "New game"), Binding("l", "load", "Load"), Binding("o", "settings", "Settings"),
-                Binding("q", "quit_game", "Quit")]
+    BINDINGS = ARROW_BINDINGS + [Binding("n", "new", "New game"), Binding("l", "load", "Load"),
+                                 Binding("o", "settings", "Settings"), Binding("q", "quit_game", "Quit")]
+
+    def action_menu_move(self, step: int) -> None:
+        cycle_focus(self, step)
 
     def compose(self) -> ComposeResult:
         with Vertical(id="title-root"):

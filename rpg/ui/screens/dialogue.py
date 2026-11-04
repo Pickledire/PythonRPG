@@ -21,6 +21,7 @@ from rpg.core.dialogue import (
     VisualRequest,
 )
 from rpg.core.session import Encounter
+from rpg.ui.menus import ARROW_BINDINGS, cycle_focus
 from rpg.ui.palette import MUTED_STYLE
 from rpg.ui.screens.modals import ConfirmModal
 from rpg.ui.widgets import EventLog, VisualEffect
@@ -31,9 +32,12 @@ END = -3
 
 
 class DialogueScreen(Screen[None]):
-    BINDINGS = [Binding(str(n), f"choose({n - 1})", show=False) for n in range(1, 10)] + [
+    BINDINGS = ARROW_BINDINGS + [Binding(str(n), f"choose({n - 1})", show=False) for n in range(1, 10)] + [
         Binding("escape", "abandon", "Walk away"),
     ]
+
+    def action_menu_move(self, step: int) -> None:
+        cycle_focus(self, step)
 
     def __init__(self, runner: DialogueRunner, title: str = "") -> None:
         super().__init__()
