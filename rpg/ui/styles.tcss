@@ -161,10 +161,26 @@ PlayerPanel .panel-section {
 #act-hunt { background: $error 60%; }
 #act-quests { background: $accent 50%; }
 #act-rest { background: $warning 40%; }
-#hub-log {
+#hub-journal {
     height: 1fr;
     border: round $panel-lighten-2;
     border-title-color: $text-muted;
+    background: $surface;
+}
+#hub-quests {
+    height: auto;
+    max-height: 60%;
+    padding: 0 1 1 1;
+    overflow-y: auto;
+}
+#hub-log-label {
+    width: 100%;
+    color: $text-muted;
+    padding: 0 1;
+    border-top: solid $panel-lighten-1;
+}
+#hub-log {
+    height: 1fr;
 }
 
 /* ------------------------------------------------------------------ tables & detail panes */
@@ -634,4 +650,39 @@ ModalScreen {
 }
 .settings-select {
     width: 30;
+}
+
+/* ------------------------------------------------------------------ endings */
+EndingScreen {
+    align: center middle;
+    background: black;
+}
+#ending-root {
+    width: 100%;
+    height: auto;
+    max-width: 90;
+}
+#ending-end, #ending-title, #ending-lines, #ending-meta {
+    width: 100%;
+    text-align: center;
+    content-align: center middle;
+    margin-bottom: 1;
+}
+#ending-end {
+    margin-bottom: 0;
+}
+#ending-lines {
+    margin-top: 1;
+    margin-bottom: 2;
+}
+#ending-menu {
+    width: 30;
+    height: auto;
+}
+#ending-menu Button {
+    width: 100%;
+    margin-bottom: 1;
+}
+.choice-locked {
+    color: $text-muted;
 }

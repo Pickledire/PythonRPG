@@ -19,10 +19,6 @@ from rpg.core.effects import EffectKind, StatusEffect
 from rpg.core.session import QUESTS, GameSession
 from rpg.services.persistence import SaveError, SaveManager
 
-# Dangling links already present in the story content (unwritten branches).
-KNOWN_CONTENT_GAPS = {
-    "forest/woman_help_take_key", "forest/woman_help_try_to_escape", "forest/woman_help_wait_for_help",
-}
 
 
 def write_nodes(base: Path, nodes: dict[str, dict]) -> None:
@@ -35,8 +31,7 @@ def write_nodes(base: Path, nodes: dict[str, dict]) -> None:
 class DialogueContentTests(unittest.TestCase):
     def test_shipped_dialogue_is_valid(self):
         repo = DialogueRepository(config.DIALOGUE_DIR)
-        problems = [p for p in repo.validate() if not any(gap in p for gap in KNOWN_CONTENT_GAPS)]
-        self.assertEqual(problems, [])
+        self.assertEqual(repo.validate(), [])
 
     def test_every_quest_starts(self):
         repo = DialogueRepository(config.DIALOGUE_DIR)

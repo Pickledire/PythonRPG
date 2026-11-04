@@ -431,6 +431,10 @@ _TEMPLATES: list[EnemyTemplate] = [
                   level=1, strength=(5, 8), agility=(8, 12), defense=(0, 2)),
     EnemyTemplate("skeleton", "Skeleton", (32, 38), (7, 9), "undead", "Animated bones held together by dark magic.",
                   level=1, strength=(6, 9), agility=(5, 8), defense=(4, 6), immune=UNDEAD),
+    # Story only (Brannoc's cellar, Emberwick); not in the hunt pools.
+    EnemyTemplate("cellar_rat", "Cellar Rat", (28, 34), (5, 7), "beast",
+                  "A rat the size of a small dog. It has clearly been eating well.",
+                  level=1, strength=(4, 6), agility=(11, 14), defense=(0, 2), aliases=("giant rat",)),
     EnemyTemplate("wolf", "Wolf", (40, 46), (7, 9), "beast", "A wild wolf, with sharp teeth and claws.",
                   level=1, strength=(6, 8), agility=(10, 13), defense=(1, 3), on_hit=(_bleed(4, 3, 0.20),)),
     EnemyTemplate("bandit", "Bandit", (56, 64), (10, 12), "humanoid",

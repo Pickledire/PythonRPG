@@ -11,7 +11,6 @@ from textual.screen import Screen
 from textual.widgets import Footer, Header, Label, OptionList
 from textual.widgets.option_list import Option
 
-from rpg.core.session import QUESTS
 from rpg.ui.palette import MUTED_STYLE
 
 
@@ -23,8 +22,8 @@ class QuestBoardScreen(Screen):
         with Vertical(id="quest-root"):
             yield Label("Where will you seek adventure?", classes="screen-title")
             options = []
-            for quest in QUESTS:
-                prompt = Text(quest.title, style="bold #E0A458")
+            for quest in self.app.session.board():
+                prompt = Text(quest.title, style="bold")  # theme colour: stays readable when highlighted
                 prompt.append(f"\n  {quest.blurb}", style=MUTED_STYLE)
                 options.append(Option(prompt, id=quest.key))
             yield OptionList(*options, id="quest-list")
@@ -38,6 +37,6 @@ class QuestBoardScreen(Screen):
     def embark(self, event: OptionList.OptionSelected) -> None:
         from rpg.ui.screens.dialogue import DialogueScreen
 
-        quest = next(q for q in QUESTS if q.key == event.option_id)
         session = self.app.session
+        quest = next(q for q in session.board() if q.key == event.option_id)
         self.app.push_screen(DialogueScreen(session.dialogue(session.quest_start(quest)), title=quest.title))

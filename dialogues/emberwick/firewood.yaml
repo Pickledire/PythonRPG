@@ -1,0 +1,124 @@
+# Job 2: firewood from the edge of the Hearthlands (quest inn_firewood).
+# Chopping is a timing minigame; a hungry wolf on the way back can be fought, stared down (Wisdom), or, for a
+# Beastkin, growled off.
+
+_defaults:
+  speaker: The Harrow Road
+
+road:
+  lines:
+    - >-
+      The road north out of Emberwick is two ruts in the snow, and then not even that. The wind finds every
+      gap in your clothes.
+    - >-
+      An hour out, the trees begin: black pines, half of them down under the weight of the snow. Plenty of
+      deadfall. Most of it frozen solid.
+  choices:
+    - text: Get to work with the axe.
+      effects:
+        - minigame:
+            type: timing
+            dc: 10
+            title: Frozen Deadfall
+            intro: Swing when the needle crosses the mark. Frozen wood doesn't forgive a sloppy cut.
+            action: Swing
+            success: chopped_well
+            partial: chopped
+            failure: chopped_badly
+            retreat: road
+    - text: Turn back for now.
+
+chopped_well:
+  lines:
+    - >-
+      The axe bites clean every time. Before long the sledge is piled high, more than Brannoc asked for.
+  effects:
+    - set_flag: [firewood_extra, true]
+  next: watcher
+
+chopped:
+  lines:
+    - It's slow, cold work, but the sledge fills.
+  next: watcher
+
+chopped_badly:
+  lines:
+    - >-
+      The axe skips off a frozen knot and comes back at you. You'll have a bruise the size of a fist. You
+      fill the sledge anyway, slower.
+  effects:
+    - damage: 8
+  next: watcher
+
+watcher:
+  speaker: The Treeline
+  lines:
+    - You're tying the load down when you feel it. Something is watching you from the trees.
+    - A wolf. Thin and grey, ribs showing. Too hungry to be careful.
+  choices:
+    - text: Fight it.
+      next: wolf_fight
+    - text: Stare it down.
+      if: {min_stat: [wisdom, 11]}
+      locked: true
+      next: stared_down
+    - text: Growl at it. Properly.
+      if: {race: Beastkin}
+      next: growled_off
+    - text: Leave the sledge and back away.
+      next: abandoned
+
+wolf_fight:
+  speaker: The Treeline
+  lines:
+    - It comes in low and fast.
+  effects:
+    - start_combat: wolf
+      fled: abandoned
+  choices:
+    - text: Haul the sledge home.
+      next: home
+
+stared_down:
+  speaker: The Treeline
+  lines:
+    - >-
+      You don't move. You don't look away. The wolf's ears go flat, then back, and after a long moment it
+      melts into the trees.
+  effects:
+    - give_xp: 15
+  choices:
+    - text: Haul the sledge home.
+      next: home
+
+growled_off:
+  speaker: The Treeline
+  lines:
+    - >-
+      You make the sound your people make at wolves. It is not a polite sound. The wolf decides it has
+      somewhere else to be.
+  effects:
+    - give_xp: 15
+  choices:
+    - text: Haul the sledge home.
+      next: home
+
+abandoned:
+  lines:
+    - >-
+      You back away from the sledge. The wolf doesn't follow; it wants you gone more than it wants you. You
+      walk back to Emberwick with nothing to show for it. The wood will still be there tomorrow. Probably.
+  effects:
+    - remove_flag: firewood_extra
+
+home:
+  lines:
+    - >-
+      The sledge is heavy and the road home is uphill both ways, which shouldn't be possible. You make it
+      back to Emberwick as the light goes.
+  effects:
+    - quest_stage: [inn_firewood, gathered]
+    - advance_time: 2
+  choices:
+    - text: Bring it in to Brannoc.
+      next: emberwick/inn/wood_paid

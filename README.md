@@ -78,11 +78,16 @@ Mouse clicks work everywhere too.
 - **Trials (minigames)**: stealth, lockpicking, quick-time events, precision timing, rune memory and balance,
   started from dialogue, plus boss quick-time events mid-combat. See [Trials](#trials-minigames).
 - **Economy**: a rotating Merchant's Emporium that stocks gear for your level (buy, sell, repair) and the
-  Collegium Arcana (spells, staves, robes and jewelry) reached through the Mages Academy questline. Every
+  Collegium's stall (spells, staves, robes and jewelry, on the quest board for now). Every
   item is priced from its power.
 - **Balance**: tuned with bot playthroughs. See [docs/BALANCE_AUDIT.md](docs/BALANCE_AUDIT.md) and
   `tools/balance_sim.py`.
-- **Eight quest lines** written as JSON dialogue with conditions, effects, fights and rewards.
+- **A story engine**: scenes written in YAML (many per file), a story memory of flags, numbers, visits and
+  quest stages, lines that change with your race and past choices, greyed-out choices that say what they
+  need, rewards that pay once, quests listed in the camp's journal box, and endings that close the run. See
+  [docs/STORY_ENGINE.md](docs/STORY_ENGINE.md).
+- **The Banked Fire**: Emberwick's inn, its innkeeper's odd jobs, and a secret ending.
+- **The Sunken Vault**: a test quest that uses every trial (for development).
 - **Campfire rest**: full recovery, time passes, and the night may bring ambushes, thieves, gifts
   or visitors.
 - **The Ghost Horror**: linger too long at camp and something comes for you.
@@ -162,13 +167,18 @@ rpg/
     progression.py     XP, gold, loot and trophies
     shop.py            Rotating shops, selling, repairs
     campfire.py        Resting and night events
-    dialogue.py        Data-driven dialogue engine
-    world.py           Time of day and story flags
+    dialogue.py        The story engine: scenes, conditions, effects, the runner
+    storydata.py       Loading YAML story files
+    quests.py          Journal quests and the quest board (data)
+    endings.py         Endings and their epilogues (data)
+    storycheck.py      Whole-story checks (broken links, typos, dead scenes)
+    world.py           Time of day and the story's memory (flags, numbers, visits, quest stages)
     minigames/         Trials as pure state machines (qte, lockpick, timing, memory, balance, stealth)
     session.py         GameSession: the single façade the UI uses
   services/
     persistence.py     Save slots, atomic writes, v1 save migration
     settings.py        Player settings (options are data; the settings screen is built from them)
+    profile.py         The meta profile across runs (endings found)
   ui/
     app.py             RPGApp: navigation and multi-screen flows
     palette.py         Themes + text colors (re-skin here)
@@ -178,11 +188,14 @@ rpg/
     screens/           Title, character creation, camp, encounter, combat, inventory,
                        character sheet, shop, quests, dialogue, campfire, save/load, game over, modals
       minigames/       One screen per trial + the briefing
-dialogues/             Quest and encounter content (JSON)
-tools/                 balance_sim.py (bot playthroughs for balancing), import_ascii_motion.py (ASCII Motion
+dialogues/             Scenes: new content in YAML (emberwick/), older quests in JSON
+story/                 board.yaml (the quest board), quests/ (journal quests), endings.yaml
+tools/                 story_check.py (checks the whole story), balance_sim.py (bot playthroughs for
+                       balancing), import_ascii_motion.py (ASCII Motion
                        exports), make_boss_art.py (boss portraits)
-docs/                  BALANCE_AUDIT.md (balance findings, targets and how to keep it balanced)
-saves/                 Save slots (slot1.json ... slot3.json)
+docs/                  BALANCE_AUDIT.md (balance findings, targets and how to keep it balanced),
+                       STORY_ENGINE.md (how to write story content), story/ (the story bible)
+saves/                 Save slots (slot1.json ... slot3.json), autosave.json, profile.json
 tests/                 Unit tests for every core system + a headless UI test
 ```
 
@@ -220,14 +233,13 @@ starting item ids, plus optional trial bonuses in `RACE_SKILLS` and traits in `R
 on-hit effects, regeneration, intro text, trophy choices) and, for random hunts, to `LEVEL_POOLS`.
 Dialogue can start a fight with `{"start_combat": "frost_giant"}` (by id or display name).
 
-**Write a quest**: add JSON nodes under `dialogues/` and a `Quest` entry in `rpg/core/session.py`.
-The schema (conditions and effects) is documented at the top of `rpg/core/dialogue.py`. Attribute checks
-work in both directions: `{"min_stat": ["charisma", 12]}` as a condition for a persuasion choice, and
-`{"stat_change": ["vitality", 1]}` or `{"set_wisdom": 15}` as effects. To check
-content for broken links and unknown enemies or items:
+**Write a quest**: write scenes in a YAML file under `dialogues/`, define the quest in `story/quests/`, and
+add a board entry to `story/board.yaml` if it starts from the hub. The guide is
+[docs/STORY_ENGINE.md](docs/STORY_ENGINE.md); the full list of conditions and effects is at the top of
+`rpg/core/dialogue.py`. Then check the whole story for broken links, typos and unreachable scenes:
 
 ```bash
-python -c "from rpg.core.dialogue import DialogueRepository; from rpg.config import DIALOGUE_DIR; print('\n'.join(DialogueRepository(DIALOGUE_DIR).validate()) or 'OK')"
+python tools/story_check.py
 ```
 
 **Animations**: export from [ASCII Motion](https://ascii-motion.app) as a TUI component (`.tsx`) and run

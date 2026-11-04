@@ -16,7 +16,9 @@ from rpg.core.combat import Phase
 from rpg.core.events import LogEvent, Tone
 from rpg.core.minigames import MinigameResult, MinigameSpec
 from rpg.core.session import Encounter, GameSession
+from rpg import config
 from rpg.services.persistence import SaveManager
+from rpg.services.profile import ProfileStore
 from rpg.services.settings import Settings, SettingsStore
 from rpg.ui.palette import THEMES
 
@@ -38,6 +40,7 @@ class RPGApp(App):
         super().__init__()
         self.saves = SaveManager(save_dir)
         self.settings_store = SettingsStore(save_dir)
+        self.profile_store = ProfileStore(save_dir)
         self.settings: Settings = self.settings_store.load()
         self.session: GameSession | None = None
         self._seed = seed
@@ -188,6 +191,32 @@ class RPGApp(App):
         self.session = None
         self.touch()
         await self.reset_to(GameOverScreen(p.name, p.level, p.kills, killer))
+
+    async def ending_flow(self, ending_id: str, checkpoint: dict | None = None) -> None:
+        """A scene ended the game: autosave the checkpoint, record the ending, roll the credits."""
+        from rpg.ui.screens.ending import EndingScreen
+
+        session = self.session
+        if session is None:
+            return
+        ending = session.end_game(ending_id)
+        autosaved = False
+        if checkpoint is not None:
+            try:
+                self.saves.save_payload(checkpoint, config.AUTOSAVE_SLOT)
+                autosaved = True
+            except OSError as exc:
+                self.notify(f"Couldn't write the autosave: {exc}", severity="error")
+        profile = self.profile_store.load()
+        first_time = profile.record_ending(ending.ending_id, ending.title, session.player.name)
+        try:
+            self.profile_store.save(profile)
+        except OSError as exc:
+            self.notify(f"Couldn't save your profile: {exc}", severity="error")
+        hero = session.player.name
+        self.session = None
+        self.touch()
+        await self.reset_to(EndingScreen(ending, hero, first_time, len(profile.endings), autosaved))
 
     async def hunt_flow(self) -> None:
         from rpg.ui.screens.modals import Choice, ChoiceModal

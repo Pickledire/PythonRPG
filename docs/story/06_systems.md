@@ -4,7 +4,11 @@ The story bible above asks for systems the game doesn't have yet. This is the li
 order I'd build them. None of it replaces what exists; the dialogue nodes, combat, minigames, items and
 balance tools all carry over.
 
-## 1. The story's memory (needed by everything else)
+## 1. The story's memory (needed by everything else) — built
+
+Built, along with the house ending as its first test: see [docs/STORY_ENGINE.md](../STORY_ENGINE.md). The camp's journal
+box (quests above the log), an autosave before endings and a profile of endings found came with it. Still to do from this table:
+nothing; the flag registry is covered for now by `tools/story_check.py` (it flags anything checked but never set).
 
 | System | Why the story needs it |
 |---|---|
@@ -60,8 +64,8 @@ animal companions first).
 
 ## Suggested order
 
-1. The Ledger, visit tracking and "once", conditional text, greyed choices, quests as data, YAML.
-2. The story tools (registry, linter, story bot, diagram export).
+1. ~~The Ledger, visit tracking and "once", conditional text, greyed choices, quests as data, YAML.~~ Done.
+2. The story tools: ~~linter~~ (done: `tools/story_check.py`), story bot, diagram export.
 3. Regions, towns, travel, region hunts, bounties, regional bosses and Track.
 4. Reputation, guilds and allegiance.
 5. Origins and endings.

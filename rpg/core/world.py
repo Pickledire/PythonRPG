@@ -1,4 +1,13 @@
-"""World state shared by quests, shops and encounters: time of day and story flags."""
+"""World state shared by quests, shops and encounters: time of day and the story's memory.
+
+The story's memory (the "Ledger"):
+
+- ``flags``: named facts (``saw_crowned_rat: true``, ``oswin: persuaded``).
+- ``vars``: numbers (reputation, counters): ``rep.brannoc: 3``. Missing numbers read as 0.
+- ``visits``: how many times each scene has been entered.
+- ``claimed``: which scenes and choices have already paid out their rewards (rewards pay once).
+- ``quests``: each started quest's current stage (``done`` and ``failed`` are final).
+"""
 
 from __future__ import annotations
 
@@ -26,6 +35,13 @@ class WorldState:
     shop_unlocks: set[str] = field(default_factory=set)
     bosses_defeated: set[str] = field(default_factory=set)
     ghost_horror_seen: bool = False
+    vars: dict[str, float] = field(default_factory=dict)
+    visits: dict[str, int] = field(default_factory=dict)
+    claimed: set[str] = field(default_factory=set)
+    quests: dict[str, str] = field(default_factory=dict)
+
+    def var(self, key: str) -> float:
+        return self.vars.get(key, 0)
 
     def advance(self, hours: int = 1) -> None:
         self.bell = (self.bell + int(hours)) % 24
@@ -44,6 +60,10 @@ class WorldState:
             "shop_unlocks": sorted(self.shop_unlocks),
             "bosses_defeated": sorted(self.bosses_defeated),
             "ghost_horror_seen": self.ghost_horror_seen,
+            "vars": self.vars,
+            "visits": self.visits,
+            "claimed": sorted(self.claimed),
+            "quests": self.quests,
         }
 
     @classmethod
@@ -54,4 +74,8 @@ class WorldState:
             shop_unlocks=set(data.get("shop_unlocks", [])),
             bosses_defeated=set(data.get("bosses_defeated", [])),
             ghost_horror_seen=bool(data.get("ghost_horror_seen", False)),
+            vars={str(k): v for k, v in (data.get("vars") or {}).items() if isinstance(v, (int, float))},
+            visits={str(k): int(v) for k, v in (data.get("visits") or {}).items()},
+            claimed=set(data.get("claimed") or []),
+            quests={str(k): str(v) for k, v in (data.get("quests") or {}).items()},
         )

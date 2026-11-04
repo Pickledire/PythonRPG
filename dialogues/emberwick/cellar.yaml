@@ -1,0 +1,86 @@
+# Job 1: rats in the Banked Fire's cellar (quest inn_rats).
+# The biggest rat escapes, wearing something like a crown. That's the player's first, silly brush with the
+# Rat King. Nobody explains it.
+
+_defaults:
+  speaker: The Cellar
+
+stairs:
+  lines:
+    - >-
+      Brannoc hands you a lantern and opens the cellar door. The stairs are steep and slick with frost. When
+      you're halfway down he shuts the door behind you. You hear the bolt slide.
+    - '"So they don''t come up," he calls through the wood.'
+    - >-
+      It's colder down here than outside. Barrels, sacks, a smell like wet fur. Something scratches behind
+      the barley.
+  choices:
+    - text: Kick the barley sack.
+      next: fight
+    - text: Put out the lantern and wait for them to come to you.
+      effects:
+        - minigame:
+            type: stealth
+            dc: 10
+            title: In the Dark
+            intro: Stay still. Stay quiet. Let them get close.
+            creature: The rat
+            duration: 16
+            success: fight_opener
+            partial: fight
+            failure: fight_ambushed
+            retreat: stairs
+
+fight:
+  lines:
+    - The sack bursts and a rat the size of a dog comes out of it, already angry.
+  effects:
+    - start_combat: cellar_rat
+      fled: fled
+  choices:
+    - text: Look around.
+      next: aftermath
+
+fight_opener:
+  lines:
+    - It never hears you. You get one good blow in before it knows you're there.
+  effects:
+    - start_combat: cellar_rat
+      opener: 0.3
+      fled: fled
+  choices:
+    - text: Look around.
+      next: aftermath
+
+fight_ambushed:
+  lines:
+    - You lose track of the scratching. Then something heavy lands on your back.
+  effects:
+    - start_combat: cellar_rat
+      ambush: true
+      fled: fled
+  choices:
+    - text: Look around.
+      next: aftermath
+
+fled:
+  lines:
+    - You take the stairs three at a time and hammer on the door until Brannoc lets you out.
+    - He looks at you, then down the stairs. "Big, aren't they."
+
+aftermath:
+  lines:
+    - The rat is dead. Two more scatter into the walls.
+    - Then you see the biggest one.
+    - >-
+      It sits on a barrel at the edge of the lantern light, fat as a cat, watching you. There's something on
+      its head. A ring? A bottle cap? It looks almost like a little crown.
+    - >-
+      It looks at you for a moment longer than a rat should. Then it's gone, into a crack in the wall you'd
+      swear was too small for it.
+  effects:
+    - quest_stage: [inn_rats, cleared]
+    - set_flag: [saw_crowned_rat, true]
+  choices:
+    - text: Go back upstairs and tell Brannoc.
+      next: emberwick/inn/rats_paid

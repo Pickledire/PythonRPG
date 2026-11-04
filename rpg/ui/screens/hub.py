@@ -7,11 +7,12 @@ from textual.app import ComposeResult
 from textual.binding import Binding
 from textual.containers import Grid, Horizontal, Vertical
 from textual.screen import Screen
-from textual.widgets import Button, Footer, Header, Label
+from textual.widgets import Button, Footer, Header, Label, Static
 
 from rpg import config
 from rpg.core.events import LogEvent, Tone
 from rpg.ui.widgets import EventLog, PlayerPanel
+from rpg.ui.widgets.quest_list import quest_text
 
 ACTIONS = [
     ("hunt", "Hunt", "Find an enemy to fight", "h"),
@@ -45,12 +46,16 @@ class HubScreen(Screen):
                         button = Button(label, id=f"act-{action}", classes="hub-button")
                         button.tooltip = hint
                         yield button
-                yield EventLog(id="hub-log")
+                # One box for the journal: quests on top, the event log underneath.
+                with Vertical(id="hub-journal"):
+                    yield Static(id="hub-quests")
+                    yield Label("Log", id="hub-log-label")
+                    yield EventLog(id="hub-log")
         yield Footer()
 
     def on_mount(self) -> None:
+        self.query_one("#hub-journal").border_title = "Journal"
         log = self.query_one("#hub-log", EventLog)
-        log.border_title = "Journal"
         log.add(LogEvent("You make camp at the edge of town. Adventure waits in every direction.", Tone.STORY))
         self.watch(self.app, "revision", lambda *_: self._refresh_title(), init=True)
         self.set_interval(1.0, self._idle_tick)
@@ -60,6 +65,7 @@ class HubScreen(Screen):
         session = self.app.session
         if session:
             self.query_one("#hub-title", Label).update(f"Camp · {session.world.time_label}")
+            self.query_one("#hub-quests", Static).update(quest_text(session.journal()))
 
     def journal(self, events: list[LogEvent] | LogEvent) -> None:
         self.query_one("#hub-log", EventLog).add(events)
@@ -73,6 +79,7 @@ class HubScreen(Screen):
 
     def on_screen_resume(self) -> None:
         self._idle = 0
+        self._refresh_title()
 
     def _idle_tick(self) -> None:
         session = self.app.session

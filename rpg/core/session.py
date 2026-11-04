@@ -6,6 +6,7 @@ and exposes intention-revealing operations (hunt, rest, buy, equip, ...) that re
 
 from __future__ import annotations
 
+import json
 import random
 from dataclasses import dataclass
 
@@ -13,42 +14,39 @@ from rpg import config
 from rpg.core import campfire
 from rpg.core.attributes import Attribute
 from rpg.core.combat import CombatSession, Phase, apply_consumable, consumable_blocker
-from rpg.core.dialogue import DialogueRepository, DialogueRunner
+from rpg.core.dialogue import DialogueRepository, DialogueRunner, check_conditions
+from rpg.core.endings import Ending, EndingBook
 from rpg.core.enemies import ENEMIES, Enemy, QTETrigger, UnknownEnemyError
 from rpg.core.entities import Player
 from rpg.core.events import LogEvent, Tone
 from rpg.core.items import Consumable, ConsumableEffect, Item
 from rpg.core.minigames import Minigame, MinigameKind, MinigameSpec, Outcome, build_minigame
 from rpg.core.progression import VictoryReport, apply_victory, grant_item, roll_victory
+from rpg.core.quests import BoardEntry, QuestBook, load_board
 from rpg.core.shop import Shop, ShopMode
 from rpg.core.skills import SkillCheck, skill_check
 from rpg.core.world import WorldState
 
 
-@dataclass(frozen=True)
-class Quest:
-    key: str
-    title: str
-    blurb: str
-    start_node: str
-    alt_node: str | None = None  # used instead of start_node when alt_flag is set
-    alt_flag: str | None = None
+# The quest board's destinations are data (story/board.yaml). ``Quest`` is the old name.
+Quest = BoardEntry
+QUESTS, BOARD_ERRORS = load_board(config.STORY_DIR / "board.yaml")
+_QUESTBOOK: QuestBook | None = None
+_ENDINGS: EndingBook | None = None
 
 
-QUESTS: list[Quest] = [
-    Quest("tavern", "The Tavern", "Ask the tavern keeper if they've heard about something interesting.", "tavern/intro"),
-    Quest("blacksmith", "The Blacksmith", "Ask the blacksmith about a strange artifact.", "blacksmith/intro"),
-    Quest("mages", "Mages Academy", "Seek out a powerful wizard at the academy.", "mages/intro"),
-    Quest("forest", "The Dark Forest", "Head into the dark forest blindly.", "forest/intro"),
-    Quest("fighters", "Local Fighters", "Start a fighting competition with the local fighters.", "fighters/intro",
-          alt_node="fighters/arena", alt_flag="arena_created"),
-    Quest("mt_aegis", "Mt. Aegis", "Climb Mt. Aegis in search of something strange.", "mt_aegis/intro"),
-    Quest("valoria", "Ruins of Valoria", "Explore the ruins of the ancient city.", "valoria/intro"),
-    Quest("graveyard", "The Graveyard", "Visit the local graveyard in search of a lost soul.", "graveyard/intro"),
-    # Temporary: a showcase of every minigame. Remove once real quests use them.
-    Quest("test_vault", "The Sunken Vault (trial run)", "Sneak, pick, balance and fight through a drowned vault. "
-          "Every minigame in one quest.", "test_vault/intro"),
-]
+def default_questbook() -> QuestBook:
+    global _QUESTBOOK
+    if _QUESTBOOK is None:
+        _QUESTBOOK = QuestBook.load(config.STORY_DIR / "quests")
+    return _QUESTBOOK
+
+
+def default_endings() -> EndingBook:
+    global _ENDINGS
+    if _ENDINGS is None:
+        _ENDINGS = EndingBook.load(config.STORY_DIR / "endings.yaml")
+    return _ENDINGS
 
 
 @dataclass
@@ -71,6 +69,8 @@ class GameSession:
         self.world = world or WorldState()
         self.rng = rng or random.Random()
         self.dialogues = DialogueRepository(dialogue_dir or config.DIALOGUE_DIR)
+        self.quests = default_questbook()
+        self.endings = default_endings()
         self.shops = {mode: Shop(mode) for mode in ShopMode}
         # Player settings (not saved with the game): see rpg/services/settings.py.
         self.difficulty = "normal"
@@ -231,15 +231,36 @@ class GameSession:
         shop.rotate(seed, self.world.shop_unlocks if mode == ShopMode.GENERAL else None, self.player.level)
         return shop
 
-    def quest_start(self, quest: Quest) -> str:
-        if quest.alt_flag and self.world.flags.get(quest.alt_flag) and quest.alt_node:
-            return quest.alt_node
+    def board(self) -> list[BoardEntry]:
+        """The quest board's destinations that are open right now."""
+        return [entry for entry in QUESTS if check_conditions(self, list(entry.conditions))]
+
+    def quest_start(self, quest: BoardEntry) -> str:
+        for conditions, start in quest.routes:
+            if check_conditions(self, list(conditions)):
+                return start
         return quest.start_node
+
+    def journal(self) -> list[tuple[str, str, str, str]]:
+        """(quest id, title, giver, current journal text) for every started quest, with its stage."""
+        entries = []
+        for quest_id, stage in self.world.quests.items():
+            quest = self.quests.get(quest_id)
+            title = quest.title if quest else quest_id
+            entries.append((stage, title, quest.giver if quest else "", quest.stage_text(stage) if quest else ""))
+        return entries
+
+    def end_game(self, ending_id: str) -> Ending:
+        return self.endings.resolve(self, ending_id)
 
     def dialogue(self, start_id: str) -> DialogueRunner:
         return DialogueRunner(self, self.dialogues, start_id)
 
     # ------------------------------------------------------------ persistence
+    def snapshot(self) -> dict:
+        """A deep copy of the save data as it is right now (for checkpoints)."""
+        return json.loads(json.dumps(self.to_dict()))
+
     def to_dict(self) -> dict:
         return {"version": config.SAVE_VERSION, "player": self.player.to_dict(), "world": self.world.to_dict()}
 

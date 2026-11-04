@@ -39,7 +39,7 @@ class SaveLoadScreen(Screen[None]):
         options = self.query_one(OptionList)
         options.clear_options()
         first_enabled = None
-        for index, info in enumerate(self.app.saves.list_slots()):
+        for index, info in enumerate(self.app.saves.list_slots(include_autosave=self.mode == "load")):
             disabled = self.mode == "load" and (not info.exists or bool(info.error))
             options.add_option(Option(info.label, id=f"slot{info.slot}", disabled=disabled))
             if not disabled and first_enabled is None:

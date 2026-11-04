@@ -1,3 +1,4 @@
 textual>=3.0
 pyfiglet>=1.0
+pyyaml>=6.0
 colorama>=0.4.6  # only needed by the original Main.py version

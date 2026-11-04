@@ -1,0 +1,270 @@
+# The Banked Fire, Emberwick's inn. Brannoc runs it.
+#
+# Brannoc: old, blunt, tired, kind underneath. Short sentences. He never says more than he has to, and he
+# never explains a joke. He calls the soup "soup" with a straight face.
+#
+# His three odd jobs (inn_rats -> inn_firewood -> inn_drunk) lead to the cottage (the_cottage), and buying
+# the cottage ends the game (see cottage.yaml and story/endings.yaml). Nothing here hints that it's an ending.
+
+_defaults:
+  speaker: Brannoc
+
+start:
+  speaker: The Banked Fire
+  lines:
+    - text: The door sticks, then gives. Heat and woodsmoke hit you like a wall.
+      if: {first_visit: true}
+    - text: >-
+        The Banked Fire is a long, low room with a fireplace you could stand up in. Refugees sleep on the
+        benches along the walls with their boots still on.
+      if: {first_visit: true}
+    - text: >-
+        Behind the counter an old man with a grey beard and forearms like ship's rope is wiping a mug that
+        is already clean. He doesn't look up. "Shut the door. You're letting the winter in."
+      if: {first_visit: true}
+    # How the room takes you, by race. Only on the first visit.
+    - text: He gives your beard a long, approving look. It's the warmest welcome you'll get today.
+      if: {first_visit: true, race: Dwarf}
+    - text: A few of the refugees shuffle along their bench, away from you. The old man doesn't.
+      if: {first_visit: true, race: Orc}
+    - text: >-
+        When he does look up, he looks at your face for a long moment. Then he goes back to his mug.
+        "We don't ask questions here. We ask for coin."
+      if: {first_visit: true, race: Revenant}
+    - text: >-
+        "Collegium's north, past the lake," he says, before you've opened your mouth. "Everyone with ears
+        like that asks."
+      if: {first_visit: true, race: Elf}
+    - text: >-
+        He has to lean over the counter to see you. "Mind the dogs. They think anything your size is
+        supper."
+      if: {first_visit: true, race: Halfling}
+    - text: He eyes the soot on your hands. "If you're here about the chimney, it's about time."
+      if: {first_visit: true, race: Gnome}
+    - text: Someone by the fire mutters a prayer to the Hearth. The old man tells them to shut it.
+      if: {first_visit: true, race: Dragonkin}
+    - text: '"Northerner," he says. Not a question. "Snow''s worse up there, I hear."'
+      if: {first_visit: true, race: Beastkin}
+    - text: '"Pine on you," he says, sniffing. "Ashwood folk. Don''t go planting anything in my floor."'
+      if: {first_visit: true, race: Druid}
+    - text: '"Hearthlands?" he asks, and doesn''t wait for the answer. "Everyone''s from the Hearthlands now."'
+      if: {first_visit: true, race: Human}
+    - text: The Banked Fire is as warm and as crowded as ever. Brannoc looks up from his mug and nods once.
+      if: {first_visit: false}
+  next: counter
+
+counter:
+  lines:
+    - text: >-
+        "Brannoc. This is my inn. Beds are ten gold, the soup is free, and it tastes like it."
+      if: {first_visit: true}
+    - text: '"Well?"'
+      if: {first_visit: false}
+  choices:
+    # --- the rats
+    - text: Ask if he has any work.
+      if: {quest_not_started: inn_rats}
+      next: rats_offer
+    - text: Go back down to the cellar.
+      if: {quest_at: [inn_rats, started]}
+      next: emberwick/cellar/stairs
+    - text: Tell him the cellar is clear.
+      if: {quest_at: [inn_rats, cleared]}
+      next: rats_paid
+    # --- the firewood
+    - text: Ask if he has any more work.
+      if: {quest_done: inn_rats, quest_not_started: inn_firewood}
+      next: wood_offer
+    - text: Head out for the firewood.
+      if: {quest_at: [inn_firewood, started]}
+      next: emberwick/firewood/road
+    - text: Bring in the firewood.
+      if: {quest_at: [inn_firewood, gathered]}
+      next: wood_paid
+    # --- the drunk
+    - text: Ask if he has any more work.
+      if: {quest_done: inn_firewood, quest_not_started: inn_drunk}
+      next: drunk_offer
+    - text: Go and deal with Oswin.
+      if: {quest_at: [inn_drunk, started]}
+      next: emberwick/drunk/wake
+    - text: Tell him Oswin is settled.
+      if: {quest_at: [inn_drunk, settled]}
+      next: drunk_paid
+    # --- after
+    - text: Ask about the cottage.
+      if: {quest_active: the_cottage}
+      next: emberwick/cottage/ask
+    - text: Ask if he has any more work.
+      if: {quest_done: inn_drunk}
+      next: no_work
+    # --- always
+    - text: Ask about Emberwick.
+      next: town
+    - text: Rent a bed for the night. (10 gold)
+      if: {min_gold: 10}
+      locked: true
+      next: bed
+      effects:
+        - add_gold: -10
+    - text: Leave.
+
+rats_offer:
+  lines:
+    - '"Work." He sets the mug down. "Rats. In the cellar. Big ones."'
+    - >-
+      "They've had two sacks of barley and a wheel of cheese, and last night one of them looked at me like I
+      owed it rent. Clear them out and there's forty gold in it."
+  choices:
+    - text: I'll do it.
+      next: emberwick/cellar/stairs
+      effects:
+        - start_quest: inn_rats
+    - text: Forty isn't much for rats that size.
+      if: {min_stat: [charisma, 12]}
+      locked: true
+      next: rats_haggle
+    - text: Not right now.
+      next: counter
+
+rats_haggle:
+  lines:
+    - He looks at you for a while. You look back.
+    - '"Fifty," he says at last. "And you sweep up after."'
+  effects:
+    - set_flag: [brannoc_haggled, true]
+  choices:
+    - text: Deal.
+      next: emberwick/cellar/stairs
+      effects:
+        - start_quest: inn_rats
+
+rats_paid:
+  lines:
+    - '"Dead?" Brannoc asks.'
+    - >-
+      You tell him about the one that got away: the big one, sitting on the barrel, wearing what looked
+      like-
+    - He holds up a hand. "Don't. I don't want to know what it was wearing."
+    - He counts coins onto the counter, slowly, the way a man does when every coin has a name.
+  effects:
+    - add_gold: 40
+      if: {flag_not_set: brannoc_haggled}
+    - add_gold: 50
+      if: {flag_set: brannoc_haggled}
+    - give_xp: 30
+    - add_var: [rep.brannoc, 1]
+    - complete_quest: inn_rats
+  next: counter
+
+wood_offer:
+  lines:
+    - >-
+      "Wood," Brannoc says. "The boy who chopped for me ran off to join the Free Holds. Or the Regency. He
+      wasn't clear."
+    - >-
+      "Woodpile's under four feet of snow and that fire eats a cord a week. There's deadfall at the edge of
+      the Hearthlands, an hour up the Harrow Road. Bring me a sledge-load before the snow shuts the road."
+    - '"Thirty gold. Take the axe by the door. Bring it back."'
+  choices:
+    - text: I'll go.
+      next: emberwick/firewood/road
+      effects:
+        - start_quest: inn_firewood
+    - text: Not right now.
+      next: counter
+
+wood_paid:
+  lines:
+    - Brannoc comes out into the cold and looks at the sledge for a long time.
+    - text: >-
+        "That's more than I asked for," he says. He sounds almost offended about it. Then he puts ten more
+        coins on top of the thirty.
+      if: {flag_set: firewood_extra}
+    - '"Good," he says. "That''s another week."'
+  effects:
+    - add_gold: 30
+    - add_gold: 10
+      if: {flag_set: firewood_extra}
+    - give_xp: 30
+    - add_var: [rep.brannoc, 1]
+    - complete_quest: inn_firewood
+  next: counter
+
+drunk_offer:
+  lines:
+    - >-
+      Brannoc nods at the corner by the fire, where a big man in a carter's coat is asleep sitting up, one
+      hand still round a mug.
+    - >-
+      "Oswin. Drives the salt wagons. Been drinking on my slate for a month, says he'll pay when the roads
+      open."
+    - >-
+      "Roads won't open till spring, and spring's not coming. He owes me thirty. Get it off him, talk him
+      round, or throw him out in the snow. I don't much care which."
+  choices:
+    - text: I'll talk to him.
+      next: emberwick/drunk/wake
+      effects:
+        - start_quest: inn_drunk
+    - text: Not right now.
+      next: counter
+
+drunk_paid:
+  lines:
+    - text: '"He cried?" Brannoc says. "Oswin?" He shakes his head slowly. "Thirty years I''ve known him."'
+      if: {flag_is: [oswin, persuaded]}
+    - text: Brannoc counts the money twice. "Didn't break anything, did you? Good."
+      if: {any: [{flag_is: [oswin, threatened]}, {flag_is: [oswin, stared]}]}
+    - text: '"Saw that through the window," Brannoc says. Something that might be a smile moves under his beard.'
+      if: {flag_is: [oswin, thrown]}
+    - text: >-
+        Brannoc pushes the coins back across the counter. "You paid him off yourself. I saw. Keep it."
+      if: {flag_is: [oswin, paid_for]}
+    - He leans on the counter. For once he doesn't pick up a mug.
+    - '"You do good work. You don''t talk much. I like that."'
+    - >-
+      "There's a cottage at the end of the lane. Widow Hesk's. She's gone south to her daughter and she
+      won't be back. Two rooms, a good chimney, a roof that mostly holds."
+    - '"Five hundred gold. I''d put in a word for you."'
+    - He picks his mug back up, like he's said too much.
+  effects:
+    - add_gold: 15
+      if: {not: {flag_is: [oswin, paid_for]}}
+    - add_gold: 30
+      if: {flag_is: [oswin, paid_for]}
+    - give_xp: 40
+    - add_var: [rep.brannoc, 1]
+    - complete_quest: inn_drunk
+    - start_quest: the_cottage
+  next: counter
+
+no_work:
+  lines:
+    - '"Nothing today," Brannoc says. "Come back when the roof falls in."'
+  next: counter
+
+town:
+  lines:
+    - >-
+      "Emberwick." He shrugs. "Crossroads. Market on a good day. There haven't been many good days."
+    - >-
+      "Half the people in this room walked here from somewhere that isn't there any more. Tax collectors,
+      soldiers, the cold. Pick one."
+    - >-
+      "There's the fire on the hill, you'll have seen it. The Order keeps it lit. Only one for thirty miles
+      that still is. People come a long way to stand near it."
+    - text: '"Ground shook again last week." He goes back to his mug. "Ground does that."'
+      if: {first_visit: true}
+  next: counter
+
+bed:
+  lines:
+    - >-
+      The bed is narrow and the blanket smells of someone else, but it's warm, and nobody kicks you in the
+      night. You sleep like a stone.
+  repeat: true
+  effects:
+    - full_rest: true
+    - set_time: 7
+  next: counter

@@ -1,0 +1,41 @@
+# Emberwick's quests. Each stage's text is what the journal shows while the quest is at that stage.
+# "done" (and "failed") end a quest.
+
+inn_rats:
+  title: Rats in the Cellar
+  giver: Brannoc
+  stages:
+    started: >-
+      Brannoc wants the rats out of the Banked Fire's cellar. They've had two sacks of barley and a wheel
+      of cheese.
+    cleared: The cellar is clear, mostly. The biggest rat got away. Tell Brannoc.
+    done: You cleared Brannoc's cellar. He paid you and almost smiled.
+
+inn_firewood:
+  title: Firewood
+  giver: Brannoc
+  stages:
+    started: >-
+      The inn's woodpile is buried in snow. Bring a sledge-load of deadfall back from the edge of the
+      Hearthlands, an hour up the Harrow Road.
+    gathered: You have the firewood. Haul it back to the Banked Fire.
+    done: The Banked Fire will stay warm another week. Brannoc said so, which for him is a speech.
+
+inn_drunk:
+  title: The Carter's Slate
+  giver: Brannoc
+  stages:
+    started: >-
+      Oswin the carter has drunk on Brannoc's slate for a month and won't pay. Get the thirty gold, talk him
+      round, or throw him out in the snow.
+    settled: Oswin is dealt with. Tell Brannoc.
+    done: Oswin's slate is settled, one way or another.
+
+the_cottage:
+  title: A House in Emberwick
+  giver: Brannoc
+  stages:
+    offered: >-
+      The old cottage at the end of the lane is for sale: two rooms, a good chimney, a roof that mostly
+      holds. Five hundred gold. Brannoc says he'd put in a word.
+    done: You bought the cottage.

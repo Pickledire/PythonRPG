@@ -1,0 +1,42 @@
+# Endings. A scene ends the run with the effect {end_game: <id>}. The epilogue is shown after THE END, one
+# line at a time; lines may have an "if" like scene lines, so the run is reflected in how it ends.
+
+a_house_in_emberwick:
+  title: A House in Emberwick
+  epilogue:
+    - You lived in the cottage at the end of the lane for a long time.
+    - You moved the bed. The roof stopped leaking eventually, mostly because you fixed it.
+    - text: Brannoc came by most evenings. He brought the chair. It was a good chair.
+      if: {var: "rep.brannoc >= 4"}
+    - text: Brannoc came by now and then, mostly to complain about the soup.
+      if: {var: "rep.brannoc < 4"}
+    - text: Oswin brought you a sack of salt every spring, though spring never really came.
+      if: {any: [{flag_is: [oswin, persuaded]}, {flag_is: [oswin, paid_for]}]}
+    - text: Oswin crossed the street whenever he saw you coming. You didn't mind.
+      if: {any: [{flag_is: [oswin, threatened]}, {flag_is: [oswin, stared]}, {flag_is: [oswin, thrown]}]}
+    # Every race has its own line.
+    - text: Letters came from the Holds now and then. You used them to light the fire.
+      if: {race: Dwarf}
+    - text: The Collegium never sent for you. After a while you stopped waiting for the letter.
+      if: {race: Elf}
+    - text: The children stopped being afraid of you by the second winter. By the third they were climbing you.
+      if: {race: Orc}
+    - text: You grew the best potatoes on the lane. You grew the only potatoes on the lane.
+      if: {race: Halfling}
+    - text: You fixed the chimney. Then everyone's chimney. Then the well.
+      if: {race: Gnome}
+    - text: Something green grew up through your floor every summer. You let it.
+      if: {race: Druid}
+    - text: You never got used to sleeping indoors. You slept by the door, where you could hear the wind.
+      if: {race: Beastkin}
+    - text: On the coldest nights, people knocked to warm their hands by your breath. You let them in.
+      if: {race: Dragonkin}
+    - text: Nobody in Emberwick ever asked why you didn't eat. Brannoc had told them not to.
+      if: {race: Revenant}
+    - text: You never went back to the Hearthlands. There was nothing there to go back to.
+      if: {race: Human}
+    - text: Sometimes, at night, you missed the fighting. Not often.
+      if: {min_kills: 25}
+    - The ground shook, now and then. Ground does that.
+    - The winter never ended.
+    - You didn't really notice.

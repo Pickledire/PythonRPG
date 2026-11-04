@@ -1,0 +1,14 @@
+# Temporary: keeps the spell shop reachable while the old Mages Academy quest is gone.
+# Replace with the Collegium's members-only shop at Glassmere (see docs/story/03_factions.md).
+
+stall:
+  speaker: The Collegium's Stall
+  lines:
+    - A Collegium clerk minds a stall of spellbooks, staves and robes under a canvas awning.
+  choices:
+    - text: Browse the stall.
+      repeat: true
+      effects:
+        - open_shop: magic
+      next: stall
+    - text: Leave.

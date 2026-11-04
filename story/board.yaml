@@ -1,0 +1,24 @@
+# The quest board: places you can set out for from the hub.
+#   key:    a unique name
+#   title:  what the board shows
+#   blurb:  one line under the title
+#   start:  the first scene (see dialogues/)
+#   if:     optional, only listed while this condition holds
+#   routes: optional, start somewhere else while a condition holds (first match wins)
+
+- key: emberwick_inn
+  title: The Banked Fire
+  blurb: Emberwick's inn. Warm beds, thin soup, and an innkeeper who's always short a pair of hands.
+  start: emberwick/inn/start
+
+# Temporary: the spell shop, until the Collegium has its own place in the story.
+- key: collegium_shop
+  title: The Collegium's Stall (temporary)
+  blurb: Spells, staves, robes and jewelry. Will become the Collegium's members-only shop.
+  start: dev/collegium/stall
+
+# Temporary: a showcase of every minigame. Remove once real quests use them.
+- key: test_vault
+  title: The Sunken Vault (trial run)
+  blurb: Sneak, pick, balance and fight through a drowned vault. Every minigame in one quest.
+  start: test_vault/intro

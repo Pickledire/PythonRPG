@@ -1,0 +1,133 @@
+# Job 3: Oswin the carter, who won't pay his slate (quest inn_drunk).
+# Five ways out: talk him round (Charisma), lean on him (Strength), look at him (Orcs only), pay his debt
+# yourself, or carry him out over the icy steps (a balance minigame). How you did it is in the "oswin" flag,
+# and Brannoc (and the ending) remember it.
+
+_defaults:
+  speaker: Oswin
+
+wake:
+  lines:
+    - >-
+      You shake his shoulder. Oswin opens one eye, then the other, and they don't agree about where you are.
+    - >-
+      "Who're you? Brannoc send you?" He laughs, which turns into a cough. "Tell him I'll pay. When the roads
+      open."
+    - text: Then he gets a proper look at you, and goes a bit pale.
+      if: {race: Orc}
+    - text: '"Oh, a dwarf. Come to collect, have you? Your lot always collect."'
+      if: {race: Dwarf}
+    - text: '"He sent a child? Is that what we''ve come to?"'
+      if: {race: Halfling}
+    - text: He squints at your face, then decides he's drunker than he thought.
+      if: {race: Revenant}
+  choices:
+    - text: Talk him round.
+      if: {min_stat: [charisma, 12]}
+      locked: true
+      next: persuaded
+    - text: Lift him up by his coat.
+      if: {min_stat: [strength, 12]}
+      locked: true
+      next: threatened
+    - text: Don't say anything. Just look at him.
+      if: {race: Orc}
+      next: stared
+    - text: Pay his slate yourself. (30 gold)
+      if: {min_gold: 30}
+      locked: true
+      next: paid_for
+      effects:
+        - add_gold: -30
+    - text: Throw him out.
+      effects:
+        - minigame:
+            type: balance
+            dc: 10
+            title: The Icy Steps
+            intro: He's very heavy, the steps are very icy, and he keeps trying to sing.
+            duration: 12
+            success: thrown_clean
+            partial: thrown_clean
+            failure: thrown_fall
+            retreat: wake
+    - text: Leave him for now.
+
+persuaded:
+  lines:
+    - >-
+      You sit down across from him and talk. About the roads. About Brannoc, who kept the fire lit for him
+      all month. About what happens to men who drink on credit in a town full of hungry people.
+    - >-
+      Oswin listens. Somewhere in the middle he starts to cry, which you didn't expect. Then he digs in his
+      boot and counts out thirty gold, most of it in coppers.
+  effects:
+    - set_flag: [oswin, persuaded]
+    - quest_stage: [inn_drunk, settled]
+  choices:
+    - text: Take the money to Brannoc.
+      next: emberwick/inn/drunk_paid
+
+threatened:
+  lines:
+    - You lift him by his coat until his boots leave the floor. It takes both hands. He's a big man.
+    - '"All right," he says. "All right." The money was in his boot the whole time.'
+  effects:
+    - set_flag: [oswin, threatened]
+    - quest_stage: [inn_drunk, settled]
+  choices:
+    - text: Take the money to Brannoc.
+      next: emberwick/inn/drunk_paid
+
+stared:
+  lines:
+    - You don't say anything. You just look at him.
+    - Oswin looks back. Then he looks at your tusks. Then he finds thirty gold he didn't know he had.
+  effects:
+    - set_flag: [oswin, stared]
+    - quest_stage: [inn_drunk, settled]
+  choices:
+    - text: Take the money to Brannoc.
+      next: emberwick/inn/drunk_paid
+
+paid_for:
+  lines:
+    - You count thirty gold onto the table. Oswin stares at it, then at you.
+    - '"Why''d you do that?"'
+    - >-
+      You don't really have an answer. He doesn't seem to need one. He picks up his hat and goes, and on the
+      way out he stops to shake Brannoc's hand.
+  effects:
+    - set_flag: [oswin, paid_for]
+    - add_var: [rep.brannoc, 1]
+    - quest_stage: [inn_drunk, settled]
+  choices:
+    - text: Go back to the counter.
+      next: emberwick/inn/drunk_paid
+
+thrown_clean:
+  lines:
+    - >-
+      You get him over your shoulder and down the icy steps without either of you breaking anything, and
+      drop him in a snowbank. He sits up, suddenly very sober.
+    - '"Thirty," you say. He pays.'
+  effects:
+    - set_flag: [oswin, thrown]
+    - quest_stage: [inn_drunk, settled]
+  choices:
+    - text: Take the money to Brannoc.
+      next: emberwick/inn/drunk_paid
+
+thrown_fall:
+  lines:
+    - >-
+      Halfway down the icy steps your feet go out from under you and you both go down. He lands on you. He
+      is extremely heavy.
+    - In the snowbank, wheezing, he pays you just to make it stop.
+  effects:
+    - damage: 10
+    - set_flag: [oswin, thrown]
+    - quest_stage: [inn_drunk, settled]
+  choices:
+    - text: Take the money to Brannoc.
+      next: emberwick/inn/drunk_paid

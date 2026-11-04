@@ -1,0 +1,50 @@
+# A House in Emberwick: the secret early ending.
+#
+# Buying the cottage ends the game, on the spot. Nothing warns the player: no "are you sure", no ominous
+# music, no hint in the journal. That's the joke. The game autosaves first (as it was when this conversation
+# began), so the surprise costs a reload, not the run.
+
+_defaults:
+  speaker: Brannoc
+
+ask:
+  lines:
+    - text: >-
+        "Widow Hesk's place," Brannoc says. "End of the lane, past the well. You'll know it by the chimney."
+      if: {first_visit: true}
+    - text: '"Still for sale," he says. "Nobody else has five hundred gold. Nobody else is daft enough to stay."'
+      if: {first_visit: false}
+    - text: '"I''d throw in a chair," he adds. "Good chair."'
+      if: {var: "rep.brannoc >= 4"}
+  choices:
+    - text: Buy the cottage. (500 gold)
+      if: {min_gold: 500}
+      locked: true
+      next: key
+      effects:
+        - add_gold: -500
+        - complete_quest: the_cottage
+    - text: Not yet.
+      next: emberwick/inn/counter
+
+key:
+  lines:
+    - >-
+      You count out five hundred gold. Brannoc counts it again, slowly, and puts it in a box under the
+      counter.
+    - Then he hands you an iron key on a bit of string.
+    - '"Roof leaks over the bed," he says. "Move the bed."'
+  next: house
+
+house:
+  speaker: The Cottage
+  lines:
+    - The lane is quiet. The snow is clean. The cottage is small and cold and smells of old smoke.
+    - >-
+      There's kindling in the box by the hearth, and a stack of dry logs that someone left for whoever came
+      next.
+    - You light the fire. It catches on the first try.
+    - You take off your boots.
+    - You sit down.
+  effects:
+    - end_game: a_house_in_emberwick

@@ -33,13 +33,14 @@ class SlotInfo:
 
     @property
     def label(self) -> str:
+        slot = "Autosave" if self.slot == config.AUTOSAVE_SLOT else f"Slot {self.slot}"
         if not self.exists:
-            return f"Slot {self.slot} — empty"
+            return f"{slot} — empty"
         if self.error:
-            return f"Slot {self.slot} — unreadable ({self.error})"
+            return f"{slot} — unreadable ({self.error})"
         when = f" · {self.saved_at}" if self.saved_at else ""
         legacy = " · from the original game" if self.legacy else ""
-        return f"Slot {self.slot} — {self.name}, level {self.level} {self.race}{when}{legacy}"
+        return f"{slot} — {self.name}, level {self.level} {self.race}{when}{legacy}"
 
 
 class SaveManager:
@@ -48,13 +49,21 @@ class SaveManager:
         self.slots = slots
 
     def path(self, slot: int) -> Path:
+        if slot == config.AUTOSAVE_SLOT:
+            return self.directory / "autosave.json"
         if not 1 <= slot <= self.slots:
             raise SaveError(f"Slot must be between 1 and {self.slots}")
         return self.directory / f"slot{slot}.json"
 
     # ------------------------------------------------------------ listing
-    def list_slots(self) -> list[SlotInfo]:
-        return [self.slot_info(slot) for slot in range(1, self.slots + 1)]
+    def list_slots(self, include_autosave: bool = False) -> list[SlotInfo]:
+        """The player's slots; with ``include_autosave``, the autosave first (when there is one)."""
+        infos = [self.slot_info(slot) for slot in range(1, self.slots + 1)]
+        if include_autosave:
+            auto = self.slot_info(config.AUTOSAVE_SLOT)
+            if auto.exists:
+                infos.insert(0, auto)
+        return infos
 
     def slot_info(self, slot: int) -> SlotInfo:
         path = self.path(slot)
@@ -71,13 +80,16 @@ class SaveManager:
             return SlotInfo(slot, True, error=type(exc).__name__)
 
     def any_saves(self) -> bool:
-        return any(info.exists and not info.error for info in self.list_slots())
+        return any(info.exists and not info.error for info in self.list_slots(include_autosave=True))
 
     # ------------------------------------------------------------ save / load
     def save(self, session: GameSession, slot: int) -> Path:
+        return self.save_payload(session.to_dict(), slot)
+
+    def save_payload(self, payload: dict, slot: int) -> Path:
+        """Write save data (``GameSession.to_dict()`` or a ``snapshot()`` taken earlier) to a slot."""
         path = self.path(slot)
-        payload = session.to_dict()
-        payload["saved_at"] = datetime.now().strftime("%Y-%m-%d %H:%M")
+        payload = dict(payload, saved_at=datetime.now().strftime("%Y-%m-%d %H:%M"))
         self.directory.mkdir(parents=True, exist_ok=True)
         fd, tmp = tempfile.mkstemp(prefix=f".slot{slot}-", suffix=".json", dir=self.directory)
         try:
