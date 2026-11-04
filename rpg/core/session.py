@@ -11,7 +11,7 @@ import random
 from dataclasses import dataclass
 
 from rpg import config
-from rpg.core import campfire
+from rpg.core import bestiary, campfire
 from rpg.core.attributes import Attribute
 from rpg.core.combat import CombatSession, Phase, apply_consumable, consumable_blocker
 from rpg.core.dialogue import DialogueRepository, DialogueRunner, check_conditions
@@ -23,8 +23,10 @@ from rpg.core.items import Consumable, ConsumableEffect, Item
 from rpg.core.minigames import Minigame, MinigameKind, MinigameSpec, Outcome, build_minigame
 from rpg.core.progression import VictoryReport, apply_victory, grant_item, roll_victory
 from rpg.core.quests import BoardEntry, QuestBook, load_board
+from rpg.core.regions import Region, RegionMap
 from rpg.core.shop import Shop, ShopMode
 from rpg.core.skills import SkillCheck, skill_check
+from rpg.core import travel as travel_rules
 from rpg.core.world import WorldState
 
 
@@ -33,6 +35,8 @@ Quest = BoardEntry
 QUESTS, BOARD_ERRORS = load_board(config.STORY_DIR / "board.yaml")
 _QUESTBOOK: QuestBook | None = None
 _ENDINGS: EndingBook | None = None
+_REGIONS: RegionMap | None = None
+_LORE: tuple[dict[str, str], list[str]] | None = None
 
 
 def default_questbook() -> QuestBook:
@@ -40,6 +44,21 @@ def default_questbook() -> QuestBook:
     if _QUESTBOOK is None:
         _QUESTBOOK = QuestBook.load(config.STORY_DIR / "quests")
     return _QUESTBOOK
+
+
+def default_regions() -> RegionMap:
+    global _REGIONS
+    if _REGIONS is None:
+        _REGIONS = RegionMap.load(config.STORY_DIR / "regions.yaml")
+    return _REGIONS
+
+
+def default_lore() -> tuple[dict[str, str], list[str]]:
+    """Bestiary lore (creature id -> text) and any problems reading it."""
+    global _LORE
+    if _LORE is None:
+        _LORE = bestiary.load_lore(config.STORY_DIR / "bestiary.yaml")
+    return _LORE
 
 
 def default_endings() -> EndingBook:
@@ -71,6 +90,7 @@ class GameSession:
         self.dialogues = DialogueRepository(dialogue_dir or config.DIALOGUE_DIR)
         self.quests = default_questbook()
         self.endings = default_endings()
+        self.regions = default_regions()
         self.shops = {mode: Shop(mode) for mode in ShopMode}
         # Player settings (not saved with the game): see rpg/services/settings.py.
         self.difficulty = "normal"
@@ -103,7 +123,7 @@ class GameSession:
         if boss_id:
             boss = ENEMIES.create(boss_id, self.rng, self.player.level)
             return Encounter(self._prepare(boss), 1.0, is_milestone_boss=True)
-        enemy = ENEMIES.random_for_level(self.player.level, self.rng)
+        enemy = self._local_enemy()
         multiplier = 1.0
         if risky:
             scale = config.RISKY_HUNT_ENEMY_SCALE
@@ -111,6 +131,32 @@ class GameSession:
             multiplier = config.RISKY_HUNT_REWARD_MULTIPLIER
         ENEMIES.roll_affix(enemy, self.rng)
         return Encounter(self._prepare(enemy), multiplier)
+
+    @property
+    def region(self) -> Region | None:
+        return self.regions.get(self.world.region)
+
+    @property
+    def place(self) -> str:
+        """Where you are, for titles: ``Emberwick``, ``Camp in the Ashwood``."""
+        region = self.region
+        return region.place if region else "Camp"
+
+    def _local_enemy(self) -> Enemy:
+        """A creature of the region you're in (any creature at your level if the map doesn't know it)."""
+        region = self.region
+        if region and region.hunt:
+            return region.roll_enemy(self.player.level, self.rng)
+        return ENEMIES.random_for_level(self.player.level, self.rng)
+
+    def travel_options(self) -> list[travel_rules.TravelOption]:
+        return travel_rules.options(self.regions, self.world)
+
+    def travel(self, destination: str, mode: travel_rules.TravelMode) -> travel_rules.TravelReport:
+        report = travel_rules.travel(self.player, self.world, self.regions, destination, mode, self.rng)
+        if report.ambush:
+            self._prepare(report.ambush)
+        return report
 
     def create_story_enemy(self, enemy_id: str) -> tuple[Enemy, list[LogEvent]]:
         try:
@@ -134,6 +180,7 @@ class GameSession:
     def begin_combat(self, encounter: Encounter, allow_flee: bool = True) -> CombatSession:
         rewards = encounter.reward_multiplier * self.difficulty_rules["rewards"]
         combat = CombatSession(self.player, encounter.enemy, self.rng, rewards, allow_flee)
+        bestiary.record(self.world, encounter.enemy.template_id)
         if encounter.ambush:
             combat.ambush()
         if encounter.opener:
@@ -146,6 +193,7 @@ class GameSession:
         if combat.phase != Phase.VICTORY:
             return None
         enemy = combat.enemy
+        bestiary.record(self.world, enemy.template_id, defeated=True)
         if enemy.is_boss:
             self.world.bosses_defeated.add(enemy.template_id)
         report = roll_victory(enemy, self.rng, combat.reward_multiplier, self.player.level)
@@ -214,7 +262,7 @@ class GameSession:
 
     # ------------------------------------------------------------ camp, shops, quests
     def rest(self) -> campfire.CampfireReport:
-        report = campfire.rest(self.player, self.world, self.rng)
+        report = campfire.rest(self.player, self.world, self.rng, ambusher=self._local_enemy)
         if report.ambush:
             self._prepare(report.ambush)
         return report
@@ -232,8 +280,11 @@ class GameSession:
         return shop
 
     def board(self) -> list[BoardEntry]:
-        """The quest board's destinations that are open right now."""
-        return [entry for entry in QUESTS if check_conditions(self, list(entry.conditions))]
+        """The quest board's destinations here and now: entries for this region (or for anywhere) whose
+        conditions hold."""
+        return [entry for entry in QUESTS
+                if (not entry.where or self.world.region in entry.where)
+                and check_conditions(self, list(entry.conditions))]
 
     def quest_start(self, quest: BoardEntry) -> str:
         for conditions, start in quest.routes:
@@ -249,6 +300,9 @@ class GameSession:
             title = quest.title if quest else quest_id
             entries.append((stage, title, quest.giver if quest else "", quest.stage_text(stage) if quest else ""))
         return entries
+
+    def bestiary(self) -> dict[str, list[bestiary.Entry]]:
+        return bestiary.entries(self.world, self.regions, default_lore()[0])
 
     def end_game(self, ending_id: str) -> Ending:
         return self.endings.resolve(self, ending_id)

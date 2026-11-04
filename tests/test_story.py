@@ -21,7 +21,15 @@ from rpg.core.dialogue import (
 from rpg.core.endings import EndingBook
 from rpg.core.minigames import Outcome
 from rpg.core.quests import BoardEntry, QuestBook
-from rpg.core.session import BOARD_ERRORS, QUESTS, GameSession, default_endings, default_questbook
+from rpg.core.session import (
+    BOARD_ERRORS,
+    QUESTS,
+    GameSession,
+    default_endings,
+    default_lore,
+    default_questbook,
+    default_regions,
+)
 from rpg.core.storycheck import check_story
 from rpg.services.persistence import SaveManager
 from rpg.services.profile import ProfileStore
@@ -285,7 +293,7 @@ class QuestAndEndingTests(StoryFixture):
 
     def test_board_entries_routes_and_visibility(self):
         entry = BoardEntry("x", "X", "", "x/start", ({"flag_set": "unlocked"},),
-                           ((({"flag_set": "back"},), "x/again"),))
+                           routes=((({"flag_set": "back"},), "x/again"),))
         self.assertEqual(self.session.quest_start(entry), "x/start")
         self.world.flags["back"] = True
         self.assertEqual(self.session.quest_start(entry), "x/again")
@@ -318,7 +326,9 @@ class StoryCheckTests(StoryFixture):
 
     def test_shipped_story_is_clean(self):
         repo = DialogueRepository(config.DIALOGUE_DIR)
-        errors, warnings = check_story(repo, default_questbook(), default_endings(), QUESTS, BOARD_ERRORS)
+        lore, lore_errors = default_lore()
+        errors, warnings = check_story(repo, default_questbook(), default_endings(), QUESTS,
+                                       BOARD_ERRORS + lore_errors, default_regions(), lore)
         self.assertEqual(errors, [])
         self.assertEqual(warnings, [])
 

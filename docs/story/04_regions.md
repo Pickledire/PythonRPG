@@ -31,6 +31,40 @@ Hunting is its own activity, but where you hunt and what you can find are shaped
 
 So nobody meets a Titan by grinding. You meet one after you've learned what Titans are and gone looking.
 
+## The map and travel (built)
+
+The map lives in [story/regions.yaml](../../story/regions.yaml): each region's starting level, its creatures
+and its roads. Roads go both ways.
+
+```
+                             Titanfell
+                                 |
+    Shrieking Cliffs ------- Frostreach ------- Mt. Aegis ------- Emberpeaks
+         |         \          /                    |                  |
+         |          Glassmere -------------- Brennhold                |
+         |         /                               |                  |
+    Drowned Marches -- Ashwood ------------ The Hearthlands           |
+         |                                         |                  |
+         +------------------------------------ Barrowfields ------- Valoria
+```
+
+- **On foot** you can only go one road, to a region next door. It takes 6 hours, and about a quarter of the
+  time the road brings trouble (bandits or a local creature, a cutpurse, a lost potion); sometimes luck
+  (a dropped purse, a potion, an old soldier's tip).
+- **By carriage** you can go anywhere, 4 hours a road. Highwaymen stop a carriage 4% of the time.
+- **The fare** is 15 gold, plus 10 per road, plus hazard pay of half a gold per level of the destination's
+  starting level, rounded to 5. From Emberwick: Brennhold or the Ashwood 30, the Barrowfields 35, Glassmere
+  40, Mt. Aegis 45, the Drowned Marches 50, Valoria 55, the Frostreach or the Cliffs 60, the Emberpeaks 70,
+  Titanfell 90. Riding home to the Hearthlands is the cheapest (25).
+- **Why that price.** Hunts pay about 13 gold a fight at levels 1-3, 21 at 5, 34 at 10 and 50 at 15. A
+  short ride is about two hunts early on and under one by level 10; the far, deadly places cost 5-7 early
+  hunts, so nobody reaches them on pocket change.
+
+Hunting meets the region's own creatures at your level, but never below its starting level. Familiar
+creatures in a region you've outgrown are weaker for your level and pay less (rewards follow how dangerous
+an enemy is), which nudges you onward. The milestone bosses (the Titan at level 10 and so on) still turn up
+on any hunt until they become lore-gated legendary hunts.
+
 ## The regions
 
 Levels are a draft. The first number is roughly where a region becomes safe to enter; the second is where the
@@ -66,7 +100,15 @@ middle, mountains and ice to the north, ruins to the south, fire to the east.
 | Stone Sentinel | Test quest | An early regional or story boss in Hearthlands ruins |
 | Ghost Horror | Idle haunting | Stays as camp folklore, and becomes a Barrowfields regular |
 
-## New enemies we'll need
+## The creatures (built)
+
+Every region now has ten creatures of its own on top of a few from the original roster: 120 new in all, half
+new species (the Hollow Scarecrow, the Gutter Knight, the Mad Dwarf, the Echo of Stone) and half variants of
+existing ones (the Bandit Cutthroat, the Feral Frost Bear, the Wight Huskarl). They're defined in
+`rpg/core/creatures.py`, hunted per `story/regions.yaml`, and described in the Bestiary with lore from
+`story/bestiary.yaml`. Regional bosses and legendary hunts are still to come.
+
+## New enemies we'll need (the original list)
 
 The current roster covers beasts and monsters well, but a war story needs people to fight, and each region
 needs its own flavour:

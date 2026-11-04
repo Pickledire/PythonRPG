@@ -1,0 +1,175 @@
+# Bestiary lore: what folk know about each creature, shown once you've defeated one.
+# Keep it to one or two short sentences, in the world's voice. tools/story_check.py lists creatures without lore.
+
+# ------------------------------------------------------------------ the original roster
+goblin: Goblins breed in every ditch and barrow in the Hearthlands. Alone they're cowards; in threes they're brave; in tens, run.
+skeleton: The Barrowfields used to keep their dead. Lately the dead have been wandering off.
+wolf: The winter has made the packs bolder. Farmers sleep with the axe by the door.
+bandit: Most of them were farmers once. The tax collectors took the harvest, and they took up the road.
+orc: Clan warriors from beyond the walls. Some hire on as sellswords; some don't bother with the hiring.
+spriggan: The forest's own guardians, more bark than flesh. The Grove says they're angry. The Grove doesn't say at what.
+troll: Cut one and it heals before your eyes. Fire stops it, or so the stories say.
+dire_wolf: A wolf the size of a pony. Where there's one, the pack isn't far behind.
+hagraven: Witches who traded their humanity for power, feather by feather. They don't remember what they were.
+cave_bear: Bears used to sleep through the winter. This winter never ends, so they stopped.
+harpy: Half woman, half carrion bird, all spite. They nest on the cliffs and hunt the lake shore.
+ghost_horror: It comes for those who linger too long in the dark, they say. Nobody who stayed to check has said anything since.
+giant: Mostly peaceful, mostly asleep. Wake one and you'll find out about the rest.
+wraith: Grief with nowhere to go. It steals warmth because it remembers what warmth was.
+barrow_wight: The old chieftains were buried with their gold and their guards. Both are still down there.
+ogre: Dim, hungry and very strong. Ogres have been known to eat a whole ox. Then the farmer.
+werewolf: The curse passes by bite. Some fight it. Most stop fighting by the third full moon.
+minotaur: Nobody knows where they came from. They're always found in the deepest, most twisting tunnels, as though they like them.
+basilisk: Its gaze stiffens the blood. The marsh folk hunt it with polished shields and their eyes shut.
+stone_golem: Quarried, carved and woken by someone long dead. It still follows their last order.
+dragon: A young dragon is still a dragon. The cult in the Emberpeaks says the old ones are waking.
+wyvern: Smaller than a dragon and twice as bad-tempered. The tail spike is the part to watch.
+fire_elemental: A fire that got up and walked. Steel goes soft near it.
+frost_troll: The trolls of the high ice heal slower in the cold, which is the only kind thing anyone has said about them.
+wraith_lord: The lesser dead obey it. Where one walks, the graves around it start to stir.
+horrid_monster: Nobody agrees on what it is. Everyone agrees they never want to see another.
+cellar_rat: Fat, bold and well fed. Brannoc swears they're getting bigger.
+
+# ------------------------------------------------------------------ the Hearthlands
+bandit_cutthroat: The bandits who enjoy it. Every gang has one, and the others keep their distance from him.
+bandit_archer: They shoot from the hedges and run for the next hedge. Close the distance and they fold.
+goblin_firestarter: Goblins discovered fire a long time ago. They're still very excited about it.
+frostbitten_skeleton: The cold got into the bones and stayed there. Their touch is ice; their bones are brittle as ice, too.
+regency_enforcer: The Regent needs grain for his soldiers. The enforcers make sure he gets it, whatever's left for the farmers.
+deserter: The war has three sides and all of them hang deserters. So they live on the road, and the road is not kind.
+hollow_scarecrow: Hedge witches stitch them together to guard the fields. Some of the witches are gone. The scarecrows aren't.
+tusked_boar: Lean, mean and quick on its feet. A boar's charge has killed more farmers than bandits have.
+crow_swarm: They follow the armies and the hunters, waiting. Sometimes they get impatient.
+hedge_witch: Every village has a wise-woman. Some of them got wiser than they should have.
+
+# ------------------------------------------------------------------ Brennhold and the Undercity
+undercity_thug: The Undercity's muscle. Paid by the broken bone and never short of work.
+rat_swarm: Brennhold has more rats than people. Some nights, they all seem to be heading the same way.
+sewer_ghoul: The drains under Brennhold go deeper than any map. Ghouls live at the bottom and come up when they're hungry.
+gutter_knight: Nobody has seen under the helm. The rats nesting in its armour don't seem to mind it, which is worse.
+plague_rat: The healers in Brennhold burn every one they catch. They don't catch many.
+undercity_smuggler: Anything can be bought in the Undercity, and these are the people who carry it there.
+corrupt_watchman: 'Paid twice: once by the city, once by whoever needs the watch to look the other way.'
+cutpurse: Gone before you've noticed, and your purse with them. The ones who get caught are the slow ones.
+gutter_mage: The Collegium turned them away. The back alleys didn't. They'll sell you a spell, or sell you to someone.
+sewer_leech: Grown fat on what goes down the drains. They've started climbing the walls toward the grates.
+
+# ------------------------------------------------------------------ the Ashwood
+spriggan_matron: The oldest spriggans mend the young ones with sap and song. Kill her first, or you'll be fighting all day.
+pine_stalker: It hunts from above. Hunters in the Ashwood look up before they look ahead.
+ashwood_grizzly: The forest's bears are thin and furious this winter. They'll fight anything for the scraps.
+hagraven_sister: A hagraven still becoming one. She keeps her mother's habits and her own cruelty.
+wisp: Follow the light, the stories say, and it leads you home. The stories were written by people who didn't follow it.
+rimebark_treant: The forest is freezing from the roots up. Some of the trees decided not to wait for it.
+ashwood_weaver: Its webs stretch across the old paths. The Grove leaves them be; travellers don't have that luxury.
+young_werewolf: Bitten, not born. It hasn't learned to hide what it is yet, which makes it easy to find and hard to kill.
+grove_zealot: The Grove's hardliners believe the forest should take the towns back. They're happy to start with you.
+shadow_wolf: Black-furred wolves that run in the dark under the pines. You see the eyes long before you see the wolf.
+
+# ------------------------------------------------------------------ Glassmere
+rogue_apprentice: Every year a few Collegium students read something they shouldn't. The Collegium calls them dropouts. The lake calls them dinner.
+mere_shade: The ice on Glassmere is thick, but not everywhere. The shades walk the lake looking for the thin places.
+runebound_sentry: The Collegium carved them to guard the tower. Some wandered off their posts a century ago and never came back.
+mana_wyrm: Raw magic, leaking from the Collegium's tower, learned to coil and bite. It eats spells, and the people casting them.
+ice_lurker: Fishermen on Glassmere cut their holes in the ice carefully. Something under there is listening for the axe.
+harpy_screecher: The loudest of the lake harpies. When she screams, the others come.
+stitched_familiar: A student wanted a better familiar. It got out. So did the student, in pieces.
+glass_spider: You can see its heart beating through its body. You won't see its web until you're in it.
+frost_sprite: The lake's little spites. Alone they're a nuisance; in a flurry they'll freeze a man solid.
+wandering_grimoire: A spellbook that learned to read itself. The Collegium wants it back. It does not want to go.
+
+# ------------------------------------------------------------------ Mt. Aegis and the Holds
+mad_dwarf: Miners who went too deep sometimes come back wrong. They say they heard the mountain breathing, and they keep digging toward it.
+deep_goblin: Generations in the deep tunnels have made them pale, big-eyed and fearless in the dark.
+deep_goblin_shaman: They worship something under the mountain. They won't say what, but they leave it offerings of dwarven bone.
+holdguard_automaton: Forged by the first clans to guard the gates. Its orders are older than any living dwarf, and it still follows them.
+stonehide_troll: A cave troll gone grey with quarry dust. Its hide turns a pick, never mind a sword.
+ogre_mauler: The ogres of the lower slopes raid the mine camps. This one took a mine cart's axle for a club.
+tunnel_crawler: Miners hear them scraping in the walls. When the scraping stops, they run.
+hill_giant: It lives on the mountain's lower slopes and throws boulders at anything that comes up the road.
+oathbroken_dwarf: A dwarf without a clan is a dwarf without a name. They make their living on the mountain roads, and they hate everyone.
+miners_shade: The dead of the deep mines. Its lamp still burns, and it's still looking for the shaft back up.
+
+# ------------------------------------------------------------------ the Barrowfields
+skeleton_archer: It held the barrow walls with a bow in life. Five hundred years on, it hasn't missed a watch.
+skeletal_champion: The chieftain's sworn shield, buried at his feet. Its bones are old and brittle, but it's still standing.
+headless_knight: Lost its head in a battle nobody remembers. Still riding out to finish it.
+grave_ghoul: The Barrowfields' ghouls are the reason the grave-diggers carry spears.
+bone_crawler: When skeletons fall apart, sometimes they don't get back up the way they were.
+gravehound: Buried at its master's feet, still guarding the grave. Still hungry.
+wailing_widow: She mourns someone buried in the mounds. Her grief is loud enough to stop a spell in your mouth.
+corpse_candle: A flame over a grave that wasn't dug yet. The old folk say it's waiting for you.
+grave_robber: The barrows are full of gold, if you don't mind who's guarding it. These ones mind witnesses more.
+wight_huskarl: A dead king's guard, axe still in hand. The king's barrow is somewhere behind it.
+
+# ------------------------------------------------------------------ the Frostreach
+ice_wolf: White wolves of the high ice. The tribes say they're the cold's own hunting dogs.
+snowmane_alpha: The white packs follow it. Kill it, and they scatter; fail, and they don't.
+beastkin_raider: The tribes don't welcome southerners, and these are the ones who make sure you understand that.
+beastkin_shaman: She speaks with the spirits of the ice. Lately, she says, something under it has started speaking back.
+feral_frost_bear: Starving and half-mad. It kills more than it can eat, then kills again.
+frost_giant: The cold comes off a frost giant like heat off a forge. They say the glaciers follow them.
+glacier_crawler: It lives inside the ice and comes out to feed. You hear the glacier crack just before it does.
+frost_wraith: Someone who lay down in the snow to rest. The cold kept them, and keeps them still.
+snow_stalker: 'The tribes won''t say its name. They''ll say: don''t travel in a blizzard.'
+mammoth: Peaceful grazers, until something threatens the herd. Then the ground shakes.
+
+# ------------------------------------------------------------------ the Shrieking Cliffs
+stormwing_harpy: They ride the gales off the sea and drop out of the wind. You hear the shriek just before the claws.
+storm_spirit: The wind through the cliffs gathers into these, crackling and howling. Iron draws its lightning.
+cliff_wyvern: Nests on ledges no climber can reach, and makes sure no climber tries.
+howling_shade: The cliffs are named for the wind. Some of the shrieking is the dead.
+cliffside_smuggler: The Undercity's goods come up the cliff paths at night. The smugglers don't want to know who's watching.
+wrecker: Lights false lanterns on the rocks. The ships come in, the wreckers go down with axes.
+cliff_crab: Its shell turns blades. Smugglers say hit it where the shell isn't, which doesn't narrow it down much.
+razorbeak_flock: Sea birds that strip a seal to the bone in a minute. They aren't fussy about seals.
+brine_hag: She calls the fog in off the sea. What walks out of it isn't always what walked in.
+drowned_sailor: The sea gives back what it takes, eventually. It doesn't give it back the way it was.
+
+# ------------------------------------------------------------------ the Drowned Marches
+bog_lurker: It lies under the frozen mud with only its eyes showing. The marsh is very quiet where it hunts.
+marsh_troll: Covered in weed and leeches, and worse to smell than to fight. Only just.
+deserter_captain: He led his company out of the war and into the marsh. They do what he says now. Mostly.
+bog_corpse: The marsh preserves the dead perfectly. Lately, it's been preserving them on their feet.
+marsh_leech: Fat on the deserters who hide out here, and always hungry for more.
+mire_basilisk: Smaller and muddier than its desert cousins. Its gaze works just as well.
+marsh_light: Lights over the water that lead travellers to the deep places. The Marches are full of the people they've led.
+bog_golem: Mud, roots and a drowned man's bones. Something in the marsh is making them.
+plague_toad: It sweats poison. The marsh folk use it for arrows. Carefully.
+sunken_knight: Rode out to save a village that's under the swamp now. Never stopped riding.
+
+# ------------------------------------------------------------------ the Ruins of Valoria
+valorian_legionnaire: The empire's soldiers never broke formation, not even after the empire did.
+legion_bowman: They loosed their last volley the night Valoria fell, and have been loosing ever since.
+valorian_automaton: Brass and sun-crystal, built to serve an empire. It never noticed the empire ended.
+clockwork_hound: Valorian hunting dogs of gears and glass. Still ticking, still hunting.
+bound_soul: Valoria bound its Titan with the souls of its own people. Some of them are still bound.
+deathless_acolyte: A priest of the Lich Regent. Death was a promotion.
+radiant_shade: The ghosts of Valoria shine with a light that comes from nowhere. Looking at them too long hurts.
+glass_golem: Crystal golems guarded the palace. Their edges cut the hand that strikes them.
+frozen_courtier: The court of Valoria was at a feast when the city fell. Some of them are still there, and still at it.
+wraith_captain: It commands the dead on the ruined walls, the way it did when they were alive.
+
+# ------------------------------------------------------------------ the Emberpeaks
+dragon_cultist: They pray to the old dragons, and the old dragons, they say, have started to listen.
+cult_flamecaller: The fire speaks to them. They do what it says.
+scaleguard: Cult warriors in armour of shed dragon scales. Fire doesn't touch them.
+cinder_elemental: Ash and embers that hold together just long enough to hurt you.
+ash_wraith: Pilgrims who climbed to the cult's altars and never came down. They still smoulder.
+ember_drake: A dragon's lesser cousin, all speed and bad temper.
+salamander: Swims in the lava pools. Comes out glowing and in a bad mood.
+obsidian_golem: Volcanic glass shaped into a guardian. It's still warm inside, and sharp outside.
+cinder_hound: The cult breeds them to hunt pilgrims who change their minds.
+fire_giant: Its hair is smoke and its club is a burning tree. The only warm place left, and it's guarding it.
+
+# ------------------------------------------------------------------ Titanfell
+riftborn_horror: The land up here cracks open, and things crawl out of the cracks.
+shardling: Small things of living stone, broken off something enormous. They move like they're trying to remember how.
+obsidian_stalker: Black glass, sharp all over, and it casts no shadow.
+the_unshaped: It won't hold one form. The scholars who saw it disagree on everything except that they never want to see it again.
+ancient_frost_troll: Older than the kingdom. Moss grows on the ice on its back.
+elder_wyvern: A century of fighting its own kind for the high air. It wins.
+colossal_mammoth: Everything in Titanfell is the wrong size. The mammoths are the least of it.
+starved_dragon: Thin as a rake and glad to see you.
+hollow_giant: A giant that died up here and didn't notice. The wind howls through its ribs.
+stone_echo: A voice in the rock, speaking a language you almost understand. It sounds like it's calling a name.

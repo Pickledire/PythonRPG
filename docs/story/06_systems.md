@@ -19,7 +19,10 @@ nothing; the flag registry is covered for now by `tools/story_check.py` (it flag
 | **Quests and arcs as data** | A quest file with availability, stages, journal text, which quests exclude each other, and act gates, instead of the Python list in `session.py`. A journal screen to read them. |
 | **Writer-friendly files** | YAML with many nodes per file and comments, instead of one JSON file per node. JSON keeps loading. |
 
-## 2. The world map
+## 2. The world map — partly built
+
+Built: regions and roads, travel on foot and by carriage, region hunts, the calendar, the place in the title,
+and the quest board filtered by region. Still to do: towns as hubs, bounty boards, regional bosses, Track.
 
 | System | Why |
 |---|---|

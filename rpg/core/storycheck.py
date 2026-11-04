@@ -17,6 +17,7 @@ from rpg.core.dialogue import (
 )
 from rpg.core.endings import EndingBook
 from rpg.core.quests import BoardEntry, QuestBook
+from rpg.core.regions import RegionMap
 from rpg.core.storydata import as_conditions
 
 _QUEST_CONDITIONS = ("quest_active", "quest_not_started", "quest_done", "quest_failed")
@@ -50,8 +51,11 @@ def _targets(node: DialogueNode) -> set[str]:
 
 
 def check_story(repo: DialogueRepository, quests: QuestBook, endings: EndingBook, board: list[BoardEntry],
-                board_errors: list[str] = ()) -> tuple[list[str], list[str]]:
-    errors: list[str] = list(repo.validate()) + list(quests.errors) + list(endings.errors) + list(board_errors)
+                board_errors: list[str] = (), regions: RegionMap | None = None,
+                lore: dict[str, str] | None = None) -> tuple[list[str], list[str]]:
+    regions = regions or RegionMap()
+    errors: list[str] = (list(repo.validate()) + list(quests.errors) + list(endings.errors) + list(board_errors)
+                         + list(regions.errors))
     warnings: list[str] = []
 
     nodes: dict[str, DialogueNode] = {}
@@ -91,6 +95,9 @@ def check_story(repo: DialogueRepository, quests: QuestBook, endings: EndingBook
             for key in ("visited", "not_visited"):
                 if key in cond and cond[key] not in nodes:
                     errors.append(f"{where}: {key} names missing scene '{cond[key]}'")
+            if "in_region" in cond and regions.regions:
+                places = cond["in_region"] if isinstance(cond["in_region"], list) else [cond["in_region"]]
+                errors.extend(f"{where}: unknown region '{p}'" for p in places if p not in regions)
             if track_reads:
                 for key in ("flag_set", "flag_not_set"):
                     if key in cond:
@@ -131,6 +138,8 @@ def check_story(repo: DialogueRepository, quests: QuestBook, endings: EndingBook
 
     for entry in board:
         where = f"board.yaml ({entry.key})"
+        if regions.regions:
+            errors.extend(f"{where}: unknown region '{r}'" for r in entry.where if r not in regions)
         for start in [entry.start_node] + [s for _, s in entry.routes]:
             reached.add(start)
             if not repo.exists(start):
@@ -149,6 +158,12 @@ def check_story(repo: DialogueRepository, quests: QuestBook, endings: EndingBook
             warnings.append(f"{where}: number '{name}' is checked but nothing changes it (a typo?)")
     for node_id in sorted(yaml_ids - reached):
         warnings.append(f"{repo.file_of(node_id)}: scene '{node_id.rsplit('/', 1)[-1]}' can't be reached")
+    if lore is not None:
+        from rpg.core.enemies import ENEMIES
+
+        hunted = {e for r in regions.regions.values() for e, _ in r.hunt}
+        warnings.extend(f"bestiary.yaml: no lore for '{e}'" for e in sorted(hunted - set(lore)))
+        errors.extend(f"bestiary.yaml: lore for unknown creature '{e}'" for e in sorted(set(lore) - set(ENEMIES.templates)))
     for quest_id in sorted(set(quests.quests) - quests_moved):
         warnings.append(f"quest '{quest_id}' is never started")
     for ending_id in sorted(set(endings.endings) - endings_used):

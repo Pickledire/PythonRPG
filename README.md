@@ -26,7 +26,7 @@ For the best look use a modern terminal (Windows Terminal, iTerm2, kitty, WezTer
 | Where | Keys |
 |---|---|
 | Title | `n` new game · `l` load · `o` settings · `q` quit |
-| Camp (hub) | `h` hunt · `q` quests · `r` rest · `i` inventory · `c` character · `s` shop · `ctrl+s` save · `l` load · `o` settings · `esc` title |
+| Camp (hub) | `h` hunt · `q` quests · `t` travel · `r` rest · `b` bestiary · `i` inventory · `c` character · `s` shop · `ctrl+s` save · `l` load · `o` settings · `esc` title |
 | Combat | `1` attack · `2` cast · `3` item · `4` flee |
 | Dialogue | `1`–`9` choose · `esc` walk away |
 | Trials | see each trial's briefing; the memory trial is mouse-only |
@@ -62,8 +62,17 @@ Mouse clicks work everywhere too.
 - **Spells** (about 50): damage, drains, damage-over-time, debuffs, haste, wards, and a healing line from Mend
   to Divine Light. Intelligence adds +3% spell damage per point above 10, Wisdom +4% healing. The Collegium
   Arcana sells the strongest.
-- **Level-scaled hunts**: enemies are built at your level from designed stat ranges, in pools that change
-  every few levels. Some resist physical or magic damage or are immune to effects. Elites carry modifiers
+- **Regions and travel**: twelve regions on a map of roads (`story/regions.yaml`). You hunt the creatures
+  of the region you're in, never weaker than its starting level. Walk to the regions next door (the road
+  can bring bandits, thieves or luck) or pay for a carriage to anywhere (30-90 gold, almost always safe).
+  The quest board lists what's on offer where you are.
+- **160 creatures**: every region has its own (ten new per region, built in `rpg/core/creatures.py` from a
+  stat curve fitted to the original roster, plus variants like the Bandit Cutthroat and the Feral Frost Bear).
+- **The Bestiary** (`b`): every creature you've met, by region, with what it can do in plain words (weak to
+  spells, can freeze you, heals itself...), how tough it is at your level, and its lore once you've beaten one.
+- **A calendar**: days and a seven-day Harrowfolk week (Kindlemorn to Hearthsday); the title shows where you
+  are and when.
+- **Level-scaled hunts**: enemies are built at your level from designed stat ranges. Some resist physical or magic damage or are immune to effects. Elites carry modifiers
   (*Enraged, Armored, Shielded, Swift, Venomous, Searing, Vampiric, Thorned, Frenzied, Regenerating,
   Hulking, Ethereal, Hexing*), and from level 15 they can carry two.
 - **Bosses**: a Titan at level 10 (one of eight elements, immune to its own), the Elder Dragon at 15, the
@@ -172,6 +181,10 @@ rpg/
     quests.py          Journal quests and the quest board (data)
     endings.py         Endings and their epilogues (data)
     storycheck.py      Whole-story checks (broken links, typos, dead scenes)
+    regions.py         The map: regions, roads, fares, what lives where
+    travel.py          Travel on foot and by carriage, and the road's surprises
+    creatures.py       The creatures of each region (new species and variants)
+    bestiary.py        What you've met, and its traits in plain words
     world.py           Time of day and the story's memory (flags, numbers, visits, quest stages)
     minigames/         Trials as pure state machines (qte, lockpick, timing, memory, balance, stealth)
     session.py         GameSession: the single façade the UI uses
@@ -189,7 +202,8 @@ rpg/
                        character sheet, shop, quests, dialogue, campfire, save/load, game over, modals
       minigames/       One screen per trial + the briefing
 dialogues/             Scenes: new content in YAML (emberwick/), older quests in JSON
-story/                 board.yaml (the quest board), quests/ (journal quests), endings.yaml
+story/                 board.yaml (the quest board), quests/ (journal quests), endings.yaml, regions.yaml
+                       (the map), bestiary.yaml (creature lore)
 tools/                 story_check.py (checks the whole story), balance_sim.py (bot playthroughs for
                        balancing), import_ascii_motion.py (ASCII Motion
                        exports), make_boss_art.py (boss portraits)
@@ -229,8 +243,12 @@ Then add its id to a shop pool or loot table, or hand it out from dialogue with 
 **Add a race**: one `_race(...)` line in `rpg/config.py` with its seven attributes, base HP, blurb and
 starting item ids, plus optional trial bonuses in `RACE_SKILLS` and traits in `RACE_TRAITS`.
 
-**Add an enemy**: add an `EnemyTemplate` to `_TEMPLATES` in `rpg/core/enemies.py` (stats, spellbook,
-on-hit effects, regeneration, intro text, trophy choices) and, for random hunts, to `LEVEL_POOLS`.
+**Add an enemy**: for a region creature, add a `creature(...)` (new species, numbers from a role and a
+level) or a `variant(...)` (a twist on an existing one) in `rpg/core/creatures.py`, put it in a region's
+`hunt` list and give it a line of lore in `story/bestiary.yaml`. For a special one (a boss, a story
+enemy), add an `EnemyTemplate` to `_TEMPLATES` in `rpg/core/enemies.py` (stats, spellbook,
+on-hit effects, regeneration, intro text, trophy choices) and, for hunting, to a region's `hunt` list in
+`story/regions.yaml`.
 Dialogue can start a fight with `{"start_combat": "frost_giant"}` (by id or display name).
 
 **Write a quest**: write scenes in a YAML file under `dialogues/`, define the quest in `story/quests/`, and

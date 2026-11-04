@@ -132,7 +132,10 @@ class CharacterScreen(Screen):
             table.add_row("Primed", Text(primes + " (next trial)", style="#9FD08F"))
         table.add_row("", "")
         section("World")
-        table.add_row("Time", world.time_label)
+        region = session.region
+        table.add_row("Location", f"{session.place}" + (f", {region.name}" if region and region.place != region.name
+                                                        and region.name not in session.place else ""))
+        table.add_row("Date", world.date_label)
         bosses = ", ".join(sorted(b.replace("_", " ").title() for b in world.bosses_defeated)) or "none yet"
         table.add_row("Bosses slain", bosses)
         upcoming = session.pending_boss()

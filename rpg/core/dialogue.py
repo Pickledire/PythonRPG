@@ -30,8 +30,9 @@ Conditions (one mapping may hold several; all must pass):
 flag_set, flag_not_set, flag_is [k, v], var ("rep.brannoc >= 3", or [key, op, value]), min_kills, min_level,
 min_gold, min_stat [stat, value], min_skill [skill, value], has_item, has_lockpick, race (a name or a list),
 not_race, visited, not_visited, first_visit (true/false, the scene being entered), quest_active,
-quest_not_started, quest_done, quest_failed, quest_at [quest, stage], time_at, time_gte, time_between [a, b]
-(wraps midnight), and the combinators any, all and not.
+quest_not_started, quest_done, quest_failed, quest_at [quest, stage], in_region (a region id or a list),
+weekday (a day name or a list), min_day, time_at, time_gte, time_between [a, b] (hours; wraps midnight), and the
+combinators any, all and not.
 
 Effects: set_flag [k, v], remove_flag, set_var [k, v], add_var [k, delta], set_health, heal, full_rest,
 set_mana, set_<stat> for any attribute, stat_change [stat, delta], add_gold, give_xp, advance_time, set_time,
@@ -381,7 +382,8 @@ REWARD_EFFECTS = {"give_xp", "give_item", "unlock_shop", "add_var", *SET_STAT_EF
 KNOWN_CONDITIONS = {
     "flag_set", "flag_not_set", "flag_is", "var", "min_kills", "min_level", "min_gold", "min_stat", "min_skill",
     "has_item", "has_lockpick", "race", "not_race", "visited", "not_visited", "first_visit", "quest_active",
-    "quest_not_started", "quest_done", "quest_failed", "quest_at", "time_at", "time_gte", "time_between",
+    "quest_not_started", "quest_done", "quest_failed", "quest_at", "in_region", "weekday", "min_day",
+    "time_at", "time_gte", "time_between",
     "any", "all", "not",
 }
 
@@ -462,6 +464,9 @@ def condition_problems(cond: dict) -> list[str]:
         if key in cond:
             names = cond[key] if isinstance(cond[key], list) else [cond[key]]
             problems += [f"unknown race '{n}'" for n in names if n not in config.RACES]
+    if "weekday" in cond:
+        names = cond["weekday"] if isinstance(cond["weekday"], list) else [cond["weekday"]]
+        problems += [f"unknown weekday '{n}'" for n in names if n not in config.WEEKDAYS]
     return problems
 
 
@@ -538,6 +543,16 @@ def _check_one(ctx: DialogueContext, cond: dict, here: str | None = None) -> boo
             quest_id, stage = cond["quest_at"]
             if _quest_stage(ctx, quest_id) != str(stage):
                 return False
+        if "in_region" in cond:
+            places = cond["in_region"] if isinstance(cond["in_region"], list) else [cond["in_region"]]
+            if world.region not in places:
+                return False
+        if "weekday" in cond:
+            days = cond["weekday"] if isinstance(cond["weekday"], list) else [cond["weekday"]]
+            if world.weekday not in days:
+                return False
+        if "min_day" in cond and world.day < int(cond["min_day"]):
+            return False
         if "time_at" in cond and bell != int(cond["time_at"]):
             return False
         if "time_gte" in cond and bell < int(cond["time_gte"]):

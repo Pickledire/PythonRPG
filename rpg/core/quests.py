@@ -19,6 +19,7 @@ The quest board (``story/board.yaml``) lists the places you can set out for from
       title: The Banked Fire
       blurb: Emberwick's inn.
       start: emberwick/inn/start
+      where: hearthlands           # optional: only listed in this region (or a list of regions)
       if: {...}                    # optional: only listed while this holds
       routes:                      # optional: start somewhere else while a condition holds
         - {if: {flag_set: arena_created}, start: fighters/arena}
@@ -110,6 +111,7 @@ class BoardEntry:
     blurb: str
     start_node: str
     conditions: tuple[dict, ...] = ()
+    where: tuple[str, ...] = ()  # regions where it's listed; empty means everywhere
     routes: tuple[tuple[tuple[dict, ...], str], ...] = field(default=())  # (conditions, start) pairs
 
 
@@ -125,8 +127,10 @@ def load_board(path: Path) -> tuple[list[BoardEntry], list[str]]:
     for item in raw if isinstance(raw, list) else []:
         try:
             routes = tuple((tuple(as_conditions(r.get("if"))), str(r["start"])) for r in item.get("routes") or [])
+            where = item.get("where") or ()
+            where = (where,) if isinstance(where, str) else tuple(str(w) for w in where)
             entries.append(BoardEntry(str(item["key"]), str(item["title"]), str(item.get("blurb") or ""),
-                                      str(item["start"]), tuple(as_conditions(item.get("if"))), routes))
+                                      str(item["start"]), tuple(as_conditions(item.get("if"))), where, routes))
         except (KeyError, TypeError, AttributeError, StoryDataError) as exc:
             errors.append(f"{Path(path).name}: bad board entry {item!r}: {exc}")
     return entries, errors

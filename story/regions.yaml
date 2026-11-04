@@ -1,0 +1,120 @@
+# The map of Harrowmark. See docs/story/04_regions.md for what each region is for in the story.
+#
+#   name:       shown in menus
+#   place:      where you are when you're there (the hub title shows it)
+#   blurb:      shown the first time you arrive, and on the travel screen
+#   min_level:  creatures here are never weaker than this, however low your level
+#   neighbors:  regions you can walk to (roads go both ways; tools/story_check.py checks that)
+#   hunt:       the creatures you meet hunting here, with how common each is (see rpg/core/creatures.py)
+#
+# Roughly: lowlands in the middle, mountains and ice to the north, ruins to the south, fire to the east.
+#
+#                              Titanfell
+#                                  |
+#     Shrieking Cliffs ------- Frostreach ------- Mt. Aegis ------- Emberpeaks
+#          |         \          /                    |                  |
+#          |          Glassmere -------------- Brennhold                |
+#          |         /                               |                  |
+#     Drowned Marches -- Ashwood ------------ The Hearthlands           |
+#          |                                         |                  |
+#          +------------------------------------ Barrowfields ------- Valoria
+
+hearthlands:
+  name: The Hearthlands
+  place: Emberwick
+  blurb: >-
+    Farms and frozen fields along the Harrow Road. Emberwick sits at the crossroads, its Cradlefire still burning on
+    the hill.
+  min_level: 1
+  neighbors: [brennhold, ashwood, barrowfields]
+  hunt: {wolf: 14, goblin: 12, bandit: 12, skeleton: 8, bandit_cutthroat: 8, bandit_archer: 7, goblin_firestarter: 7, frostbitten_skeleton: 6, regency_enforcer: 7, deserter: 7, hollow_scarecrow: 5, tusked_boar: 8, crow_swarm: 8, hedge_witch: 5, dire_wolf: 3}
+
+brennhold:
+  name: Brennhold
+  place: Brennhold
+  blurb: >-
+    The capital. Walls, chimneys, the Regent's banners, and under it all a maze of sewers and cellars that nobody
+    maps.
+  min_level: 5
+  neighbors: [hearthlands, glassmere, mt_aegis]
+  hunt: {undercity_thug: 10, rat_swarm: 10, sewer_ghoul: 8, gutter_knight: 5, plague_rat: 9, undercity_smuggler: 8, corrupt_watchman: 8, cutpurse: 9, gutter_mage: 6, sewer_leech: 7, bandit: 8, cellar_rat: 6, orc: 4}
+
+ashwood:
+  name: The Ashwood
+  place: Camp in the Ashwood
+  blurb: Old black pines, freezing from the roots up. The trees are too quiet.
+  min_level: 8
+  neighbors: [hearthlands, glassmere, drowned_marches]
+  hunt: {spriggan: 9, spriggan_matron: 5, pine_stalker: 8, ashwood_grizzly: 6, hagraven: 6, hagraven_sister: 6, wisp: 7, rimebark_treant: 6, ashwood_weaver: 8, young_werewolf: 5, grove_zealot: 5, shadow_wolf: 8, wolf: 6, cave_bear: 5, werewolf: 2}
+
+glassmere:
+  name: Glassmere
+  place: Glassmere
+  blurb: A frozen lake, a scholars' town on its shore, and the Collegium's great tower standing out on the ice.
+  min_level: 10
+  neighbors: [brennhold, ashwood, frostreach, shrieking_cliffs]
+  hunt: {rogue_apprentice: 9, mere_shade: 8, runebound_sentry: 6, mana_wyrm: 7, ice_lurker: 7, harpy_screecher: 7, stitched_familiar: 6, glass_spider: 8, frost_sprite: 9, wandering_grimoire: 5, harpy: 7, wraith: 6, horrid_monster: 2}
+
+mt_aegis:
+  name: Mt. Aegis and the Holds
+  place: The Gates of Aegis
+  blurb: The dwarves' mountain. Great gates, deep halls, and mines that go down further than anyone admits.
+  min_level: 15
+  neighbors: [brennhold, frostreach, emberpeaks]
+  hunt: {mad_dwarf: 8, deep_goblin: 10, deep_goblin_shaman: 6, holdguard_automaton: 6, stonehide_troll: 7, ogre_mauler: 6, tunnel_crawler: 7, hill_giant: 6, oathbroken_dwarf: 7, miners_shade: 7, troll: 6, ogre: 5, stone_golem: 4, minotaur: 3, giant: 3}
+
+barrowfields:
+  name: The Barrowfields
+  place: Camp in the Barrowfields
+  blurb: Burial mounds as far as you can see. The dead here have stopped staying where they were put.
+  min_level: 15
+  neighbors: [hearthlands, drowned_marches, valoria]
+  hunt: {skeleton_archer: 9, skeletal_champion: 7, headless_knight: 6, grave_ghoul: 8, bone_crawler: 6, gravehound: 8, wailing_widow: 6, corpse_candle: 7, grave_robber: 7, wight_huskarl: 6, skeleton: 8, barrow_wight: 7, wraith: 6, ghost_horror: 2}
+
+frostreach:
+  name: The Frostreach
+  place: Camp in the Frostreach
+  blurb: The north. Glaciers, endless white, and beastkin tribes who don't welcome southerners.
+  min_level: 25
+  neighbors: [glassmere, mt_aegis, shrieking_cliffs, titanfell]
+  hunt: {ice_wolf: 10, snowmane_alpha: 5, beastkin_raider: 9, beastkin_shaman: 6, feral_frost_bear: 7, frost_giant: 6, glacier_crawler: 6, frost_wraith: 7, snow_stalker: 7, mammoth: 6, frost_troll: 8, dire_wolf: 4, wraith: 3}
+
+shrieking_cliffs:
+  name: The Shrieking Cliffs
+  place: Camp on the Shrieking Cliffs
+  blurb: Sea cliffs carved by the wind into shapes that howl. Smugglers' coves below, harpy nests above.
+  min_level: 30
+  neighbors: [glassmere, frostreach, drowned_marches]
+  hunt: {stormwing_harpy: 9, storm_spirit: 7, cliff_wyvern: 7, howling_shade: 7, cliffside_smuggler: 8, wrecker: 8, cliff_crab: 7, razorbeak_flock: 8, brine_hag: 6, drowned_sailor: 8, harpy: 6, wyvern: 4}
+
+drowned_marches:
+  name: The Drowned Marches
+  place: Camp in the Drowned Marches
+  blurb: A frozen swamp full of sunken villages, deserters and things that were never meant to see daylight.
+  min_level: 30
+  neighbors: [ashwood, shrieking_cliffs, barrowfields]
+  hunt: {bog_lurker: 8, marsh_troll: 7, deserter_captain: 5, bog_corpse: 8, marsh_leech: 8, mire_basilisk: 6, marsh_light: 7, bog_golem: 6, plague_toad: 8, sunken_knight: 6, bandit: 5, basilisk: 4, troll: 4}
+
+valoria:
+  name: The Ruins of Valoria
+  place: Camp in the Ruins of Valoria
+  blurb: A fallen empire in the south, preserved in ice and a light that comes from nowhere.
+  min_level: 40
+  neighbors: [barrowfields, emberpeaks]
+  hunt: {valorian_legionnaire: 10, legion_bowman: 8, valorian_automaton: 6, clockwork_hound: 8, bound_soul: 7, deathless_acolyte: 6, radiant_shade: 7, glass_golem: 5, frozen_courtier: 6, wraith_captain: 5, wraith_lord: 4, barrow_wight: 4, stone_golem: 3}
+
+emberpeaks:
+  name: The Emberpeaks
+  place: Camp in the Emberpeaks
+  blurb: Volcanic peaks in the east, the only warm place left in Harrowmark. Something up there knows it.
+  min_level: 45
+  neighbors: [mt_aegis, valoria]
+  hunt: {dragon_cultist: 9, cult_flamecaller: 6, scaleguard: 6, cinder_elemental: 8, ash_wraith: 7, ember_drake: 6, salamander: 8, obsidian_golem: 5, cinder_hound: 8, fire_giant: 5, fire_elemental: 6, dragon: 3, wyvern: 4}
+
+titanfell:
+  name: Titanfell
+  place: Camp in Titanfell
+  blurb: The shattered far north, where the land itself has moved. Nothing here is the size it should be.
+  min_level: 65
+  neighbors: [frostreach]
+  hunt: {riftborn_horror: 7, shardling: 9, obsidian_stalker: 7, the_unshaped: 6, ancient_frost_troll: 6, elder_wyvern: 6, colossal_mammoth: 6, starved_dragon: 4, hollow_giant: 6, stone_echo: 7, frost_troll: 5, wraith_lord: 4, dragon: 3, stone_golem: 4}

@@ -149,7 +149,7 @@ PlayerPanel .panel-section {
 
 /* ------------------------------------------------------------------ hub */
 #hub-actions {
-    grid-size: 5;
+    grid-size: 6;
     grid-gutter: 1 2;
     grid-rows: 3;
     height: auto;
@@ -158,9 +158,12 @@ PlayerPanel .panel-section {
 .hub-button {
     width: 100%;
 }
-#act-hunt { background: $error 60%; }
-#act-quests { background: $accent 50%; }
-#act-rest { background: $warning 40%; }
+/* Out into the world in colour; menus stay neutral; Title (leaving) is red. */
+#act-hunt { background: $success 45%; }
+#act-quests { background: $primary 60%; }
+#act-travel { background: #4E7F96 70%; }
+#act-rest { background: $accent 50%; }
+#act-title { background: $error 65%; }
 #hub-journal {
     height: 1fr;
     border: round $panel-lighten-2;
@@ -692,4 +695,47 @@ EndingScreen {
 }
 .choice-locked {
     color: $text-muted;
+}
+
+/* ------------------------------------------------------------------ travel */
+#travel-root {
+    padding: 1 2;
+}
+#travel-list {
+    height: 1fr;
+    border: round $primary 40%;
+    background: $surface;
+    margin: 1 0;
+}
+/* Rows here carry their own colours (danger, gold), so the highlight is a soft band, not a solid bar. */
+#travel-list > .option-list--option-highlighted, #quest-list > .option-list--option-highlighted {
+    background: $primary 25%;
+    text-style: bold;
+}
+
+/* ------------------------------------------------------------------ bestiary */
+#bestiary-root {
+    padding: 1 2;
+}
+#bestiary-body {
+    height: 1fr;
+    margin: 1 0;
+}
+#bestiary-list {
+    width: 40;
+    height: 100%;
+    border: round $primary 40%;
+    background: $surface;
+}
+#bestiary-list > .option-list--option-highlighted {
+    background: $primary 25%;
+    text-style: bold;
+}
+#bestiary-detail {
+    width: 1fr;
+    height: 100%;
+    border: round $panel-lighten-2;
+    background: $surface;
+    padding: 1 2;
+    margin-left: 1;
 }

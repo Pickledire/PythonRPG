@@ -3,6 +3,7 @@
 #   title:  what the board shows
 #   blurb:  one line under the title
 #   start:  the first scene (see dialogues/)
+#   where:  optional, only listed in this region or these regions (see story/regions.yaml); none = everywhere
 #   if:     optional, only listed while this condition holds
 #   routes: optional, start somewhere else while a condition holds (first match wins)
 
@@ -10,6 +11,7 @@
   title: The Banked Fire
   blurb: Emberwick's inn. Warm beds, thin soup, and an innkeeper who's always short a pair of hands.
   start: emberwick/inn/start
+  where: hearthlands
 
 # Temporary: the spell shop, until the Collegium has its own place in the story.
 - key: collegium_shop

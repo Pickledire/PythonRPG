@@ -12,11 +12,11 @@ from textual.binding import Binding
 from textual.reactive import reactive
 from textual.screen import Screen
 
+from rpg import config
 from rpg.core.combat import Phase
 from rpg.core.events import LogEvent, Tone
 from rpg.core.minigames import MinigameResult, MinigameSpec
 from rpg.core.session import Encounter, GameSession
-from rpg import config
 from rpg.services.persistence import SaveManager
 from rpg.services.profile import ProfileStore
 from rpg.services.settings import Settings, SettingsStore
@@ -89,7 +89,7 @@ class RPGApp(App):
     def touch(self) -> None:
         """Announce that game state changed so watchers refresh."""
         if self.session:
-            self.sub_title = f"{self.session.player.name} · {self.session.world.time_label}"
+            self.sub_title = f"{self.session.player.name} · {self.session.place} · {self.session.world.time_label}"
         else:
             self.sub_title = ""
         self.revision += 1
@@ -217,6 +217,36 @@ class RPGApp(App):
         self.session = None
         self.touch()
         await self.reset_to(EndingScreen(ending, hero, first_time, len(profile.endings), autosaved))
+
+    async def travel_flow(self, destination: str, mode) -> None:
+        """Walk or ride to another region: the road (maybe a fight), then the arrival."""
+        from rpg.core.travel import TravelError
+        from rpg.ui.screens.hub import HubScreen
+
+        session = self.session
+        if session is None or self._hunting:
+            return
+        hub = next((s for s in self.screen_stack if isinstance(s, HubScreen)), None)
+        self._hunting = True
+        try:
+            try:
+                report = session.travel(destination, mode)
+            except TravelError as exc:
+                self.notify(str(exc), severity="warning")
+                return
+            if hub:
+                hub.journal(report.events)
+            self.touch()
+            if report.ambush:
+                phase = await self.run_encounter(Encounter(report.ambush, ambush=True))
+                if phase == Phase.DEFEAT:
+                    return
+            if hub:
+                hub.journal(report.arrival)
+            await self.resolve_level_ups()
+            self.touch()
+        finally:
+            self._hunting = False
 
     async def hunt_flow(self) -> None:
         from rpg.ui.screens.modals import Choice, ChoiceModal

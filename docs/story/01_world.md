@@ -10,6 +10,13 @@ The old king is dead with no heir, and three powers are tearing the realm apart 
 don't stay buried. The ground shakes at night, a little more every year, and the old fires on the hills keep
 going out. Most people blame the war.
 
+## The Harrowfolk week
+
+Seven days: **Kindlemorn, Rimeday, Stonesday, Galesday, Shadesday, Brightsday, Hearthsday.** Kindlemorn is when
+the Cradlefires are fed and the week begins; Hearthsday is the day of rest, when families keep the home
+hearth. The Hearth Order says the days are named for the old fires. Scholars point out that fire, ice, stone,
+wind, shadow and light are six of the Titans' elements, that two are missing, and that nobody remembers why.
+
 ## Tone
 
 Somewhere between Skyrim and Dark Souls: a harsh land where people are tough and hope is earned.

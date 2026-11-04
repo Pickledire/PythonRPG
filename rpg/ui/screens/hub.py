@@ -17,7 +17,9 @@ from rpg.ui.widgets.quest_list import quest_text
 ACTIONS = [
     ("hunt", "Hunt", "Find an enemy to fight", "h"),
     ("quests", "Quests", "Seek adventure and story", "q"),
+    ("travel", "Travel", "Walk or take a carriage to another region", "t"),
     ("rest", "Rest", "Rest at the campfire", "r"),
+    ("bestiary", "Bestiary", "Creatures you've met: what they can do, where they live", "b"),
     ("inventory", "Inventory", "Equip gear, use items", "i"),
     ("character", "Character", "Stats and attributes", "c"),
     ("shop", "Shop", "Merchant's Emporium", "s"),
@@ -68,7 +70,7 @@ class HubScreen(Screen):
     def _refresh_title(self) -> None:
         session = self.app.session
         if session:
-            self.query_one("#hub-title", Label).update(f"Camp · {session.world.time_label}")
+            self.query_one("#hub-title", Label).update(f"{session.place} · {session.world.time_label}")
             self.query_one("#hub-quests", Static).update(quest_text(session.journal()))
 
     def journal(self, events: list[LogEvent] | LogEvent) -> None:
@@ -111,6 +113,14 @@ class HubScreen(Screen):
             from rpg.ui.screens.quests import QuestBoardScreen
 
             app.push_screen(QuestBoardScreen())
+        elif action == "travel":
+            from rpg.ui.screens.travel import TravelScreen
+
+            app.push_screen(TravelScreen())
+        elif action == "bestiary":
+            from rpg.ui.screens.bestiary import BestiaryScreen
+
+            app.push_screen(BestiaryScreen())
         elif action == "rest":
             from rpg.ui.screens.campfire import CampfireScreen
 

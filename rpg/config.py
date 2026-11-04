@@ -143,8 +143,29 @@ MILESTONE_BOSSES: list[tuple[int, str]] = [
 ]
 
 # --------------------------------------------------------------------------- world
-START_BELL = 8  # world time 0-23
+START_BELL = 8  # the hour of the day, 0-23 (the game starts at 8 in the morning)
 REST_HOURS = 8
+
+# The Harrowfolk week. The Hearth Order says the days are named for the old fires. Scholars aren't so sure.
+WEEKDAYS = ("Kindlemorn", "Rimeday", "Stonesday", "Galesday", "Shadesday", "Brightsday", "Hearthsday")
+
+# --------------------------------------------------------------------------- travel
+# On foot you can only reach the regions next door, and the road may bring trouble. A carriage goes anywhere
+# by the major roads, for a fare, and is almost always safe.
+#
+# Fare = CARRIAGE_BASE_FARE + CARRIAGE_FARE_PER_ROAD x roads + CARRIAGE_HAZARD_PER_LEVEL x the destination's
+# starting level, rounded to 5 gold. That's 30 gold next door, about 40-60 for the middle of the map and 90 for
+# Titanfell. Hunts pay about 13 gold a fight at levels 1-3, 21 at 5, 34 at 10 and 50 at 15, so a short ride is
+# about two hunts early on and less than one by level 10, while the far, deadly places cost 5-7 early hunts and
+# can't be reached on pocket change.
+CARRIAGE_BASE_FARE = 15
+CARRIAGE_FARE_PER_ROAD = 10
+CARRIAGE_HAZARD_PER_LEVEL = 0.5
+WALK_HOURS_PER_ROAD = 6
+CARRIAGE_HOURS_PER_ROAD = 4
+WALK_TROUBLE_CHANCE = 0.25    # bandits, thieves, a lost pack strap
+WALK_FORTUNE_CHANCE = 0.15    # a dropped purse, a kind traveler
+CARRIAGE_AMBUSH_CHANCE = 0.04  # highwaymen on the major roads
 
 # Idle haunting on the camp screen: milestone whispers, then the Ghost Horror (once per run).
 HAUNT_TIMEOUT_SECONDS = 30

@@ -59,6 +59,10 @@ counter:                    # this scene's id is emberwick/inn/counter
 | Visits | automatic | `visited`, `not_visited`, `first_visit: true` |
 | Quests | `start_quest`, `quest_stage: [id, stage]`, `complete_quest`, `fail_quest` | `quest_active`, `quest_at: [id, stage]`, `quest_done`, `quest_not_started`, `quest_failed` |
 
+Place and time: `in_region: hearthlands` (or a list), `weekday: Hearthsday` (or a list), `min_day: 10`, and
+the hour with `time_at`, `time_gte` and `time_between`. A board entry in `story/board.yaml` can take
+`where: hearthlands` (or a list) so it's only listed there.
+
 Conditions combine: one mapping with several keys means all of them, and `any: [...]`, `all: [...]` and
 `not: {...}` do the rest. `race: Dwarf`, `race: [Elf, Gnome]` and `not_race` check the player's race.
 

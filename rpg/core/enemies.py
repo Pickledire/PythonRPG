@@ -725,3 +725,9 @@ class EnemyFactory:
 ENEMIES = EnemyFactory()
 for _template in _TEMPLATES:
     ENEMIES.register(_template)
+
+# The creatures of each region (rpg/core/creatures.py), built on the roster above.
+from rpg.core.creatures import build as _build_creatures  # noqa: E402
+
+for _template in _build_creatures(dict(ENEMIES.templates)):
+    ENEMIES.register(_template)

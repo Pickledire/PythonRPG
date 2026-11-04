@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import random
+from collections.abc import Callable
 from dataclasses import dataclass, field
 
 from rpg import config
@@ -22,7 +23,9 @@ class CampfireReport:
     levels_gained: int = 0
 
 
-def rest(player: Player, world: WorldState, rng: random.Random) -> CampfireReport:
+def rest(player: Player, world: WorldState, rng: random.Random,
+         ambusher: Callable[[], Enemy] | None = None) -> CampfireReport:
+    """``ambusher`` makes the creature for a night ambush (the region's creatures); default: any at your level."""
     report = CampfireReport()
     player.full_restore()
     player.cleanse()
@@ -33,7 +36,7 @@ def rest(player: Player, world: WorldState, rng: random.Random) -> CampfireRepor
     if roll < 0.35:  # bad night
         bad = rng.random()
         if bad < 0.40:
-            report.ambush = ENEMIES.random_for_level(player.level, rng)
+            report.ambush = ambusher() if ambusher else ENEMIES.random_for_level(player.level, rng)
             report.events.append(LogEvent(f"You are ambushed in the night by {report.ambush.name}!", Tone.DAMAGE))
         elif bad < 0.70:
             report.dialogue_category = "bad"
