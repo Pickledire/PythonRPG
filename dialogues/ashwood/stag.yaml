@@ -1,0 +1,431 @@
+# The Ashwood: Ash and Antler (quest ashwood_stag).
+#
+# Ilvaren: elf ranger of the Ashwood enclave. Cold, proud, dry, three hundred years old and tired of humans.
+# Hob Tanner: Hearthlands farmer turned poacher. Gentle, desperate, ashamed.
+# Rook: a Grove zealot. Calm in the way a frozen lake is calm.
+#
+# Mostly talk and tracking; fights only if you choose them. No trials.
+# Flags for later: ashwood_hob (freed / helped / taught / arrested / given / betrayed), ashwood_rook (calmed /
+# beaten / obeyed). Reputation: rep.grove, rep.elves. Placeholder: grove_initiate.
+
+_defaults:
+  speaker: Ilvaren
+
+edge:
+  speaker: The Enclave's Edge
+  lines:
+    - text: >-
+        Where the black pines give way to silver birch, someone has hung bone charms from the branches. They
+        turn in the wind without a sound. Beyond them, the elves' enclave: you can't see it, which is the point.
+      if: {first_visit: true}
+    - text: >-
+        An elf in grey-green steps out from a tree you would have sworn was empty, bow strung and lowered.
+        "You are loud," she says. "Everyone from outside is loud."
+      if: {first_visit: true}
+    - text: '"Kinsman." She inclines her head, a fraction. "You have been among the short-lived too long. You walk like them."'
+      if: {first_visit: true, race: Elf}
+    - text: '"A keeper." Something in her face eases. "The Grove sends its own, now? Good. It should."'
+      if: {first_visit: true, race: Druid}
+    - text: '"Human." She says it the way you''d say "weather."'
+      if: {first_visit: true, race: Human}
+    - text: Ilvaren is waiting at the birch line, exactly where she said she'd be. She always is.
+      if: {first_visit: false}
+  choices:
+    - text: Ask why she's out here with a strung bow.
+      if: {quest_not_started: ashwood_stag}
+      next: stags
+    - text: Ask about the white stags.
+      if: {not_visited: ashwood/stag/lore}
+      next: lore
+    - text: Pick up the poacher's trail.
+      if: {quest_at: [ashwood_stag, tracking]}
+      next: trail
+    - text: Go back to the poacher's camp.
+      if: {quest_at: [ashwood_stag, camp_found]}
+      next: camp
+    - text: Go back and face the zealot.
+      if: {quest_at: [ashwood_stag, reckoning]}
+      next: rook
+    - text: Tell Ilvaren how it ended.
+      if: {quest_at: [ashwood_stag, report]}
+      next: report
+    - text: Speak the old greeting of the Grove.
+      if: {future: grove_initiate}
+      locked: Grove initiates only
+    - text: Leave.
+
+lore:
+  lines:
+    - >-
+      "The white stags are the forest's memory. Every grove has one. When it dies, the grove forgets
+      itself; the trees grow wrong, the springs go sour." She looks into the pines. "We have lost three this
+      winter."
+    - >-
+      "Lately the ones that are left lie down with their heads toward the deep wood, all of them the same
+      way, as if they were listening." She shrugs, elegantly. "Stags are strange."
+  next: edge
+
+stags:
+  lines:
+    - >-
+      "Someone is killing the white stags. Three this winter. Shot, gutted, and the meat taken. The antlers
+      left in the snow." Her jaw tightens. "Not a hunter. A hunter takes the antlers."
+    - >-
+      "The Grove wants blood for it. The enclave would rather have the poacher alive and the Grove calm. I
+      would rather not be asked to choose." She looks at you. "You, however, are nobody. Nobody can choose."
+  choices:
+    - text: I'll find your poacher.
+      next: stags_accepted
+      effects:
+        - start_quest: ashwood_stag
+    - text: '"[Druid] The Grove sent me. I''ll find him."'
+      if: {race: Druid}
+      next: stags_druid
+    - text: What happens to him when I find him?
+      next: stags_fate
+    - text: Not my forest.
+      next: edge
+
+stags_fate:
+  lines:
+    - >-
+      "That depends on who finds him first." She almost smiles. "If it is me, he leaves the Ashwood and
+      never comes back. If it is the Grove, he becomes part of the Ashwood, and never leaves. If it is you...
+      I am curious."
+  choices:
+    - text: I'll find him.
+      next: stags_accepted
+      effects:
+        - start_quest: ashwood_stag
+    - text: Not my forest.
+      next: edge
+
+stags_druid:
+  lines:
+    - '"Then the Grove chose well, for once." Praise, from her. You can tell because she looks pained.'
+  effects:
+    - add_var: [rep.grove, 1]
+    - start_quest: ashwood_stag
+  next: stags_accepted
+
+stags_accepted:
+  lines:
+    - >-
+      "The last kill was by the Weeping Stones, half a day north. The trail is a day old." She hands you
+      nothing, gives no directions and is gone between one blink and the next.
+  effects:
+    - quest_stage: [ashwood_stag, tracking]
+  next: edge
+
+# ------------------------------------------------------------------ the trail
+trail:
+  speaker: The Weeping Stones
+  lines:
+    - >-
+      Three standing stones, rimed with frost, weeping meltwater down their faces. In the snow between them,
+      a stain, a pair of antlers, and too many tracks: deer, wolf, boots, and something that isn't any of them.
+  choices:
+    - text: Read the tracks carefully.
+      if: {min_stat: [wisdom, 12]}
+      locked: true
+      next: trail_read
+    - text: Follow the scent. Smoke, blood, and an unwashed man.
+      if: {race: Beastkin}
+      next: trail_read
+    - text: Wait for dark, and look for a campfire.
+      if: {time_between: [20, 4]}
+      locked: Only at night
+      next: trail_fire
+    - text: Follow the blood trail and hope.
+      next: trail_long
+
+trail_read:
+  speaker: The Weeping Stones
+  lines:
+    - >-
+      Boots: one man, heavy, walking badly. He dragged the meat on a hide. The wolf tracks came later and
+      went the other way, following the blood. The man went east, along the frozen stream, toward a thread
+      of smoke you can only see if you know it's there.
+  effects:
+    - give_xp: 60
+  next: camp
+
+trail_fire:
+  speaker: The Ashwood at Night
+  lines:
+    - >-
+      In the dark the forest is a black wall, and in that wall, a single orange point, low down, carefully
+      hidden from every direction but this one.
+  next: camp
+
+trail_long:
+  speaker: The Ashwood
+  lines:
+    - >-
+      You follow the blood. So does something else. You hear it before you see it: soft feet in the snow,
+      matching your pace, just out of sight to the left. Then to the right.
+  effects:
+    - start_combat: shadow_wolf
+      ambush: true
+      fled: edge
+  choices:
+    - text: Keep following the blood.
+      next: trail_long_end
+
+trail_long_end:
+  speaker: The Ashwood
+  lines:
+    - >-
+      It takes until dusk, and the wolf's mate shadows you for an hour before it gives up. The blood trail
+      ends at a frozen stream, and across it, a thread of smoke.
+  effects:
+    - advance_time: 4
+  next: camp
+
+# ------------------------------------------------------------------ Hob
+camp:
+  speaker: The Poacher's Camp
+  lines:
+    - text: >-
+        A lean-to of pine boughs, a fire banked so low it hardly smokes, a white hide pegged out to dry. A man
+        in a farmer's coat jumps up with a crossbow, then doesn't seem to know what to do with it.
+      if: {first_visit: true}
+    - text: Hob is still at the lean-to. He hasn't run. He doesn't look like he has anywhere to run to.
+      if: {first_visit: false}
+    - '"Stay back. I''ll... stay back." The crossbow shakes. It isn''t loaded.'
+  effects:
+    - quest_stage: [ashwood_stag, camp_found]
+  choices:
+    - text: '"Your crossbow isn''t loaded."'
+      next: hob
+    - text: '"Put it down. I just want to talk."'
+      next: hob
+    - text: Knock the crossbow out of his hands.
+      next: hob_disarmed
+
+hob_disarmed:
+  speaker: Hob Tanner
+  lines:
+    - >-
+      It's not difficult. He sits down hard in the snow and puts his hands over his head, the way people do
+      when they've been taught by soldiers.
+  next: hob
+
+hob:
+  speaker: Hob Tanner
+  lines:
+    - >-
+      "Hob. Hob Tanner. I farmed at Low Ferring, by the Harrow Road, till the Regent's men came for the
+      harvest. All of it. Said the soldiers needed it more." He laughs, badly. "Maybe they did."
+    - >-
+      "There's forty of us in the old quarry past the forest's edge. Families. One stag feeds them for a
+      week. I didn't know they were holy. I swear on the Hearth I didn't know." He looks at the white hide.
+      "I knew they were white, though. I should have known."
+    - text: >-
+        He looks at you properly for the first time. "You're from the Hearthlands too. You know what they
+        took."
+      if: {race: Human}
+  choices:
+    - text: Tell him to go, and tell Ilvaren he fled north.
+      next: hob_freed
+    - text: Give him money for the quarry folk. (30 gold)
+      if: {min_gold: 30}
+      locked: true
+      next: hob_helped
+      effects:
+        - add_gold: -30
+    - text: Show him where the Grove allows hunters to take deer.
+      if: {min_stat: [wisdom, 13]}
+      locked: true
+      next: hob_taught
+    - text: '"[Druid] I''ll speak for you to the Grove. Show me the quarry."'
+      if: {race: Druid}
+      next: hob_taught
+    - text: Tie his hands. Ilvaren can decide.
+      next: hob_arrested
+
+hob_freed:
+  speaker: Hob Tanner
+  lines:
+    - >-
+      He stares at you, then grabs the hide and runs before you can change your mind. Halfway across the
+      stream he turns. "I won't come back," he calls. "I won't. Hearth keep you."
+  effects:
+    - set_flag: [ashwood_hob, freed]
+    - give_xp: 100
+  next: rook_arrives
+
+hob_helped:
+  speaker: Hob Tanner
+  lines:
+    - >-
+      He looks at the coins for a long time before he takes them. "This'll buy grain in Emberwick. For a
+      month, if the merchants are honest. They won't be. Three weeks." He wipes his eyes on his sleeve. "No
+      more stags. On my children."
+  effects:
+    - set_flag: [ashwood_hob, helped]
+    - give_xp: 120
+    - add_var: [rep.free_holds, 1]
+  next: rook_arrives
+
+hob_taught:
+  speaker: Hob Tanner
+  lines:
+    - >-
+      You show him the brown deer runs by the south edge, where the Grove has always let hunters take what
+      they need, and how to leave the antlers on a stone with the skull facing the deep wood. The old way.
+    - '"Nobody ever told us," he says. "We''re from the fields. Nobody ever told us any of it."'
+  effects:
+    - set_flag: [ashwood_hob, taught]
+    - give_xp: 150
+    - add_var: [rep.grove, 1]
+  next: rook_arrives
+
+hob_arrested:
+  speaker: Hob Tanner
+  lines:
+    - He doesn't fight. He holds out his wrists. "Tell them at the quarry it was quick, whatever it is."
+  effects:
+    - set_flag: [ashwood_hob, arrested]
+    - give_xp: 100
+  next: rook_arrives
+
+# ------------------------------------------------------------------ Rook
+rook_arrives:
+  speaker: Rook
+  lines:
+    - >-
+      The forest goes quiet, the way it does before snow. A man walks out of the trees in a cloak of moss
+      and bark, barefoot, carrying a staff grown rather than carved. His eyes are green right through.
+    - '"The forest has asked for the poacher," he says, very gently. "I have come to give it what it asked for."'
+  effects:
+    - quest_stage: [ashwood_stag, reckoning]
+  next: rook
+
+rook:
+  speaker: Rook
+  lines:
+    - text: '"He is gone," Rook says, looking at the empty lean-to. "You sent him. Why?"'
+      if: {any: [{flag_is: [ashwood_hob, freed]}, {flag_is: [ashwood_hob, helped]}, {flag_is: [ashwood_hob, taught]}]}
+    - text: He looks at Hob, tied by the fire. "You have done half my work. Give me the rest."
+      if: {flag_is: [ashwood_hob, arrested]}
+  choices:
+    - text: Tell him a starving man is not an enemy of the forest.
+      if: {min_stat: [charisma, 14]}
+      locked: true
+      next: rook_calmed
+    - text: '"[Druid] Keeper to keeper: the forest feeds the hungry. It always has."'
+      if: {race: Druid}
+      next: rook_calmed
+    - text: Hand Hob over.
+      if: {flag_is: [ashwood_hob, arrested]}
+      next: rook_given
+    - text: Tell him where Hob went.
+      if: {any: [{flag_is: [ashwood_hob, freed]}, {flag_is: [ashwood_hob, helped]}, {flag_is: [ashwood_hob, taught]}]}
+      next: rook_betrayed
+    - text: Stand between him and the trail.
+      next: rook_fight
+
+rook_calmed:
+  speaker: Rook
+  lines:
+    - >-
+      He listens without blinking. When you're done, the forest is still quiet, but it's a different quiet.
+    - >-
+      "The forest also forgets," he says at last, "and forgives. Sometimes. Very well." He turns and is
+      simply not there any more. Where he stood, a white flower is growing out of the snow.
+  effects:
+    - set_flag: [ashwood_rook, calmed]
+    - add_var: [rep.grove, 2]
+    - give_xp: 150
+    - quest_stage: [ashwood_stag, report]
+  next: edge
+
+rook_given:
+  speaker: Rook
+  lines:
+    - >-
+      Rook lays a hand on Hob's head, almost tenderly, and walks him into the trees. Hob doesn't look back.
+      You don't hear anything. You'd rather have heard something.
+  effects:
+    - set_flag: [ashwood_hob, given]
+    - set_flag: [ashwood_rook, obeyed]
+    - add_var: [rep.grove, 2]
+    - add_var: [rep.free_holds, -1]
+    - give_xp: 100
+    - quest_stage: [ashwood_stag, report]
+  next: edge
+
+rook_betrayed:
+  speaker: Rook
+  lines:
+    - '"Thank you," Rook says, and goes after him. He doesn''t hurry. He doesn''t need to.'
+  effects:
+    - set_flag: [ashwood_hob, betrayed]
+    - set_flag: [ashwood_rook, obeyed]
+    - add_var: [rep.grove, 1]
+    - give_xp: 100
+    - quest_stage: [ashwood_stag, report]
+  next: edge
+
+rook_fight:
+  speaker: Rook
+  lines:
+    - '"So," he says, and the ground around his feet begins to grow thorns.'
+  effects:
+    - start_combat: grove_zealot
+      fled: edge
+  choices:
+    - text: Let him crawl away.
+      next: rook_beaten
+
+rook_beaten:
+  speaker: Rook
+  lines:
+    - >-
+      He drags himself back into the trees, leaving a trail of sap where blood should be. "The forest will
+      remember you," he says. It doesn't sound like a threat. It sounds like a fact.
+  effects:
+    - set_flag: [ashwood_rook, beaten]
+    - add_var: [rep.grove, -2]
+    - give_xp: 150
+    - quest_stage: [ashwood_stag, report]
+  next: edge
+
+# ------------------------------------------------------------------ the report
+report:
+  lines:
+    - text: '"Gone north." She looks at you for a long moment. "You are a poor liar. Good. It means you do not do it often."'
+      if: {flag_is: [ashwood_hob, freed]}
+    - text: '"You paid him." She sounds genuinely puzzled. "With your own coin. For a man who shot our stags." A pause. "Humans."'
+      if: {flag_is: [ashwood_hob, helped]}
+    - text: '"You taught him the old way." Something in her face softens. "Then he is no longer a poacher. He is a hunter. That is better."'
+      if: {flag_is: [ashwood_hob, taught]}
+    - text: '"You brought him to me." She looks at Hob for a long time. "Go home, farmer. Do not come back." She cuts his ropes.'
+      if: {flag_is: [ashwood_hob, arrested]}
+    - text: '"The Grove has him." She says nothing else for a long time. "That was their right," she says at last. "I did not have to like it."'
+      if: {any: [{flag_is: [ashwood_hob, given]}, {flag_is: [ashwood_hob, betrayed]}]}
+    - text: '"And Rook let it go?" Ilvaren raises an eyebrow, which for her is astonishment. "You must have said something very wise. Or very loud."'
+      if: {flag_is: [ashwood_rook, calmed]}
+    - text: '"You fought a keeper of the Grove." She sighs. "The forest has a long memory. So do we. I will try to forget faster than it does."'
+      if: {flag_is: [ashwood_rook, beaten]}
+    - '"The enclave thanks you." She produces two things from nowhere, the way elves do. "Choose. We are not rich in much, but we are rich in time, and both of these took a great deal of it."'
+  choices:
+    - text: Take the elven dirk.
+      next: report_done
+      effects:
+        - give_item: elven_dirk
+    - text: Take the heartwood locket.
+      next: report_done
+      effects:
+        - give_item: heartwood_locket
+
+report_done:
+  lines:
+    - '"Walk softly in the Ashwood, {name}," she says. "It is listening. More than usual, lately."'
+  effects:
+    - add_gold: 70
+    - give_xp: 120
+    - add_var: [rep.elves, 1]
+    - complete_quest: ashwood_stag
+  next: edge

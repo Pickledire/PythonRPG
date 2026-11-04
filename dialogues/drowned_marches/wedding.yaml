@@ -1,0 +1,484 @@
+# The Drowned Marches: A Wedding in the Marsh (quest marches_wedding).
+#
+# Captain Aldo Renn: led his company out of the war. Sardonic, weary, kind, tired of being in charge.
+# Mira and Tamsin: the couple. Mira is fierce and loud; Tamsin is shy and funny when nobody's looking.
+# Father Gully: a hermit priest of the Hearth, a drunk, a better man than he thinks.
+# Varga: a Regency bounty hunter. Cold, polite, professional, nothing personal.
+#
+# All talk and choices: three errands in any order, a bounty hunter to deal with, and a wedding.
+# Flags for later: marches_ring (found / bought), marches_feast (eels / toad / deer), marches_renn (safe / sold /
+# fought), marches_toast. Reputation: rep.regency, rep.free_holds. Placeholder: free_holds_member.
+
+_defaults:
+  speaker: Captain Aldo Renn
+
+camp:
+  speaker: The Stilt Camp
+  lines:
+    - text: >-
+        Huts on stilts above the frozen swamp, joined by plank walks, smoke leaking from every roof. Men and
+        women in the rags of three different armies' uniforms mend nets and argue about it.
+      if: {first_visit: true}
+    - text: >-
+        A tall man with a captain's coat and no badges on it comes down a ladder to meet you, a crossbow under
+        his arm and a mug in his hand. "If you're Regency, I'm a heron. If you're anyone else, welcome to the
+        worst address in Harrowmark."
+      if: {first_visit: true}
+    - text: Renn waves his mug at you from a plank walk. "Back again. You must like eels."
+      if: {first_visit: false}
+  choices:
+    - text: Ask why everyone looks so busy.
+      if: {quest_not_started: marches_wedding}
+      next: ask
+    - text: Go and look for a ring in the sunken village.
+      if: {quest_at: [marches_wedding, started], flag_not_set: marches_ring}
+      next: village
+    - text: Go and find the hermit priest.
+      if: {quest_at: [marches_wedding, started], flag_not_set: marches_priest}
+      next: gully
+    - text: Find something for the wedding feast.
+      if: {quest_at: [marches_wedding, started], flag_not_set: marches_feast}
+      next: feast
+    - text: Tell Renn everything's ready.
+      if: {quest_at: [marches_wedding, started], all: [{flag_set: marches_ring}, {flag_set: marches_priest}, {flag_set: marches_feast}]}
+      next: ready
+    - text: Deal with the bounty hunter.
+      if: {quest_at: [marches_wedding, bounty]}
+      next: varga
+    - text: Go to the wedding.
+      if: {quest_at: [marches_wedding, wedding]}
+      next: wedding
+    - text: Show the Grey Wolf's token.
+      if: {future: free_holds_member}
+      locked: Free Holds sworn only
+    - text: Leave.
+
+ask:
+  lines:
+    - >-
+      "Wedding," Renn says, as though it's a disease. "Mira and Tamsin. Two of my best, and the two most
+      stubborn people in the swamp, which is saying something, because I live here."
+    - >-
+      "They want it done properly. A ring, a priest, and a feast. We have none of those things. We have eels.
+      We have an enormous quantity of eels." He looks at you. "You don't look like you've deserted anything.
+      You could go places we can't."
+  choices:
+    - text: I'll help with the wedding.
+      next: ask_yes
+      effects:
+        - start_quest: marches_wedding
+    - text: Ask why they deserted.
+      next: ask_why
+    - text: Weddings aren't my business.
+
+ask_why:
+  lines:
+    - >-
+      He takes a long drink. "We were Regency. We burned a village in the Hearthlands for hiding grain. Then
+      we were Free Holds, and we hanged the Regency's tax men from their own wagons. Then somebody asked us to
+      do it again, for the Claimant, and I looked at my company and thought: enough." He shrugs. "So, eels."
+  next: ask
+
+ask_yes:
+  lines:
+    - >-
+      "There's a sunken village, Old Wennick, half a mile north. The smith there made rings, before the water
+      came. There's a hermit priest out past the reeds, Father Gully, who'll marry anyone, if you can get him
+      sober enough to stand. And food." He shudders. "Anything. Anything that isn't eel."
+  effects:
+    - set_flag: [marches_met, true]
+  next: camp
+
+# ------------------------------------------------------------------ the ring
+village:
+  speaker: Old Wennick
+  lines:
+    - >-
+      Roofs sticking out of black ice, a chimney, a church spire leaning like a drunk. The water came up ten
+      years ago and never went down. Under the ice, if you look, you can see the streets.
+    - The smithy is the one with the tall chimney. The door is under the ice, but the upstairs window isn't.
+  choices:
+    - text: Climb in through the smithy window and search properly.
+      if: {min_stat: [wisdom, 12]}
+      locked: true
+      next: village_found
+    - text: '"[Dwarf] Read the maker''s marks on the chimney stones; the old smiths hid their best work in the flue."'
+      if: {race: Dwarf}
+      next: village_flue
+    - text: Break through the ice to the smithy door.
+      next: village_ice
+    - text: Go back.
+      next: camp
+
+village_found:
+  speaker: Old Wennick
+  lines:
+    - >-
+      The upstairs is the smith's bedroom, frozen mid-morning: bed unmade, boots by the door. In a box under
+      the floorboard, wrapped in oilcloth, two plain silver rings, his and hers. Never worn.
+  effects:
+    - set_flag: [marches_ring, found]
+    - give_item: Two Silver Rings
+    - give_xp: 600
+  next: camp
+
+village_flue:
+  speaker: Old Wennick
+  lines:
+    - >-
+      Third stone up, a hammer-and-anvil mark scratched small. Behind it, a niche, and in the niche, two
+      silver rings with a maker's mark you'd recognise in any hold. "Good work," you say aloud. It is.
+  effects:
+    - set_flag: [marches_ring, found]
+    - give_item: Two Silver Rings
+    - give_xp: 650
+  next: camp
+
+village_ice:
+  speaker: Old Wennick
+  lines:
+    - >-
+      The ice cracks, and something under it, something in a peat-black skin that the swamp kept perfect,
+      takes hold of your ankle.
+  effects:
+    - start_combat: bog_corpse
+      fled: camp
+  choices:
+    - text: Search the smithy.
+      next: village_found
+
+# ------------------------------------------------------------------ the priest
+gully:
+  speaker: Father Gully
+  lines:
+    - text: >-
+        A hut in the reeds with a Hearth shrine nailed over the door, and a fat old man in a priest's robe
+        asleep in a chair outside it, a jug in his lap, snoring like a bear.
+      if: {first_visit: true}
+    - '"Eh?" He wakes. "Wedding? I don''t do weddings. I do funerals. Funerals are quieter. Nobody cries at a funeral. Well. Everybody cries at a funeral. But you know what I mean."'
+  choices:
+    - text: Talk him into it.
+      if: {min_stat: [charisma, 12]}
+      locked: true
+      next: gully_yes
+    - text: Put some coin in his poor-box. (25 gold)
+      if: {min_gold: 25}
+      locked: true
+      next: gully_paid
+      effects:
+        - add_gold: -25
+    - text: Match him drink for drink, and win.
+      if: {min_stat: [vitality, 14]}
+      locked: true
+      next: gully_drink
+    - text: Ask him why he's out here.
+      next: gully_why
+    - text: Speak to him with the Order's authority.
+      if: {future: hearth_order_member}
+      locked: Hearth Order members only
+    - text: Go back.
+      next: camp
+
+gully_why:
+  speaker: Father Gully
+  lines:
+    - >-
+      He looks at the jug for a while. "The Order sent me to bless their Cradlefire on the Wennick hill. It
+      went out. My watch. I was drunk." He drinks. "Then the water came. Probably not related." He drinks
+      again. "Probably."
+  next: gully
+
+gully_yes:
+  speaker: Father Gully
+  lines:
+    - >-
+      You tell him about Mira and Tamsin, and the eels, and that nobody's cried at anything happy in the
+      Marches for ten years. He listens. He puts the jug down. "Hah," he says. "Well. When you put it like that."
+  effects:
+    - set_flag: [marches_priest, true]
+    - give_xp: 600
+  next: camp
+
+gully_paid:
+  speaker: Father Gully
+  lines:
+    - He tips the coins out of the poor-box straight into his own purse, without shame. "The poor thank you. I'm the poor. I'll be there. Mostly sober."
+  effects:
+    - set_flag: [marches_priest, true]
+    - give_xp: 500
+  next: camp
+
+gully_drink:
+  speaker: Father Gully
+  lines:
+    - >-
+      It takes all afternoon and most of the jug. In the end it's the priest who goes over, slowly, like a
+      tree. He wakes up two hours later and says, "A man who drinks like that deserves a wedding." You're not
+      sure that follows, but you'll take it.
+  effects:
+    - set_flag: [marches_priest, true]
+    - damage: 10
+    - give_xp: 600
+  next: camp
+
+# ------------------------------------------------------------------ the feast
+feast:
+  speaker: The Marsh
+  lines:
+    - >-
+      Nothing in the Marches is food, exactly, except eels. There's an eel-wife at the edge of the camp with a
+      barrel of them. There are toads in the reeds the size of dogs. And sometimes, at dusk, marsh deer come
+      down to the open water.
+  choices:
+    - text: Buy the eel-wife's whole barrel, and have her cook it properly. (20 gold)
+      if: {min_gold: 20}
+      locked: true
+      next: feast_eels
+      effects:
+        - add_gold: -20
+    - text: Hunt one of the big toads. They say the legs are good.
+      next: feast_toad
+    - text: Wait for dusk and take a marsh deer.
+      if: {time_between: [16, 20]}
+      locked: Only at dusk
+      next: feast_deer
+    - text: '"[Beastkin] Run down a marsh deer the old way, on foot."'
+      if: {race: Beastkin}
+      next: feast_deer
+    - text: Go back.
+      next: camp
+
+feast_eels:
+  speaker: The Eel-Wife
+  lines:
+    - >-
+      "Properly?" says the eel-wife. She cracks her knuckles. "Nobody's asked me to cook properly in eight
+      years." What comes out of her pot that evening is eel, but it's eel the way the gods intended.
+  effects:
+    - set_flag: [marches_feast, eels]
+    - give_xp: 500
+  next: camp
+
+feast_toad:
+  speaker: The Marsh
+  lines:
+    - The toad is the size of a pony, and sweating poison, and does not want to be dinner.
+  effects:
+    - start_combat: plague_toad
+      fled: camp
+  choices:
+    - text: Haul it back.
+      next: feast_toad_done
+
+feast_toad_done:
+  speaker: The Marsh
+  lines:
+    - '"Toad," says Renn, looking at it. "Well. It''s not eel." It turns out to taste like chicken. Everything does, eventually.'
+  effects:
+    - set_flag: [marches_feast, toad]
+    - give_xp: 650
+  next: camp
+
+feast_deer:
+  speaker: The Marsh
+  lines:
+    - >-
+      They come down to drink at dusk, grey ghosts on the ice. You take one cleanly. The camp hasn't seen
+      venison in a year. A grown man, a deserter from two armies, weeps openly at the sight of it.
+  effects:
+    - set_flag: [marches_feast, deer]
+    - give_xp: 650
+  next: camp
+
+# ------------------------------------------------------------------ Varga
+ready:
+  lines:
+    - >-
+      "Ring, priest, and something that isn't eel." Renn looks almost happy. "Then we..."
+    - >-
+      He stops. Out on the plank walk there's a woman in a good grey coat, standing very still, looking at
+      the camp the way a buyer looks at a horse.
+    - '"Varga," Renn says quietly. "Regency bounty. She found us. Of course she did. She always does."'
+  effects:
+    - quest_stage: [marches_wedding, bounty]
+  next: varga
+
+varga:
+  speaker: Varga
+  lines:
+    - >-
+      She doesn't draw a weapon. She doesn't need to. "Captain Renn," she says pleasantly. "Two hundred gold
+      on his head. Fifty each for the rest, but I can't carry them all." She looks at you. "You're not one of
+      them. You can walk away. You can even have half."
+  choices:
+    - text: Talk her out of it.
+      if: {min_stat: [charisma, 14]}
+      locked: true
+      next: varga_talked
+    - text: Pay her more than the bounty's worth. (120 gold)
+      if: {min_gold: 120}
+      locked: true
+      next: varga_paid
+      effects:
+        - add_gold: -120
+    - text: Tell her she'll have to go through you.
+      next: varga_fight
+    - text: Take her offer. Hand Renn over.
+      next: varga_sold
+
+varga_talked:
+  speaker: Varga
+  lines:
+    - >-
+      You talk about the wedding, and the eels, and how the Regent pays two hundred gold for a man who
+      stopped burning villages. She listens without blinking.
+    - >-
+      "I've hunted deserters for eleven years," she says. "I'm very good at it. I'm going to be very bad at it
+      today." She tips her hat. "Tell the brides congratulations. I never saw this camp."
+  effects:
+    - set_flag: [marches_renn, safe]
+    - add_var: [rep.free_holds, 1]
+    - give_xp: 800
+  next: before_wedding
+
+varga_paid:
+  speaker: Varga
+  lines:
+    - She counts it. "More than the Regent pays." She almost smiles. "That says something about the Regent." She leaves.
+  effects:
+    - set_flag: [marches_renn, safe]
+    - give_xp: 700
+  next: before_wedding
+
+varga_fight:
+  speaker: Varga
+  lines:
+    - '"Nothing personal," she says, and she''s very fast.'
+  effects:
+    - start_combat: bounty_hunter
+      fled: camp
+  choices:
+    - text: Let her limp away.
+      next: varga_beaten
+
+varga_beaten:
+  speaker: Varga
+  lines:
+    - '"Nothing personal," she says again, through her teeth, and limps off into the reeds. The Regency will hear about you.'
+  effects:
+    - set_flag: [marches_renn, fought]
+    - add_var: [rep.regency, -2]
+    - add_var: [rep.free_holds, 1]
+    - give_xp: 800
+  next: before_wedding
+
+varga_sold:
+  speaker: Captain Aldo Renn
+  lines:
+    - >-
+      Renn looks at you for a long time. Then he hands his crossbow to Tamsin, and walks down the plank walk
+      to Varga, and holds out his wrists. "Do it after the wedding," he says to her. "Please." She looks at him,
+      and at the camp, and nods.
+  effects:
+    - set_flag: [marches_renn, sold]
+    - add_gold: 100
+    - add_var: [rep.regency, 2]
+    - add_var: [rep.free_holds, -2]
+    - give_xp: 400
+  next: before_wedding
+
+before_wedding:
+  lines:
+    - Somewhere on the plank walk, someone has started tuning a fiddle. Badly.
+  effects:
+    - quest_stage: [marches_wedding, wedding]
+  next: wedding
+
+# ------------------------------------------------------------------ the wedding
+wedding:
+  speaker: The Wedding
+  lines:
+    - >-
+      They do it on the biggest platform, under a roof of reeds hung with every lantern in the camp. Father
+      Gully, upright and nearly sober, says the old words of the Hearth in a voice like a church bell.
+    - text: Mira and Tamsin exchange the two silver rings from Old Wennick. They fit as if they'd been made for them.
+      if: {flag_is: [marches_ring, found]}
+    - text: Afterwards there's eel, cooked properly. Even Renn has seconds.
+      if: {flag_is: [marches_feast, eels]}
+    - text: Afterwards there's roast toad. Everyone agrees, eventually, that it tastes like chicken.
+      if: {flag_is: [marches_feast, toad]}
+    - text: Afterwards there's venison. Somebody starts singing and doesn't stop for three hours.
+      if: {flag_is: [marches_feast, deer]}
+    - text: Renn stands at the back with his wrists tied and Varga beside him, and smiles all the way through it.
+      if: {flag_is: [marches_renn, sold]}
+    - '"Who has words for the couple?" Gully asks. Everyone looks at you.'
+  choices:
+    - text: Raise a toast.
+      if: {min_stat: [charisma, 12]}
+      locked: true
+      next: toast
+    - text: Give them a wedding gift. (50 gold)
+      if: {min_gold: 50}
+      locked: true
+      next: gift
+      effects:
+        - add_gold: -50
+    - text: Object.
+      next: object
+    - text: Just raise your mug and say "To the brides."
+      next: simple
+
+toast:
+  speaker: The Wedding
+  lines:
+    - >-
+      You talk about the long winter, and the war that won't end, and how two people in a swamp decided to
+      make a promise anyway, which is the bravest thing you've seen in Harrowmark. Tamsin cries. Mira tells
+      her to stop crying, and cries.
+  effects:
+    - set_flag: [marches_toast, true]
+  next: reward
+
+gift:
+  speaker: The Wedding
+  lines:
+    - >-
+      You put fifty gold in Mira's hands. She stares at it. "That's a roof," she says. "That's a roof that
+      doesn't leak." She punches you in the shoulder, hard, which you gather is the highest honour the Marches
+      can give.
+  next: reward
+
+object:
+  speaker: The Wedding
+  lines:
+    - >-
+      There's a silence like the moment before a lightning strike. Then Mira bursts out laughing, and
+      Tamsin laughs, and then everyone's laughing, and Gully says "Objection noted and ignored" and marries them
+      anyway.
+  next: reward
+
+simple:
+  speaker: The Wedding
+  lines:
+    - '"To the brides!" roars the camp, and two hundred mugs go up. It''s enough. It''s plenty.'
+  next: reward
+
+reward:
+  lines:
+    - text: >-
+        Later, Renn finds you by the fire. "I don't know what you said to Varga," he says, "and I don't want
+        to. But I owe you a life. Take this. It was my mother's. It kept me alive through three armies."
+      if: {flag_is: [marches_renn, safe]}
+    - text: '"You stood between her and us," Renn says. "Nobody''s done that for this company since we left. Take this."'
+      if: {flag_is: [marches_renn, fought]}
+    - text: >-
+        Tamsin finds you by the fire, after Varga has taken Renn away down the plank walk. She doesn't say
+        anything. She puts something in your hand, and walks away. It's Renn's amulet.
+      if: {flag_is: [marches_renn, sold]}
+  effects:
+    - take_item: Two Silver Rings
+    - give_item: amulet_of_the_unbroken
+    - add_gold: 150
+    - give_xp: 900
+    - complete_quest: marches_wedding
+  next: camp

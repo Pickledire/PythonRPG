@@ -1,0 +1,131 @@
+# Side questlines, one per region (beyond the Hearthlands, which has Brannoc's jobs). Not part of the main story,
+# but they set flags and reputation that the main story can pick up later (see each scene file's header).
+
+# ------------------------------------------------------------------ Brennhold
+brennhold_finch:
+  title: The Clockwork Finch
+  giver: Pell Copperwhistle
+  stages:
+    started: >-
+      Pell's clockwork finch was taken as collateral by an Undercity moneylender, Ma Vetch. Find her in the
+      Gutter Market under the Tallow Bridge. It only opens after dark.
+    watch_house: >-
+      Ma Vetch sold the finch to Sergeant Holm of the city watch. It's somewhere in the Watch House on Tallow Street.
+    recovered: You have the finch. Take it back to Pell's workshop.
+    done: Pell's finch sings the hours again. Pell talked for twenty minutes about it without breathing.
+
+# ------------------------------------------------------------------ the Ashwood
+ashwood_stag:
+  title: Ash and Antler
+  giver: Ilvaren of the Ashwood enclave
+  stages:
+    started: Someone is killing the white stags the Grove keeps sacred. Ilvaren wants the poacher found.
+    tracking: The trail leads deeper into the Ashwood. Follow it to the poacher's camp.
+    camp_found: You found the poacher. Decide what happens to him before the Grove does.
+    reckoning: The Grove's zealot has come for the poacher. Settle it.
+    report: Go back to Ilvaren and tell her how it ended.
+    done: The white stags are safe, for now. The forest remembers how.
+
+# ------------------------------------------------------------------ Glassmere
+glassmere_book:
+  title: Six Years Overdue
+  giver: Tobias Fennick, Collegium under-librarian
+  stages:
+    started: >-
+      A Collegium book has been overdue for six years. Find the borrower, Corwin Ashe, starting at his lodgings
+      in the scholars' town.
+    lake: Corwin walked out onto the frozen lake. Follow him across the ice.
+    found: You found Corwin, and the book. Decide how this ends.
+    returned: Take the book (or the news) back to Fennick.
+    done: The Collegium library is one book less incomplete. Fennick seemed almost happy.
+
+# ------------------------------------------------------------------ Mt. Aegis
+aegis_brew:
+  title: The Feast of the Gate
+  giver: Hilde Stonestout, brewmaster
+  stages:
+    started: >-
+      Hilde needs frost-hops from the hop caves above the Gates of Aegis for the Feast of the Gate ale. Deep
+      goblins have moved into the caves.
+    sabotage: Someone salted Hilde's mash. Find out who before the feast.
+    brewing: The new mash is ready. Help Hilde tap the cask.
+    feast: The Feast of the Gate. The tasting decides whose ale the Holds will drink this year.
+    done: The Feast of the Gate is over, and the Holds will be talking about it for years.
+
+# ------------------------------------------------------------------ the Barrowfields
+barrow_count:
+  title: The Gravedigger's Count
+  giver: Old Sedge
+  stages:
+    started: >-
+      Old Sedge counts the barrow dead every night, and the count is one over. Visit the three barrows he
+      named: the Spearmen, the Weeping Bride and the Nameless.
+    torches: The Hearth Order has come to burn the barrows. Sister Corva is waiting at the gate.
+    last: Go back to Sedge. He wants to finish the count.
+    done: The count is right. Old Sedge can rest.
+
+# ------------------------------------------------------------------ the Frostreach
+frost_hunt:
+  title: The Long Hunt
+  giver: Kesh of the White Antler
+  stages:
+    started: Kesh needs an outsider to vouch for her hunt. First the White Antler elder must allow you near the fire.
+    stalking: Elder Thorvi allows it. Stalk the snowmane alpha with Kesh.
+    after: The alpha is dead. Go back to the camp with Kesh, and decide whose kill it was.
+    done: Kesh's rite is done, one way or another. The White Antler remember you.
+
+# ------------------------------------------------------------------ the Shrieking Cliffs
+cliffs_lights:
+  title: False Lights
+  giver: Keeper Morwen
+  stages:
+    started: >-
+      Someone is lighting false lanterns on the rocks below the lighthouse, and ships are wrecking. Start at
+      the newest wreck.
+    cove: The wreckers' trail leads down to the smugglers' coves. Find a way down the cliff.
+    false_light: Stop the wreckers at the false light, after dark.
+    done: The only light on the Shrieking Cliffs is Morwen's again.
+
+# ------------------------------------------------------------------ the Drowned Marches
+marches_wedding:
+  title: A Wedding in the Marsh
+  giver: Captain Aldo Renn
+  stages:
+    started: >-
+      Two of Captain Renn's deserters want to marry. They need a ring, someone to marry them, and something
+      to eat that isn't eel.
+    bounty: A Regency bounty hunter has found the camp. Deal with her before the wedding.
+    wedding: Everything's ready. Go to the wedding.
+    done: Mira and Tamsin are married. The Marches have never seen a party like it.
+
+# ------------------------------------------------------------------ the Ruins of Valoria
+valoria_lesson:
+  title: The Last Lesson
+  giver: Magistra Ithriel
+  stages:
+    started: Magistra Ithriel needs the rune-sealed door of a Valorian schoolhouse opened.
+    lesson: Something is still teaching inside. It expects you to sit the examination.
+    vault: The schoolhouse vault is open. Something in it wants to speak to you.
+    report: Take what you found back to Ithriel.
+    done: The Last Lesson is over. Valoria has one fewer thing waiting for a bell that never rings.
+
+# ------------------------------------------------------------------ the Emberpeaks
+ember_pilgrim:
+  title: Pilgrim's Road
+  giver: Sereth
+  stages:
+    started: Sereth wants to reach the cult's high altar and ask the dragons a question. Walk the Pilgrim's Road with them.
+    checkpoint: The Scaleguard hold the road's checkpoint. Get past them.
+    altar: The altar is close. Something on the road behind you is hunting.
+    done: Sereth asked their question. The answer is theirs to carry.
+
+# ------------------------------------------------------------------ Titanfell
+titanfell_map:
+  title: Cartographer's Folly
+  giver: Wendel Aske, cartographer
+  stages:
+    started: >-
+      Wendel's maps of Titanfell never match the land. Check his three landmarks: the Standing Ribs, the Glass
+      Field and the Crack.
+    measure: Help Wendel take a true measurement with his surveyor's glass.
+    done: Wendel has his answer, and you have a map no one else could have drawn.

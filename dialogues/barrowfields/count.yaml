@@ -1,0 +1,446 @@
+# The Barrowfields: The Gravedigger's Count (quest barrow_count).
+#
+# Old Sedge: the barrow-warden. Slow, morbid, dry as a bone, fond of a joke nobody else gets. Only about at night.
+#   (He has been dead for years and hasn't noticed. The clues are there: the hut by day, the Nameless barrow.)
+# Sister Corva: Hearth Order inquisitor. Furious, certain, brave, not cruel, very tired.
+#
+# Night-only visits, three barrows in any order (the game remembers which you've seen), a fight or two,
+# and a quiet ending. Flags for later: barrow_burned, barrow_corva (burned / dawn / left / fought),
+# barrow_sedge_rested. Reputation: rep.hearth_order. Placeholder: hearth_order_member.
+
+_defaults:
+  speaker: Old Sedge
+
+hut:
+  speaker: The Barrow-Gate
+  lines:
+    - text: >-
+        A stone hut by a rusted iron gate, and beyond the gate, the Barrowfields: low green mounds under the
+        snow, row on row, as far as the light goes.
+      if: {first_visit: true}
+    - text: >-
+        By day, the hut is empty. Dust lies thick on the table and the bed, and the hearth is cold, and
+        hasn't been lit in a long time. A note on the door, in a careful hand, says "SLEEPING. COME BACK
+        AFTER DARK."
+      if: {time_between: [6, 18]}
+    - text: >-
+        By night, a lamp burns in the window, and an old man sits in the doorway with a ledger on his knees,
+        counting under his breath.
+      if: {not: {time_between: [6, 18]}, flag_not_set: barrow_sedge_rested}
+    - text: >-
+        The hut is dark, and just a hut. There's a new shovel-shaped clean patch on the dusty table. Out in
+        the field, the snow lies quiet over every mound.
+      if: {not: {time_between: [6, 18]}, flag_set: barrow_sedge_rested}
+  choices:
+    - text: Talk to the old man.
+      if: {not: {time_between: [6, 18]}, flag_not_set: barrow_sedge_rested}
+      locked: Only after dark
+      next: sedge
+    - text: Wait for dark.
+      if: {time_between: [6, 18], flag_not_set: barrow_sedge_rested}
+      next: wait_dark
+    - text: Go out into the Barrowfields.
+      if: {quest_at: [barrow_count, started]}
+      next: field
+    - text: Leave.
+
+wait_dark:
+  speaker: The Barrow-Gate
+  lines:
+    - >-
+      You sit on the wall and watch the light go. Crows come and go. When it's nearly dark you look round and
+      the lamp is lit in the window, and you didn't see anyone go in.
+  effects:
+    - set_time: 19
+  next: hut
+
+sedge:
+  lines:
+    - text: >-
+        "Evening." He doesn't look up. "Three thousand, one hundred and six. Should be three thousand, one
+        hundred and five." He licks his pencil. "Been counting forty years. Never been out before. Out by
+        one. One extra." He looks at you, finally. "You're not dead, are you? That'd explain it."
+      if: {quest_not_started: barrow_count}
+    - text: '"Evening." He''s still counting. "Still one over."'
+      if: {quest_at: [barrow_count, started]}
+    - text: '"Evening. You''ve been round, then?" He closes the ledger. "Tell me."'
+      if: {quest_at: [barrow_count, last]}
+    - text: '"There''s lights at the gate," he says, not looking up. "Torches. I don''t like torches."'
+      if: {quest_at: [barrow_count, torches]}
+  choices:
+    - text: Ask where the extra one could be.
+      if: {quest_not_started: barrow_count}
+      next: sedge_ask
+    - text: Finish the count with him.
+      if: {quest_at: [barrow_count, last]}
+      next: last
+    - text: Tell him the Order wants to burn the barrows.
+      if: {quest_at: [barrow_count, torches]}
+      next: sedge_torches
+    - text: Ask why he counts them at all.
+      if: {not_visited: sedge_why}
+      next: sedge_why
+    - text: Leave him to it.
+
+sedge_why:
+  lines:
+    - >-
+      "Somebody has to. Folk get buried, folk get forgotten. Then they get restless. You count them, they
+      know someone's minding them. Like sheep." He thinks about this. "Quieter than sheep. Usually."
+    - text: '"Lately not so quiet. Something''s pulling at them. Coming up out of the south, like a draught under a door."'
+      if: {first_visit: true}
+  next: sedge
+
+sedge_ask:
+  lines:
+    - >-
+      "Three barrows I can't count proper. My knees won't do the hill no more." He points with the pencil.
+      "The Spearmen, up on the rise. Forty of them in there, should be. The Weeping Bride, down by the stream.
+      One, should be. And the Nameless, at the back. Nobody knows who's in that one. One, should be."
+    - '"Go and look. Count them. Come back and tell old Sedge. I''ll be here." He goes back to counting. "Always am."'
+  choices:
+    - text: I'll count them.
+      next: field
+      effects:
+        - start_quest: barrow_count
+    - text: Not tonight.
+
+sedge_torches:
+  lines:
+    - '"Burn them?" He stands up for the first time. He''s taller than you thought, and thinner. "They''re no trouble. They''re counted." He sits down again, slowly. "Go and talk to her. I can''t go past the gate. Never could."'
+  next: corva
+
+# ------------------------------------------------------------------ the field
+field:
+  speaker: The Barrowfields
+  lines:
+    - >-
+      Moonlight on snow, and the long shadows of the mounds. Somewhere a crow is laughing at something.
+    - text: You've counted the Spearmen.
+      if: {visited: spearmen_counted}
+    - text: You've counted the Weeping Bride.
+      if: {visited: bride_counted}
+    - text: You've seen the Nameless barrow.
+      if: {visited: nameless}
+  choices:
+    - text: Climb to the Barrow of the Spearmen.
+      if: {not_visited: spearmen_counted}
+      next: spearmen
+    - text: Go down to the Barrow of the Weeping Bride.
+      if: {not_visited: bride_counted}
+      next: bride
+    - text: Go to the Barrow of the Nameless.
+      if: {not_visited: nameless}
+      next: nameless
+    - text: Head back toward the gate.
+      if: {all: [{visited: spearmen_counted}, {visited: bride_counted}, {visited: nameless}]}
+      next: torches
+    - text: Go back to the hut for now.
+      next: hut
+
+spearmen:
+  speaker: The Barrow of the Spearmen
+  lines:
+    - >-
+      The door-stone has been rolled aside from the inside. Down in the dark, something clicks, and clicks,
+      and forty skeletons in rotted leather rise in two neat ranks, bows drawn, as if they've been waiting
+      for exactly this.
+  choices:
+    - text: Stand still and salute, the way soldiers do.
+      if: {min_stat: [wisdom, 12]}
+      locked: true
+      next: spearmen_salute
+    - text: '"[Orc] Bang your weapon on your chest and roar the clan challenge."'
+      if: {race: Orc}
+      next: spearmen_salute
+    - text: Fight.
+      next: spearmen_fight
+    - text: Back out, slowly.
+      next: field
+
+spearmen_salute:
+  speaker: The Barrow of the Spearmen
+  lines:
+    - >-
+      For a long moment nothing happens. Then forty skulls nod, very slightly, all together, and forty
+      bows lower. They lie back down in their ranks with a sound like a dropped bundle of sticks.
+    - Forty. You count twice. Forty.
+  effects:
+    - give_xp: 250
+  next: spearmen_counted
+
+spearmen_fight:
+  speaker: The Barrow of the Spearmen
+  lines:
+    - The first rank looses.
+  effects:
+    - start_combat: skeleton_archer
+      fled: field
+  choices:
+    - text: Count them, while they're down.
+      next: spearmen_counted
+
+spearmen_counted:
+  speaker: The Barrow of the Spearmen
+  lines:
+    - Forty spearmen, all accounted for. Whoever the extra one is, it isn't here.
+  effects:
+    - give_xp: 150
+  next: field
+
+bride:
+  speaker: The Barrow of the Weeping Bride
+  lines:
+    - >-
+      A small barrow by a frozen stream, with a stone bench beside it. On the bench sits a woman in a
+      burial veil, translucent as frost, weeping without a sound.
+    - She turns her veiled face toward you, and the weeping becomes a wail, rising, and the snow begins to move.
+  choices:
+    - text: Sit down on the bench and listen to her.
+      if: {min_stat: [wisdom, 13]}
+      locked: true
+      next: bride_listen
+    - text: Sing her the old Hearthlands wedding song.
+      if: {min_stat: [charisma, 13]}
+      locked: true
+      next: bride_listen
+    - text: Fight.
+      next: bride_fight
+    - text: Run.
+      next: field
+
+bride_listen:
+  speaker: The Weeping Bride
+  lines:
+    - >-
+      The wail falls away. She doesn't speak, but you understand her anyway, the way you understand a
+      dream: she was married on a winter morning, and her husband rode to a war, and she is waiting for him
+      on the bench where he said he'd meet her.
+    - She is still waiting. She seems content to. One bride, accounted for.
+  effects:
+    - give_xp: 300
+  next: bride_counted
+
+bride_fight:
+  speaker: The Weeping Bride
+  lines:
+    - The wail becomes a scream.
+  effects:
+    - start_combat: wailing_widow
+      fled: field
+  choices:
+    - text: Wait for her to come back to the bench.
+      next: bride_counted
+
+bride_counted:
+  speaker: The Barrow of the Weeping Bride
+  lines:
+    - One bride, on her bench, waiting. Not the extra one.
+  effects:
+    - give_xp: 100
+  next: field
+
+nameless:
+  speaker: The Barrow of the Nameless
+  lines:
+    - >-
+      At the very back of the Barrowfields, a barrow with no carving on its stones. Its door is open. Inside,
+      a single stone coffin, its lid pushed aside.
+    - It's empty. There's dust inside, and the shape in the dust of someone who lay there a long time.
+    - >-
+      From the coffin, faint in the frost on the floor, a trail of footprints leads out of the barrow, and
+      across the field, and toward the barrow-gate. It's a well-worn trail. Someone has walked it every
+      night for years.
+    - text: >-
+        You stand by the coffin longer than you mean to. It's a strange size. Your size, about. You don't know
+        why you know that, and you don't like that you do.
+      if: {race: Revenant}
+  effects:
+    - give_xp: 150
+    - set_flag: [barrow_nameless_seen, true]
+  next: field
+
+# ------------------------------------------------------------------ the torches
+torches:
+  speaker: The Barrow-Gate
+  lines:
+    - >-
+      There are lights at the barrow-gate. Torches: six of them, and six grey-habited figures of the Hearth
+      Order, and at their head a woman with a shaved head and a burn scar from jaw to collar.
+  effects:
+    - quest_stage: [barrow_count, torches]
+  next: corva
+
+corva:
+  speaker: Sister Corva
+  lines:
+    - text: >-
+        "Stand aside." Her voice is hoarse from shouting at things that don't listen. "The dead of this field
+        are walking. The Order will burn them back to rest. All of them, before the next moon."
+      if: {not_race: Revenant}
+    - text: >-
+        She looks at you, and her hand goes to her mace. "And you. I know what you are. Walking dead, in the
+        Order's own sight. Give me one reason I shouldn't start with you."
+      if: {race: Revenant}
+  choices:
+    - text: Tell her the dead here are counted and quiet, and are no one's danger.
+      if: {min_stat: [charisma, 14]}
+      locked: true
+      next: corva_left
+    - text: Ask her to wait until dawn, and see whether they rise.
+      if: {min_stat: [wisdom, 12]}
+      locked: true
+      next: corva_dawn
+    - text: Invoke the Order's authority, as one of its own.
+      if: {future: hearth_order_member}
+      locked: Hearth Order members only
+    - text: Stand aside. Let them burn.
+      next: corva_burn
+    - text: Stand in her way.
+      next: corva_fight
+
+corva_left:
+  speaker: Sister Corva
+  lines:
+    - >-
+      She hears you out. She doesn't like it. She looks past you at the field: snow, moonlight, mounds,
+      nothing walking at all.
+    - '"If one of them leaves this field," she says, "one, I come back with sixty." She turns her torches around. "Hearth keep you. You''ll need it."'
+  effects:
+    - set_flag: [barrow_corva, left]
+    - give_xp: 300
+    - quest_stage: [barrow_count, last]
+  next: hut
+
+corva_dawn:
+  speaker: Sister Corva
+  lines:
+    - >-
+      She and her brothers wait by the gate all night with their torches, and you wait with them. Nothing
+      rises. Nothing walks. At dawn, Corva looks at the field for a long time.
+    - '"Quiet," she admits. "For now." She puts out her torch in the snow. "I''ll be watching this place, gravedigger''s friend."'
+  effects:
+    - set_flag: [barrow_corva, dawn]
+    - add_var: [rep.hearth_order, 1]
+    - set_time: 19
+    - give_xp: 300
+    - quest_stage: [barrow_count, last]
+  next: hut
+
+corva_burn:
+  speaker: Sister Corva
+  lines:
+    - >-
+      You stand aside. They go down the rows with their torches, saying the old words, and one by one the
+      mounds catch, and smoke, and burn. It takes all night. The Weeping Bride's bench is the last thing to go.
+    - Corva nods to you as she leaves. "The Order remembers its friends."
+  effects:
+    - set_flag: [barrow_corva, burned]
+    - set_flag: [barrow_burned, true]
+    - add_var: [rep.hearth_order, 2]
+    - give_xp: 200
+    - quest_stage: [barrow_count, last]
+  next: hut
+
+corva_fight:
+  speaker: Sister Corva
+  lines:
+    - '"So be it." She doesn''t hesitate. She never does.'
+  effects:
+    - start_combat: hearth_inquisitor
+      fled: field
+  choices:
+    - text: Let them go.
+      next: corva_fought
+
+corva_fought:
+  speaker: Sister Corva
+  lines:
+    - >-
+      Her brothers drag her back to the road. She spits blood into the snow and looks at you with something
+      that isn't quite hate. "The Order will hear of this," she says. It will.
+  effects:
+    - set_flag: [barrow_corva, fought]
+    - add_var: [rep.hearth_order, -3]
+    - give_xp: 300
+    - quest_stage: [barrow_count, last]
+  next: hut
+
+# ------------------------------------------------------------------ the count
+last:
+  lines:
+    - text: >-
+        You tell him: forty spearmen, one bride, and an empty coffin in the Nameless barrow, and footprints
+        from it to here.
+      if: {not: {flag_set: barrow_burned}}
+    - text: >-
+        You tell him about the torches and the fires. He listens without a word, and when you're done he
+        crosses out a long column in the ledger, slowly, line by line.
+      if: {flag_set: barrow_burned}
+    - >-
+      Sedge looks at his feet. At the frost on his boots. At the dust on the table behind him, and the bed
+      nobody has slept in. He looks at you for a long time.
+    - '"Ah," he says. "Ah. That''d be it, then."'
+  choices:
+    - text: Tell him gently.
+      next: last_gently
+    - text: Say nothing. Let him work it out.
+      next: last_quiet
+
+last_gently:
+  lines:
+    - >-
+      You tell him. He nods along, the way old men do when you tell them something they half knew. "Died in
+      my sleep, I expect. The winter before last. Or the one before." He chuckles. "Kept counting. Course I
+      did. Somebody has to."
+  next: last_name
+
+last_quiet:
+  lines:
+    - >-
+      You don't say anything. He works it out on his own, the way he worked out everything, slowly and
+      thoroughly, licking his pencil. "Well," he says. "That's a turn-up."
+  next: last_name
+
+last_name:
+  lines:
+    - >-
+      He opens the ledger to the last page, where the numbers are, and in a careful hand he writes one more
+      line. "Sedge. Gravedigger. Counted." He turns the ledger round so you can see it.
+    - '"Three thousand, one hundred and six," he says. "That''s right, then." And he isn''t there.'
+    - >-
+      The lamp is still burning. On the table there's a shovel, worn smooth, and a purse that's been saved a
+      copper at a time for forty years. A note under it says, "For whoever minds them next."
+  effects:
+    - set_flag: [barrow_sedge_rested, true]
+  choices:
+    - text: Take the purse and the shovel.
+      next: reward
+    - text: Take the shovel. Leave the purse for the next warden.
+      next: reward_honest
+
+reward:
+  speaker: The Barrow-Gate
+  lines:
+    - You take them. Somebody should.
+  effects:
+    - add_gold: 140
+    - give_item: Sedge's Shovel
+    - give_item: talisman_of_purity
+    - give_xp: 400
+    - complete_quest: barrow_count
+  next: hut
+
+reward_honest:
+  speaker: The Barrow-Gate
+  lines:
+    - >-
+      You take the shovel and leave the purse on the ledger. Outside, the crows have stopped laughing. You
+      find, the next time you open your pack, a talisman wrapped in an old cloth that wasn't there before.
+  effects:
+    - give_item: Sedge's Shovel
+    - give_item: talisman_of_purity
+    - give_xp: 450
+    - add_var: [rep.hearth_order, 1]
+    - complete_quest: barrow_count
+  next: hut

@@ -170,11 +170,12 @@ class DialogueScreen(Screen[None]):
             buttons = []
             for entry in menu:
                 if entry.available:
-                    buttons.append(Button(f"{entry.index + 1}. {entry.text}", id=f"choice-{entry.index}",
+                    # Plain Text, never markup: story text like "[Gnome] ..." must show as written.
+                    buttons.append(Button(Text(f"{entry.index + 1}. {entry.text}"), id=f"choice-{entry.index}",
                                           classes="choice-button"))
                 else:
-                    locked = Button(f"   {entry.text}  [{entry.reason}]", classes="choice-button choice-locked",
-                                    disabled=True)
+                    locked = Button(Text(f"   {entry.text}  [{entry.reason}]"),
+                                    classes="choice-button choice-locked", disabled=True)
                     locked.tooltip = entry.reason
                     buttons.append(locked)
         elif self.runner.node and self.runner.node.choices:

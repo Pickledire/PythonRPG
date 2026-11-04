@@ -1,0 +1,541 @@
+# Mt. Aegis: The Feast of the Gate (quest aegis_brew).
+#
+# Hilde Stonestout: brewmaster of clan Stonestout. Loud, jolly, generous, laughs at her own jokes first.
+# Thrain Grimtankard: her rival. Dour, few words, grieving his wife. Not the villain.
+# Brokk: Thrain's young apprentice. Eager, nervous, means well, did something stupid.
+#
+# Goblins in the hop caves (fight, bribe, wait for daylight, or the miners' signal), a sabotage mystery
+# (clues), tapping the cask (timing) and the drinking contest (quick-time).
+# Flags for later: aegis_brew_quality (great / good / poor), aegis_brokk (quiet / exposed / secret),
+# aegis_feast (peace / hilde / thrain). Reputation: rep.holds. Placeholder: holds_clan_friend.
+
+_defaults:
+  speaker: Hilde Stonestout
+
+gates:
+  speaker: The Gates of Aegis
+  lines:
+    - text: >-
+        The Gates of Aegis are two slabs of carved stone forty feet high, standing open. Inside, the First Hall
+        is warm, really warm, for the first time since the winter began. It smells of yeast and hot iron.
+      if: {first_visit: true}
+    - text: >-
+        Along one wall of the hall is a brewhouse, copper vats gleaming, and in the middle of it a dwarf woman
+        with a beard braided into three forks is shouting happily at a barrel.
+      if: {first_visit: true}
+    - text: '"A cousin!" she bellows when she sees you. "From which hold? No, tell me over a drink. Everything''s better over a drink."'
+      if: {first_visit: true, race: Dwarf}
+    - text: '"An elf! In my brewhouse! Mind your ears on the pipes, lad, they''re hot."'
+      if: {first_visit: true, race: Elf}
+    - text: '"Big one! Good. I need someone who can lift a barrel without a pulley."'
+      if: {first_visit: true, race: [Orc, Dragonkin, Beastkin]}
+    - text: The brewhouse is as warm as ever. Hilde waves a ladle at you.
+      if: {first_visit: false}
+  choices:
+    - text: Ask what she's shouting at.
+      if: {quest_not_started: aegis_brew}
+      next: hilde_ask
+    - text: Touch your beard and give the clan greeting.
+      if: {race: Dwarf, not_visited: greeting}
+      next: greeting
+    - text: Go up to the hop caves.
+      if: {quest_at: [aegis_brew, started]}
+      next: caves
+    - text: Look into the sabotage.
+      if: {quest_at: [aegis_brew, sabotage]}
+      next: sabotage
+    - text: Help Hilde tap the new cask.
+      if: {quest_at: [aegis_brew, brewing]}
+      next: tap
+    - text: Go to the Feast of the Gate.
+      if: {quest_at: [aegis_brew, feast]}
+      next: feast
+    - text: Have a drink with Hilde.
+      if: {quest_done: aegis_brew}
+      next: after
+    - text: Speak for your friends among the clans.
+      if: {future: holds_clan_friend}
+      locked: Needs a friend among the clans
+    - text: Leave.
+
+greeting:
+  lines:
+    - >-
+      You touch your beard and bow from the waist, the old way, the way your grandparents did. Hilde stops
+      shouting. She touches her own beard, all three forks, and bows lower.
+    - '"Somebody raised you right," she says, and her eyes are wet. "Nobody does the old greeting any more. Sit. You''re drinking for free. Forever. Don''t argue."'
+  effects:
+    - add_var: [rep.holds, 2]
+  next: gates
+
+hilde_ask:
+  lines:
+    - >-
+      "This barrel," she says, "is a disgrace. And so am I, if I don't have a better one in three days. The
+      Feast of the Gate! The day the first clans shut the gates on the cold. And every year, the Thane drinks
+      ONE ale, and whoever brewed it, their clan sits at the high table."
+    - >-
+      "Twenty years, it's been me or Thrain Grimtankard. Thrain!" She spits, accurately, into a bucket kept
+      for the purpose. "Face like a wet slate. Brews like one too."
+    - >-
+      "I need frost-hops, from the hop caves above the gate. Only they've got deep goblins in them now, the
+      little pale horrors. You look like you've stood on a goblin before."
+  choices:
+    - text: I'll get your hops.
+      next: hilde_yes
+      effects:
+        - start_quest: aegis_brew
+    - text: Ask why the hall is so warm.
+      next: hilde_warm
+    - text: What do I get?
+      next: hilde_pay
+    - text: Not today.
+      next: gates
+
+hilde_warm:
+  lines:
+    - >-
+      "Is it?" She sniffs the air, like she hadn't noticed. "The deep halls have been warm all winter. Old
+      Gimma says the mountain's in a good mood." She shrugs, cheerfully. "Good for the yeast, whatever it is."
+  next: hilde_ask
+
+hilde_pay:
+  lines:
+    - '"Gold, and dwarf-work from my brother''s forge, and a seat at the high table if we win. And all the ale you can hold, which, looking at you, is not much." She roars with laughter. You''re not sure you''ve been insulted.'
+  next: hilde_ask
+
+hilde_yes:
+  lines:
+    - '"Ha! Up the east stair, follow the smell of wet socks. That''s the goblins, not the hops. Hops smell like pine and lemons."'
+  next: gates
+
+# ------------------------------------------------------------------ the hop caves
+caves:
+  speaker: The Hop Caves
+  lines:
+    - >-
+      High above the gate, caves where pale vines grow in the dark and the cold, heavy with frost-hops like
+      little silver lanterns. Among them, the deep goblins: a dozen at least, chattering, picking fights with
+      each other, eating the hops and spitting them out.
+    - text: Most of them are curled up in heaps, asleep. Deep goblins hate the daylight, even this far down.
+      if: {time_between: [8, 16]}
+  choices:
+    - text: Pick the hops while they sleep.
+      if: {time_between: [8, 16]}
+      locked: Only by day, while they sleep
+      next: caves_quiet
+    - text: Throw a handful of coins into the dark and let them squabble. (20 gold)
+      if: {min_gold: 20}
+      locked: true
+      next: caves_bribed
+      effects:
+        - add_gold: -20
+    - text: Bang the old miners' alarm on the pipes.
+      if: {race: Dwarf}
+      next: caves_signal
+    - text: Clear them out.
+      next: caves_fight
+    - text: Leave.
+
+caves_quiet:
+  speaker: The Hop Caves
+  lines:
+    - >-
+      You tiptoe between snoring heaps of goblin and fill a sack with silver hops. One of them opens an eye,
+      looks at you, and goes back to sleep, apparently deciding you're a dream.
+  next: caves_hops
+
+caves_bribed:
+  speaker: The Hop Caves
+  lines:
+    - >-
+      The coins clatter into the dark. Every goblin in the cave goes after them at once, biting, scratching,
+      and screaming in a language that's mostly elbows. You fill your sack in peace.
+  next: caves_hops
+
+caves_signal:
+  speaker: The Hop Caves
+  lines:
+    - >-
+      Three long, two short, on the old copper pipe: the miners' call, the one that means the deep is
+      coming up. Every dwarf child learns it. So, it turns out, does every goblin. They're gone before the
+      echo is.
+  effects:
+    - add_var: [rep.holds, 1]
+  next: caves_hops
+
+caves_fight:
+  speaker: The Hop Caves
+  lines:
+    - The biggest of them sees you, shrieks, and the rest come at you from every side.
+  effects:
+    - start_combat: deep_goblin
+      fled: gates
+  choices:
+    - text: Gather the hops before more come.
+      next: caves_hops
+
+caves_hops:
+  speaker: The Hop Caves
+  lines:
+    - >-
+      A sack of frost-hops, smelling of pine and lemons, as promised. At the back of the cave, where the
+      vines are thickest, you find an old miner's lamp hanging on a nail. It's still lit. Nobody has filled
+      it in a hundred years.
+  effects:
+    - give_item: Sack of Frost-Hops
+    - give_xp: 250
+  next: salted
+
+salted:
+  lines:
+    - >-
+      Hilde takes the sack and sniffs it with her eyes closed. "Beautiful." Then she goes to stir the mash,
+      tastes it, and her face changes.
+    - '"Salt," she says. "Someone''s salted my mash." She''s not loud now, which is worse. "Three days'' work. The night before I brew."'
+    - '"Thrain," she says. "It''s Thrain."'
+  effects:
+    - take_item: Sack of Frost-Hops
+    - quest_stage: [aegis_brew, sabotage]
+  choices:
+    - text: Tell her you'll find out who did it, properly.
+      next: sabotage
+    - text: Go along with her. It's obviously Thrain.
+      next: sabotage_blame
+
+sabotage_blame:
+  lines:
+    - '"Ha! You see it too!" She grabs a ladle like a war hammer. Then she puts it down again. "No. No. Find me proof. If I break his nose on a guess, the Thane will never forgive me. On proof, he''ll pour."'
+  next: sabotage
+
+# ------------------------------------------------------------------ who salted the mash?
+sabotage:
+  speaker: The Brewhouse
+  lines:
+    - >-
+      The brewhouse at night is all copper and shadow. Across the hall, the Grimtankard brewhouse is dark
+      except for one lamp.
+    - text: You've got a clue. Maybe it's enough to ask the right person the right question.
+      if: {any: [{flag_set: aegis_clue_salt}, {flag_set: aegis_clue_gossip}]}
+  choices:
+    - text: Look at the salt in the mash tun.
+      if: {flag_not_set: aegis_clue_salt}
+      next: clue_salt
+    - text: Ask around the hall about who was up late.
+      if: {flag_not_set: aegis_clue_gossip, min_stat: [charisma, 12]}
+      locked: true
+      next: clue_gossip
+    - text: Buy a round and let the hall talk. (15 gold)
+      if: {flag_not_set: aegis_clue_gossip, min_gold: 15}
+      locked: true
+      next: clue_gossip
+      effects:
+        - add_gold: -15
+    - text: Go and ask Thrain Grimtankard.
+      next: thrain
+    - text: Find Brokk.
+      if: {any: [{flag_set: aegis_clue_salt}, {flag_set: aegis_clue_gossip}]}
+      next: brokk
+    - text: Back.
+      next: gates
+
+clue_salt:
+  speaker: The Brewhouse
+  lines:
+    - >-
+      The salt hasn't fully dissolved. Coarse, grey, gritty. Not dwarf-salt, which is pink and comes out of
+      the mountain. This is sea salt, from the coast.
+    - Somebody in the Holds came from the coast. Somebody new.
+  effects:
+    - set_flag: [aegis_clue_salt, true]
+  next: sabotage
+
+clue_gossip:
+  speaker: The First Hall
+  lines:
+    - >-
+      Dwarves love gossip almost as much as ale. Within the hour you know who's courting whom, whose beard
+      is dyed, and that young Brokk, Thrain's new apprentice, the lad from the coast, was seen sneaking out
+      of the Stonestout brewhouse the night before last, looking like he'd swallowed a toad.
+  effects:
+    - set_flag: [aegis_clue_gossip, true]
+  next: sabotage
+
+thrain:
+  speaker: Thrain Grimtankard
+  lines:
+    - >-
+      A grey dwarf with a grey beard, scrubbing a vat that's already clean. He doesn't stop scrubbing.
+    - '"Stonestout sent you," he says. "Salt, is it." Scrub. "If I wanted to beat Hilde, I''d brew better. I always do."'
+    - text: Behind him, on a shelf, a woman's beard-ring sits on a folded cloth. He keeps the vat between you and it.
+      if: {min_stat: [wisdom, 12]}
+  choices:
+    - text: Ask about the beard-ring on the shelf.
+      if: {min_stat: [wisdom, 12]}
+      locked: true
+      next: thrain_ring
+    - text: Leave him to his scrubbing.
+      next: sabotage
+
+thrain_ring:
+  speaker: Thrain Grimtankard
+  lines:
+    - >-
+      He stops scrubbing. "Ysolde's," he says. "My wife. Brewed with her forty years. She did the hops. I did
+      the scrubbing." He starts again, slower. "This is my first feast without her. I don't much care who
+      wins."
+    - It's the most words anyone in the Holds has heard from him in a year.
+  effects:
+    - set_flag: [aegis_thrain_grief, true]
+  next: sabotage
+
+brokk:
+  speaker: Brokk
+  lines:
+    - >-
+      A young dwarf with a beard that's mostly hope, hiding in the Grimtankard barrel store. He takes one
+      look at you and sits down on a cask.
+    - >-
+      "I did it," he says, before you ask. "I salted it. It was stupid. Master Thrain's been so sad since
+      Mistress Ysolde passed, and I thought if he won the Feast, just once, he'd..." He swallows. "He doesn't
+      know. Please don't tell him. Please."
+  choices:
+    - text: Tell Thrain, quietly. He deserves to know, from you.
+      next: brokk_quiet
+    - text: Bring him before the whole hall at the Feast.
+      next: brokk_exposed
+    - text: Keep his secret. Let the ale decide.
+      next: brokk_secret
+
+brokk_quiet:
+  speaker: Thrain Grimtankard
+  lines:
+    - >-
+      Thrain listens to Brokk stammer it all out. He doesn't shout. He puts down his scrubbing brush, for the
+      first time anyone can remember, and puts a hand on the boy's shoulder.
+    - '"Daft lad," he says. Then, to you: "Tell Stonestout. I''ll tell the Thane myself. We''ll not be pouring this year."'
+  effects:
+    - set_flag: [aegis_brokk, quiet]
+    - give_xp: 300
+  next: brewing_starts
+
+brokk_exposed:
+  speaker: Brokk
+  lines:
+    - He goes white, then nods. "That's fair," he says. "That's fair." He doesn't look at you again.
+  effects:
+    - set_flag: [aegis_brokk, exposed]
+    - give_xp: 250
+  next: brewing_starts
+
+brokk_secret:
+  speaker: Brokk
+  lines:
+    - '"Thank you," he whispers. "I''ll make it up. I''ll scrub every vat in the Holds."'
+  effects:
+    - set_flag: [aegis_brokk, secret]
+    - give_xp: 250
+  next: brewing_starts
+
+brewing_starts:
+  lines:
+    - >-
+      Back at the Stonestout brewhouse, Hilde has started a new mash with the hops you brought. It's
+      bubbling, and so is she. "No time for the slow way. We tap it hot and hope. Get over here."
+  effects:
+    - quest_stage: [aegis_brew, brewing]
+  next: tap
+
+# ------------------------------------------------------------------ the tap
+tap:
+  lines:
+    - >-
+      "When the foam comes up to the third ring, you knock the tap. Not before, or it's flat. Not after, or
+      it's all over the floor and my brother's going to laugh at me for a year."
+  choices:
+    - text: Take the mallet.
+      effects:
+        - minigame:
+            type: timing
+            dc: 12
+            title: Tapping the Cask
+            intro: Watch the foam. Knock on the third ring.
+            action: Knock
+            strikes: 3
+            success: tap_great
+            partial: tap_good
+            failure: tap_poor
+            retreat: gates
+
+tap_great:
+  lines:
+    - Three perfect knocks. The ale comes out clear as mountain water and gold as a crown. Hilde tastes it and doesn't say anything at all, which is the highest praise she has.
+  effects:
+    - set_flag: [aegis_brew_quality, great]
+    - quest_stage: [aegis_brew, feast]
+    - give_xp: 300
+  next: feast
+
+tap_good:
+  lines:
+    - Not perfect, but good. A little cloudy. Hilde tastes it and nods. "That'll do. That'll more than do."
+  effects:
+    - set_flag: [aegis_brew_quality, good]
+    - quest_stage: [aegis_brew, feast]
+    - give_xp: 250
+  next: feast
+
+tap_poor:
+  lines:
+    - The third knock is late. Half the cask goes over the floor, and your boots. Hilde laughs until she cries. "Well! It's still ale! Mostly!"
+  effects:
+    - set_flag: [aegis_brew_quality, poor]
+    - quest_stage: [aegis_brew, feast]
+    - give_xp: 200
+  next: feast
+
+# ------------------------------------------------------------------ the feast
+feast:
+  speaker: The Feast of the Gate
+  lines:
+    - >-
+      The First Hall is full: every clan, every banner, long tables groaning with roast goat and black bread,
+      and at the high table the Thane of Aegis, a dwarf so old his beard has been braided into his belt.
+    - >-
+      Before the tasting, the hall wants entertainment. It always does. A space clears in front of the high
+      table, and every eye turns to the stranger.
+  choices:
+    - text: Raise a toast to the gate and the clans.
+      if: {min_stat: [charisma, 13]}
+      locked: true
+      next: feast_toast
+    - text: Sing the Gate Song, all nine verses.
+      if: {race: Dwarf}
+      next: feast_song
+    - text: Accept the challenge from the drinking table.
+      next: feast_contest
+
+feast_toast:
+  speaker: The Feast of the Gate
+  lines:
+    - >-
+      You lift a mug and speak about the gate: how it shut out the cold when the first clans came, and how
+      it's open tonight to strangers like you. The hall roars. Someone weeps. The Thane raises his mug an
+      inch, which is the most he's raised it in a decade.
+  effects:
+    - add_var: [rep.holds, 1]
+  next: tasting
+
+feast_song:
+  speaker: The Feast of the Gate
+  lines:
+    - >-
+      You sing all nine verses, including the ninth, which nobody under a hundred knows. By the third verse
+      the whole hall is singing. By the ninth, only the Thane is singing with you, and he's crying into his
+      beard.
+  effects:
+    - add_var: [rep.holds, 2]
+  next: tasting
+
+feast_contest:
+  speaker: The Feast of the Gate
+  lines:
+    - >-
+      A red-faced dwarf the shape of a barrel slams two mugs on the table. "Drink when I drink, stranger.
+      First to fall, buys the hall a round."
+  effects:
+    - minigame:
+        type: qte
+        dc: 13
+        title: The Drinking Contest
+        intro: Drink when he drinks. Don't fall over.
+        prompts: 5
+        window: 1.3
+        success: contest_won
+        partial: contest_won
+        failure: contest_lost
+        retreat: feast
+
+contest_won:
+  speaker: The Feast of the Gate
+  lines:
+    - He goes over backwards like a felled pine. The hall erupts. Somebody carries you round the hall on a shield. You don't remember much after that.
+  effects:
+    - add_var: [rep.holds, 1]
+  next: tasting
+
+contest_lost:
+  speaker: The Feast of the Gate
+  lines:
+    - You wake up under the table with someone's boot on your chest. The hall has had its round, on you.
+  effects:
+    - add_gold: -30
+  next: tasting
+
+tasting:
+  speaker: The Feast of the Gate
+  lines:
+    - text: >-
+        Before the tasting, Thrain Grimtankard stands, which he never does, and says to the whole hall,
+        "Grimtankard does not pour this year. We pour with Stonestout." And then he walks his barrel over to
+        Hilde's table, and sets it beside hers. Hilde stares at him, then bursts into tears and hugs him.
+      if: {flag_is: [aegis_brokk, quiet]}
+    - text: >-
+        You bring Brokk before the hall. It goes very quiet. Thrain stares at his apprentice, then at Hilde,
+        then sits down heavily and doesn't look up again. The Thane drinks Stonestout. It isn't a happy win.
+      if: {flag_is: [aegis_brokk, exposed]}
+    - text: >-
+        The Thane tastes both ales, slowly, twice. The hall holds its breath.
+      if: {flag_is: [aegis_brokk, secret]}
+    - text: '"Stonestout," he says. The hall roars. Hilde bellows and lifts you off your feet.'
+      if: {all: [{flag_is: [aegis_brokk, secret]}, {flag_is: [aegis_brew_quality, great]}]}
+    - text: '"Grimtankard," he says. Hilde takes it with a laugh and a curse. Thrain doesn''t smile, but he looks at Brokk for a long time.'
+      if: {all: [{flag_is: [aegis_brokk, secret]}, {not: {flag_is: [aegis_brew_quality, great]}}]}
+  choices:
+    - text: Go and find Hilde after the feast.
+      next: reward
+
+reward:
+  lines:
+    - text: '"Twenty years I''ve fought that old slate," Hilde says, "and he walked his barrel over to me." She shakes her head, wondering. "Next year, we brew together. Ysolde''s hops, my mash. Don''t tell anyone I said so."'
+      if: {flag_is: [aegis_brokk, quiet]}
+    - text: '"Won," she says, "and I don''t feel like it." She looks across the hall at Thrain. "Next time, let the poor lad off, eh?"'
+      if: {flag_is: [aegis_brokk, exposed]}
+    - '"You''ve earned this, whatever happened in there. My brother made both. Take your pick."'
+  effects:
+    - set_flag: [aegis_feast, peace]
+      if: {flag_is: [aegis_brokk, quiet]}
+    - set_flag: [aegis_feast, hilde]
+      if: {any: [{flag_is: [aegis_brokk, exposed]}, {all: [{flag_is: [aegis_brokk, secret]}, {flag_is: [aegis_brew_quality, great]}]}]}
+    - set_flag: [aegis_feast, thrain]
+      if: {all: [{flag_is: [aegis_brokk, secret]}, {not: {flag_is: [aegis_brew_quality, great]}}]}
+  choices:
+    - text: Take the dwarf-forged waraxe.
+      next: reward_done
+      effects:
+        - give_item: dwarf_forged_waraxe
+    - text: Take the dwarven lamellar.
+      next: reward_done
+      effects:
+        - give_item: dwarven_lamellar
+
+reward_done:
+  lines:
+    - '"And gold, and the hall''s thanks, and free ale every Feast of the Gate until one of us dies." She grins. "Probably me. I''ve been drinking since noon."'
+  effects:
+    - add_gold: 150
+    - give_xp: 400
+    - add_var: [rep.holds, 2]
+    - complete_quest: aegis_brew
+  next: gates
+
+after:
+  lines:
+    - text: Hilde and Thrain are arguing over a mash tun, together, which is new. "Too much salt," Thrain says. Hilde throws a ladle at him. Thrain almost smiles.
+      if: {flag_is: [aegis_feast, peace]}
+    - text: Hilde pours you a mug without asking. "On the house. Forever, I said. I meant it."
+      if: {not: {flag_is: [aegis_feast, peace]}}
+  repeat: true
+  effects:
+    - heal: 30
+  next: gates

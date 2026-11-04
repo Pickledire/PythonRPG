@@ -14,7 +14,12 @@ and [story/endings.yaml](../story/endings.yaml). The complete list of conditions
 | The quest board (places to go from the hub) | `story/board.yaml` |
 | Endings | `story/endings.yaml` |
 
-After any change, run `python tools/story_check.py`. It catches broken links, unknown quests and stages,
+After any change, run `python tools/story_check.py`, and for questlines, `python tools/story_bot.py`, which
+plays each one many times with random choices and reports whether it can be finished and which scenes it
+never reached. Story files refuse duplicate keys (YAML would quietly keep only the last), so
+`if: {flag_set: a, flag_set: b}` is an error: write `all: [{flag_set: a}, {flag_set: b}]`.
+
+Run `python tools/story_check.py`. It catches broken links, unknown quests and stages,
 condition typos, flags that are checked but never set, and scenes nothing leads to.
 
 ## Scenes
@@ -63,6 +68,10 @@ Place and time: `in_region: hearthlands` (or a list), `weekday: Hearthsday` (or 
 the hour with `time_at`, `time_gte` and `time_between`. A board entry in `story/board.yaml` can take
 `where: hearthlands` (or a list) so it's only listed there.
 
+**Placeholders for future content.** `if: {future: iron_company_guild}` is never true, so with
+`locked: Iron Company members only` the choice shows greyed out, a promise of something to come. The story
+check lists every placeholder.
+
 Conditions combine: one mapping with several keys means all of them, and `any: [...]`, `all: [...]` and
 `not: {...}` do the rest. `race: Dwarf`, `race: [Elf, Gnome]` and `not_race` check the player's race.
 
@@ -75,6 +84,11 @@ so nobody can farm a conversation. Costs, flags, fights, healing, shops and time
 - `once: true` makes *every* effect on it happen only once.
 - Any effect can have its own `if:`, for example a bigger payment if you haggled:
   `{add_gold: 50, if: {flag_set: brannoc_haggled}}`.
+
+## Quest items
+
+`give_item: Clockwork Finch` (any name that isn't a catalog item becomes a curio), `has_item: Clockwork Finch`
+to check for it, and `take_item: Clockwork Finch` to hand it over.
 
 ## Fights and trials
 

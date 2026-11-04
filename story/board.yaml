@@ -24,3 +24,70 @@
   title: The Sunken Vault (trial run)
   blurb: Sneak, pick, balance and fight through a drowned vault. Every minigame in one quest.
   start: test_vault/intro
+
+# ------------------------------------------------------------------ side questlines, one per region
+- key: brennhold_finch
+  title: Copperwhistle's Clocks
+  blurb: A gnome's workshop off Gearwright Lane, ticking like rain. Something in there is on fire, gently.
+  start: brennhold/finch/workshop
+  where: brennhold
+
+- key: ashwood_stag
+  title: The Enclave's Edge
+  blurb: Bone charms in the birches, and an elf with a strung bow who would rather you weren't here.
+  start: ashwood/stag/edge
+  where: ashwood
+
+- key: glassmere_book
+  title: The Collegium's Lower Reading Room
+  blurb: As far as outsiders may go. An under-librarian there needs a favour, urgently, in a whisper.
+  start: glassmere/book/library
+  where: glassmere
+
+- key: aegis_brew
+  title: The Stonestout Brewhouse
+  blurb: Copper vats in the warm First Hall, and a dwarf brewmaster shouting happily at a barrel.
+  start: mt_aegis/brew/gates
+  where: mt_aegis
+
+- key: barrow_count
+  title: The Barrow-Gate
+  blurb: A stone hut by a rusted gate, and an old man who counts the dead.
+  start: barrowfields/count/hut
+  where: barrowfields
+
+- key: frost_hunt
+  title: The White Antler Camp
+  blurb: Hide tents in the lee of a glacier. Antlers on every pole, frost on every dog.
+  start: frostreach/hunt/camp
+  where: frostreach
+
+- key: cliffs_lights
+  title: The Lighthouse
+  blurb: A white tower on the highest cliff, and a keeper who talks to her lamp.
+  start: shrieking_cliffs/lights/lighthouse
+  where: shrieking_cliffs
+
+- key: marches_wedding
+  title: The Stilt Camp
+  blurb: Huts on stilts above the frozen swamp, full of deserters from three armies, and an enormous quantity of eels.
+  start: drowned_marches/wedding/camp
+  where: drowned_marches
+
+- key: valoria_lesson
+  title: Ithriel's Camp
+  blurb: A tent in a plaza of faceless statues, and a scholar who is twenty years past caring what anyone thinks.
+  start: valoria/lesson/camp
+  where: valoria
+
+- key: ember_pilgrim
+  title: The Pilgrim's Road
+  blurb: Worn steps climbing into the smoke, and a dragonkin pilgrim waiting at the bottom in the falling ash.
+  start: emberpeaks/pilgrim/foot
+  where: emberpeaks
+
+- key: titanfell_map
+  title: Wendel's Camp
+  blurb: A tent pegged to a boulder the size of a house, surrounded by hundreds of maps weighed down with stones.
+  start: titanfell/map/camp
+  where: titanfell

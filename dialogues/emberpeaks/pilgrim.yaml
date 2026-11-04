@@ -1,0 +1,358 @@
+# The Emberpeaks: Pilgrim's Road (quest ember_pilgrim).
+#
+# Sereth: a dragonkin pilgrim. Serene, soft-spoken, devout on the outside, full of doubt underneath.
+# The Scaleguard at the checkpoint: a bored cult warrior who takes his tithe very seriously.
+# Mother Kallax: the cult's high priestess at the altar. Warm, certain, frightening.
+#
+# An eruption (quick-time), a checkpoint (kinship, lies, a tithe, a fight or the back way), hounds on the road,
+# and a question at the altar. Flags for later: ember_sereth (stays / leaves / wanders), ember_answer (heard).
+# Reputation: rep.dragon_cult. Placeholder: dragon_cult_sworn.
+
+_defaults:
+  speaker: Sereth
+
+foot:
+  speaker: The Foot of the Pilgrim's Road
+  lines:
+    - text: >-
+        The only warm place left in Harrowmark: black rock steaming in the snow, hot springs, a red glow on
+        the clouds above the peaks. A road of worn steps climbs into the smoke.
+      if: {first_visit: true}
+    - text: >-
+        At the bottom step sits a dragonkin in a pilgrim's grey robe, eyes closed, hands open on their knees,
+        perfectly still while the ash falls on them.
+      if: {first_visit: true}
+    - text: '"Cousin," they say, without opening their eyes. "The fire in you is loud today."'
+      if: {first_visit: true, race: Dragonkin}
+    - text: Sereth is waiting on the bottom step, as still as ever.
+      if: {first_visit: false}
+  choices:
+    - text: Ask what they're waiting for.
+      if: {quest_not_started: ember_pilgrim}
+      next: ask
+    - text: Start up the road together.
+      if: {quest_at: [ember_pilgrim, started]}
+      next: road
+    - text: Go on to the checkpoint.
+      if: {quest_at: [ember_pilgrim, checkpoint]}
+      next: checkpoint
+    - text: Climb on toward the altar.
+      if: {quest_at: [ember_pilgrim, altar]}
+      next: hounds
+    - text: Show the cult's sworn mark.
+      if: {future: dragon_cult_sworn}
+      locked: Sworn to the dragon cult only
+    - text: Leave.
+
+ask:
+  lines:
+    - >-
+      "For someone to walk with. The road is not safe alone, and I am..." They hesitate. "I am a pilgrim.
+      Pilgrims walk to the high altar and ask the dragons one question. That is all. One question."
+    - '"The cult says they are waking. That they will answer, now, after a thousand years. I would like to ask mine before they are too busy."'
+  choices:
+    - text: I'll walk with you.
+      next: ask_yes
+      effects:
+        - start_quest: ember_pilgrim
+    - text: Ask what their question is.
+      next: ask_question
+    - text: Ask what they'll do if no one answers.
+      if: {min_stat: [wisdom, 12]}
+      locked: true
+      next: ask_doubt
+    - text: Wish them luck, and leave.
+
+ask_question:
+  lines:
+    - '"That is between me and the fire." A small smile. "Ask me again at the top."'
+  next: ask
+
+ask_doubt:
+  lines:
+    - >-
+      They're quiet for a long time. The ash keeps falling. "Then I will know something," they say at last,
+      very softly. "That is also an answer. It is the one I am afraid of."
+  effects:
+    - set_flag: [ember_doubt_seen, true]
+  next: ask
+
+ask_yes:
+  lines:
+    - '"Thank you." They stand, unfold, and are taller than you expected. "Mind the steps. They are warm. Sometimes they are much warmer than that."'
+  next: road
+
+# ------------------------------------------------------------------ the road
+road:
+  speaker: The Pilgrim's Road
+  lines:
+    - >-
+      The steps climb through fields of black glass and steaming vents. Halfway up, the ground shudders, and
+      the vent beside the road coughs, and coughs again.
+    - '"Run," says Sereth, very calmly. "Now."'
+  choices:
+    - text: Run.
+      effects:
+        - minigame:
+            type: qte
+            dc: 14
+            title: Eruption
+            intro: The vent is going. Get across before it does.
+            prompts: 5
+            window: 1.2
+            success: road_clear
+            partial: road_singed
+            failure: road_burned
+            retreat: foot
+
+road_clear:
+  speaker: The Pilgrim's Road
+  lines:
+    - You're across before the vent blows. Behind you, the steps you just stood on disappear under a river of light.
+  effects:
+    - give_xp: 1100
+    - quest_stage: [ember_pilgrim, checkpoint]
+  next: checkpoint
+
+road_singed:
+  speaker: The Pilgrim's Road
+  lines:
+    - You make it, mostly. Your cloak doesn't. Sereth beats out the flames with their bare hands and doesn't seem to notice the heat.
+  effects:
+    - damage: 20
+    - give_xp: 1000
+    - quest_stage: [ember_pilgrim, checkpoint]
+  next: checkpoint
+
+road_burned:
+  speaker: The Pilgrim's Road
+  lines:
+    - The vent goes while you're still on the steps. Sereth drags you clear by the collar, but not before the heat finds you.
+  effects:
+    - damage: 45
+    - give_xp: 900
+    - quest_stage: [ember_pilgrim, checkpoint]
+  next: checkpoint
+
+# ------------------------------------------------------------------ the checkpoint
+checkpoint:
+  speaker: The Scaleguard
+  lines:
+    - >-
+      A gate of black iron across the road, and in front of it a warrior in armour made of shed dragon
+      scales, sitting on a stool, looking very bored. "Pilgrims, ten a day," he says. "Tithe or faith.
+      Which?"
+    - text: He looks at you, and at Sereth, and his whole manner changes. "Kin. Pass, both of you. Fire guide you."
+      if: {race: Dragonkin}
+  choices:
+    - text: Walk through.
+      if: {race: Dragonkin}
+      next: checkpoint_passed
+    - text: Tell him you're a believer, and mean it convincingly.
+      if: {not_race: Dragonkin, min_stat: [charisma, 13]}
+      locked: true
+      next: checkpoint_lied
+    - text: Pay the tithe. (80 gold)
+      if: {not_race: Dragonkin, min_gold: 80}
+      locked: true
+      next: checkpoint_paid
+      effects:
+        - add_gold: -80
+    - text: Take the goat track round the gate while Sereth keeps him talking.
+      if: {not_race: Dragonkin, min_stat: [agility, 14]}
+      locked: true
+      next: checkpoint_sneak
+    - text: Go through him.
+      if: {not_race: Dragonkin}
+      next: checkpoint_fight
+
+checkpoint_lied:
+  speaker: The Scaleguard
+  lines:
+    - >-
+      You talk about the fire, and the old dragons, and the warmth that will come back to the world when they
+      wake. You almost convince yourself. He nods along, moved. "Pass," he says. "Fire guide you."
+    - Sereth gives you a sidelong look as you go through. You can't tell if it's approval.
+  next: checkpoint_passed
+
+checkpoint_paid:
+  speaker: The Scaleguard
+  lines:
+    - He weighs the purse in his hand and stands aside. "The fire thanks you," he says. The fire's purse, you notice, is attached to his belt.
+  effects:
+    - add_var: [rep.dragon_cult, 1]
+  next: checkpoint_passed
+
+checkpoint_sneak:
+  speaker: The Pilgrim's Road
+  lines:
+    - >-
+      Sereth asks the Scaleguard a long, earnest question about scripture. He's delighted. Nobody ever asks
+      him about scripture. By the time he's finished answering, you're already round the gate and waiting
+      on the far side.
+  next: checkpoint_passed
+
+checkpoint_fight:
+  speaker: The Scaleguard
+  lines:
+    - He stands up off the stool, and keeps standing up. He's a lot bigger than he looked sitting down.
+  effects:
+    - start_combat: scaleguard
+      fled: foot
+    - add_var: [rep.dragon_cult, -2]
+  choices:
+    - text: Step over him.
+      next: checkpoint_passed
+
+checkpoint_passed:
+  speaker: The Pilgrim's Road
+  lines:
+    - The road climbs on, into the smoke. The altar is close now. You can feel it on your face, like standing too near a forge.
+  effects:
+    - quest_stage: [ember_pilgrim, altar]
+    - give_xp: 1100
+  next: hounds
+
+# ------------------------------------------------------------------ the hounds
+hounds:
+  speaker: The Pilgrim's Road
+  lines:
+    - >-
+      Behind you, on the road, something howls. Something answers. Sereth stops. "Cinder hounds," they say.
+      "The cult sends them after pilgrims who turn back." A pause. "I have not turned back. Have I?"
+  choices:
+    - text: Stand and fight them.
+      next: hounds_fight
+    - text: Lead them off the trail into the hot springs, where the steam will hide your scent.
+      if: {min_stat: [wisdom, 13]}
+      locked: true
+      next: hounds_springs
+    - text: Tell Sereth to keep climbing. You'll hold the road.
+      next: hounds_hold
+
+hounds_fight:
+  speaker: The Pilgrim's Road
+  lines:
+    - They come out of the smoke, eyes like coals.
+  effects:
+    - start_combat: cinder_hound
+      fled: foot
+  choices:
+    - text: Climb on.
+      next: altar
+
+hounds_springs:
+  speaker: The Hot Springs
+  lines:
+    - >-
+      You lead Sereth down off the steps and through the steam of the springs, wading where the water's
+      shallow. The howls go past above you, up the road, and fade, confused. Sereth laughs, softly, for the
+      first time since you met.
+  effects:
+    - give_xp: 300
+  next: altar
+
+hounds_hold:
+  speaker: The Pilgrim's Road
+  lines:
+    - Sereth goes. You turn and plant your feet on the warm steps as the first hound comes out of the smoke.
+  effects:
+    - start_combat: cinder_hound
+      ambush: true
+      fled: foot
+  choices:
+    - text: Catch up with Sereth.
+      next: altar
+
+# ------------------------------------------------------------------ the altar
+altar:
+  speaker: The High Altar
+  lines:
+    - >-
+      The top of the road: a ring of black pillars around a pit of slow fire, and a woman in red robes
+      kneeling at the edge of it. She rises, smiling like a grandmother. "Pilgrims," says Mother Kallax.
+      "Ask. The fire is listening. It is always listening, now."
+    - Sereth kneels at the edge of the pit, and closes their eyes, and asks their question aloud.
+    - '"Are we your children," they say, "or your servants?"'
+    - >-
+      Nothing answers. The fire turns over slowly in the pit. Mother Kallax waits, smiling. Then, very far
+      away, deep under the mountain, there's a sound like an enormous furnace door being opened, and shut.
+    - Sereth opens their eyes. They don't look at Kallax. They look at you.
+  effects:
+    - set_flag: [ember_answer, heard]
+  choices:
+    - text: Tell them the fire answered, and they should stay.
+      next: sereth_stays
+    - text: Tell them that wasn't an answer, and they should come down the mountain with you.
+      next: sereth_leaves
+    - text: Say nothing. It's their question, and their answer.
+      if: {min_stat: [wisdom, 12]}
+      locked: true
+      next: sereth_wanders
+    - text: Ask Kallax what that sound was.
+      if: {not_visited: kallax}
+      next: kallax
+
+kallax:
+  speaker: Mother Kallax
+  lines:
+    - '"That?" Her smile doesn''t change. "That was the mountain clearing its throat. It does that more, lately. We take it as encouragement."'
+  next: altar_choice
+
+altar_choice:
+  speaker: The High Altar
+  lines:
+    - Sereth is still looking at you.
+  choices:
+    - text: Tell them the fire answered, and they should stay.
+      next: sereth_stays
+    - text: Tell them that wasn't an answer, and they should come down the mountain with you.
+      next: sereth_leaves
+    - text: Say nothing. It's their question, and their answer.
+      if: {min_stat: [wisdom, 12]}
+      locked: true
+      next: sereth_wanders
+
+sereth_stays:
+  lines:
+    - >-
+      Sereth nods slowly, and turns to Kallax, and bows. "Then I am a child of the fire." They don't sound
+      certain. They sound like someone deciding to be. Kallax takes their hands, beaming.
+    - '"Thank you for walking with me," Sereth says. "Take this. Pilgrims are not supposed to own things."'
+  effects:
+    - set_flag: [ember_sereth, stays]
+    - add_var: [rep.dragon_cult, 2]
+  next: reward
+
+sereth_leaves:
+  lines:
+    - >-
+      Sereth looks at the pit for a long time. Then they stand, and turn their back on it, and on Kallax,
+      whose smile finally goes out. "Down," they say. "Yes. Let's go down."
+    - Halfway down the mountain, they press something into your hand. "Pilgrims are not supposed to own things," they say. "I am not a pilgrim any more."
+  effects:
+    - set_flag: [ember_sereth, leaves]
+    - add_var: [rep.dragon_cult, -1]
+  next: reward
+
+sereth_wanders:
+  lines:
+    - >-
+      You don't say anything. Sereth watches you not saying it, and something in their face settles. "Yes,"
+      they say. "Mine." They stand, bow to the fire, bow to Kallax, and walk past both of you down the far side
+      of the mountain, toward nowhere you know.
+    - On the altar step where they knelt, they've left something for you.
+  effects:
+    - set_flag: [ember_sereth, wanders]
+  next: reward
+
+reward:
+  speaker: The High Altar
+  lines:
+    - A feather that burns without being consumed, wrapped in a strip of grey pilgrim's cloth.
+  effects:
+    - give_item: phoenix_feather
+    - add_gold: 300
+    - give_xp: 1400
+    - complete_quest: ember_pilgrim
+  next: foot

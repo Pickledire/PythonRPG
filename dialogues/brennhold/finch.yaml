@@ -1,0 +1,643 @@
+# Brennhold: The Clockwork Finch (quest brennhold_finch).
+#
+# Pell Copperwhistle: gnome tinker. Quick, scatterbrained, kind, talks in tangents and forgets to breathe.
+# Ma Vetch: Undercity moneylender. Deadpan, knitting, never raises her voice, never needs to.
+# Sergeant Holm: city watch. Dull, eats constantly, lives for forms.
+#
+# Talk, a night-only market, the shell game (memory), the Watch House (stealth, lockpick or bureaucracy).
+# Flags for later: brennhold_crowned_coin (a coin stamped with a crown of tails: the Rat King),
+# brennhold_watch_ledger (proof the watch takes Undercity money: the Iron Company twist), finch_nim_forgiven.
+# Reputation: rep.undercity, rep.iron_company. Placeholders: undercity_guild, iron_company_guild.
+
+_defaults:
+  speaker: Pell Copperwhistle
+
+workshop:
+  speaker: Copperwhistle's Clocks and Curiosities
+  lines:
+    - text: >-
+        A narrow shop off Gearwright Lane, so full of clocks that the ticking sounds like rain. Half of them
+        tell different times. One of them is on fire, gently.
+      if: {first_visit: true}
+    - text: >-
+        A gnome in a leather apron leaps off a stool, slaps the burning clock out with a mitten, and turns to
+        you with her goggles still down. "Customer! Or burglar. Either way, hello!"
+      if: {first_visit: true}
+    - text: The workshop is shut. A note on the door says "Hearthsday. Resting. Mostly." Something ticks inside.
+      if: {weekday: Hearthsday}
+    - text: >-
+        Pell's workshop, ticking like rain. Pell looks up from something with too many springs. "{name}!
+        Sit anywhere that isn't moving."
+      if: {first_visit: false, not: {weekday: Hearthsday}}
+  choices:
+    - text: Ask what's wrong. She looks like she's been crying into a gearbox.
+      if: {quest_not_started: brennhold_finch}
+      next: pell_story
+    - text: "[Gnome] Ask which workshop she apprenticed in."
+      if: {race: Gnome, not_visited: brennhold/finch/gnome_talk}
+      next: gnome_talk
+    - text: Head down to the Gutter Market.
+      if: {quest_at: [brennhold_finch, started], time_between: [20, 4]}
+      locked: Only at night
+      next: market
+    - text: Wait in the workshop until dark.
+      if: {quest_at: [brennhold_finch, started], not: {time_between: [20, 4]}}
+      next: wait_dark
+    - text: Go to the Watch House on Tallow Street.
+      if: {quest_at: [brennhold_finch, watch_house]}
+      next: watch_house
+    - text: Give Pell her finch.
+      if: {quest_at: [brennhold_finch, recovered]}
+      next: pell_return
+    - text: Ask how the finch is getting on.
+      if: {quest_done: brennhold_finch}
+      next: finch_after
+    - text: Leave.
+
+gnome_talk:
+  lines:
+    - >-
+      "Spindlewick's, in the Low Gears. Twelve years. He made me file the same cog until I could do it in my
+      sleep, and then he made me do it in my sleep." She grins. "You? No, don't tell me, I can see it. Burn on
+      the left thumb. Spring-winder. Am I right? I'm right."
+    - It's nice to talk shop with someone who doesn't ask what an escapement is.
+  effects:
+    - add_var: [rep.pell, 1]
+  next: workshop
+
+pell_story:
+  lines:
+    - >-
+      "Wrong? Nothing's wrong. Everything's wrong. My finch is gone." She pushes her goggles up and they snap
+      back down. "Clockwork finch, size of your thumb, sings the hours. Twelve years of work. TWELVE."
+    - >-
+      "My apprentice Nim borrowed forty gold from a moneylender to buy brass, which, fine, brass is expensive,
+      I understand brass. And then Nim couldn't pay, and the moneylender took the nicest thing in the shop as
+      collateral, which was MY FINCH."
+    - '"Ma Vetch. Undercity. Gutter Market, under the Tallow Bridge. Opens after dark, closes before honest folk wake up."'
+  choices:
+    - text: I'll get your finch back.
+      next: pell_thanks
+      effects:
+        - start_quest: brennhold_finch
+    - text: What's it worth to you?
+      next: pell_haggle
+    - text: Talk her into paying something up front.
+      if: {min_stat: [charisma, 12]}
+      locked: true
+      next: pell_advance
+    - text: Where's Nim now?
+      next: pell_nim
+    - text: Not my problem.
+      next: pell_refused
+
+pell_nim:
+  lines:
+    - >-
+      "Hiding under the bed in the back. Has been since Kindlemorn." Pell lowers her voice, which makes it
+      exactly as loud. "I'm not angry. I'm VERY angry. But not at Nim. Nim's sixteen. Sixteen-year-olds borrow
+      money from people with rats on them, it's what they're for."
+    - From the back room, faintly, something says "Sorry."
+  choices:
+    - text: I'll get your finch back.
+      next: pell_thanks
+      effects:
+        - start_quest: brennhold_finch
+    - text: What's it worth to you?
+      next: pell_haggle
+
+pell_haggle:
+  lines:
+    - >-
+      "Worth? It's worth twelve years, but I can't pay you in years." She rummages. "Sixty gold. And I'll
+      make you a set of picks that'll open anything in Brennhold except my heart. That's closed. Long story.
+      Clock-related."
+  choices:
+    - text: Deal.
+      next: pell_thanks
+      effects:
+        - start_quest: brennhold_finch
+    - text: Not my problem.
+      next: pell_refused
+
+pell_advance:
+  lines:
+    - >-
+      You point out that the Undercity is dangerous, that you're doing her a favour, and that a little
+      something up front would show good faith.
+    - >-
+      Pell squints at you through the goggles. "You're good at that. You should sell clocks." She counts
+      thirty gold into your hand. "The other thirty when I hear it sing."
+  effects:
+    - add_gold: 30
+    - set_flag: [finch_paid_ahead, true]
+    - start_quest: brennhold_finch
+  next: pell_thanks
+
+pell_thanks:
+  lines:
+    - >-
+      "Thank you. Thank you! Nobody ever helps, they just ask if the clocks are for sale." She shoves a
+      half-eaten pie at you, apparently as a gesture of trust. "Gutter Market. After dark. Mind the rats. The
+      big ones are fine. It's the small ones that bite."
+  next: workshop
+
+pell_refused:
+  lines:
+    - '"Oh." She deflates. "No. Fair. It''s not your finch." She goes back to the burning clock, which has started again.'
+
+wait_dark:
+  speaker: Copperwhistle's Clocks and Curiosities
+  lines:
+    - >-
+      You sit on the one stool that isn't a clock and wait. Pell talks the whole time. By the time the lamps
+      are lit on Gearwright Lane you know more about escapements than any person should.
+  effects:
+    - set_time: 20
+  next: workshop
+
+# ------------------------------------------------------------------ the Gutter Market
+market:
+  speaker: The Gutter Market
+  lines:
+    - >-
+      Under the Tallow Bridge the river freezes and the city forgets to look. Lanterns hang from the arches.
+      Stalls sell boots, knives, other people's letters and meat you shouldn't ask about.
+    - >-
+      Everyone here is selling something, and nobody is selling directions. Somewhere a rat the size of a cat
+      sits on a crate and watches you with polite interest.
+    - text: >-
+        A few of the stallholders glance at your boots, your hands and your purse, in that order, and decide
+        you're a mark.
+      if: {not_race: [Halfling, Orc]}
+    - text: The stallholders take one look at you and suddenly find their own stalls fascinating.
+      if: {race: Orc}
+  choices:
+    - text: Ask the stallholders where to find Ma Vetch.
+      next: market_ask
+    - text: Pay one of the gutter kids to show you. (5 gold)
+      if: {min_gold: 5}
+      locked: true
+      next: market_kid
+      effects:
+        - add_gold: -5
+    - text: Read the chalk marks on the arches, the old river-traders' signs.
+      if: {race: Halfling}
+      next: market_signs
+    - text: Follow the rats. They all seem to be going the same way.
+      if: {min_stat: [wisdom, 12]}
+      locked: true
+      next: market_rats
+    - text: Give the Undercity sign.
+      if: {future: undercity_guild}
+      locked: Undercity members only
+    - text: Go back up to the street.
+
+market_ask:
+  speaker: The Gutter Market
+  lines:
+    - >-
+      Nobody's heard of Ma Vetch. Nobody's heard of anyone. A man selling single boots says he's never heard of
+      feet.
+    - >-
+      Then a very large man in a very small hat peels himself off an arch and blocks the way. "You're asking a
+      lot of questions," he says. "Questions cost."
+  choices:
+    - text: Pay him. (10 gold)
+      if: {min_gold: 10}
+      locked: true
+      next: market_paid
+      effects:
+        - add_gold: -10
+    - text: Tell him to get out of the way.
+      next: market_thug
+    - text: Back off.
+      next: market
+
+market_thug:
+  speaker: The Gutter Market
+  lines:
+    - He doesn't get out of the way. He gets out a club.
+  effects:
+    - start_combat: undercity_thug
+      fled: market
+  choices:
+    - text: Step over him and ask again, more politely.
+      next: market_paid
+
+market_paid:
+  speaker: The Gutter Market
+  lines:
+    - >-
+      Suddenly everyone remembers Ma Vetch. Third arch from the end, past the eel man. You can't miss her. She
+      knits.
+  next: vetch
+
+market_kid:
+  speaker: Sprat
+  lines:
+    - >-
+      A girl of about nine with no front teeth snatches the coin out of the air. "Ma Vetch? Easy. Follow me
+      and don't touch nothing, and if anyone asks, you're my uncle."
+    - She leads you through the market at a run, talking the whole way about which stalls sell the best stolen pies.
+  effects:
+    - set_flag: [met_sprat, true]
+  next: vetch
+
+market_signs:
+  speaker: The Gutter Market
+  lines:
+    - >-
+      River-traders have marked the arches since before the bridge was stone. Most folk think it's
+      scribble. You read it like a shop sign: fair fence here, watch your purse there, and, by the third arch,
+      a drawing of a needle and a coin. Moneylender. Pays slow, collects fast.
+  effects:
+    - add_var: [rep.undercity, 1]
+  next: vetch
+
+market_rats:
+  speaker: The Gutter Market
+  lines:
+    - >-
+      The rats aren't wandering. They're going somewhere, a steady trickle along the walls and under the
+      stalls. You follow them past the eel man to the third arch, where an old woman sits knitting with rats
+      curled round her feet like cats.
+    - They part to let you through. One of them looks back at you for a moment, the way Brannoc's did.
+  next: vetch
+
+vetch:
+  speaker: Ma Vetch
+  lines:
+    - text: >-
+        A tiny old woman in a shawl, knitting something long and grey. Rats sleep in her lap. She doesn't look
+        up. "Pell's finch," she says. "You've got that face. Clocks."
+      if: {first_visit: true}
+    - text: Ma Vetch hasn't moved. The knitting is longer. "Back again."
+      if: {first_visit: false}
+    - '"I don''t have it. I''ll tell you who does. Information costs, same as everything."'
+  choices:
+    - text: Pay her. (25 gold)
+      if: {min_gold: 25}
+      locked: true
+      next: vetch_told
+      effects:
+        - add_gold: -25
+    - text: Talk her round.
+      if: {min_stat: [charisma, 13]}
+      locked: true
+      next: vetch_charmed
+    - text: '"What''s that game you''ve got on the crate?"'
+      next: vetch_game
+    - text: Lean on her.
+      if: {min_stat: [strength, 13]}
+      locked: true
+      next: vetch_threat
+    - text: Leave.
+
+vetch_game:
+  speaker: Ma Vetch
+  lines:
+    - >-
+      Three tin cups and a dried pea. "Find the pea, I tell you for free. Lose, you pay me ten." She moves the
+      cups once, slowly, so you can see how slow she isn't going to be.
+  choices:
+    - text: Play.
+      effects:
+        - minigame:
+            type: memory
+            dc: 12
+            title: Ma Vetch's Cups
+            intro: Watch the pea. Watch her hands. Then point.
+            rounds: 3
+            success: vetch_won
+            partial: vetch_won
+            failure: vetch_lost
+            retreat: vetch
+    - text: Not today.
+      next: vetch
+
+vetch_won:
+  speaker: Ma Vetch
+  lines:
+    - You point. The pea is there. Ma Vetch looks at it for a long time.
+    - '"Hm," she says, which from her is applause.'
+  effects:
+    - set_flag: [vetch_beaten, true]
+    - add_var: [rep.undercity, 1]
+  next: vetch_told
+
+vetch_lost:
+  speaker: Ma Vetch
+  lines:
+    - You point. The pea isn't there. It isn't under any of them. It's in her hand, and has been for a while.
+    - '"Ten," she says. You pay. "And because I like a trier, I''ll tell you anyway."'
+  effects:
+    - add_gold: -10
+  next: vetch_told
+
+vetch_charmed:
+  speaker: Ma Vetch
+  lines:
+    - >-
+      You talk. She knits. You talk some more, about Pell, about Nim, about how a moneylender's reputation
+      depends on not robbing children.
+    - '"You talk nice," she says at last. "I don''t like it. Fine."'
+  next: vetch_told
+
+vetch_threat:
+  speaker: Ma Vetch
+  lines:
+    - >-
+      You put your hand on the crate and lean down. Ma Vetch keeps knitting. The rats in her lap open their
+      eyes. All of them, all at once.
+    - Behind you, a large man in a small hat clears his throat.
+  effects:
+    - start_combat: undercity_thug
+      ambush: true
+      fled: market
+  choices:
+    - text: Turn back to Ma Vetch.
+      next: vetch_respect
+
+vetch_respect:
+  speaker: Ma Vetch
+  lines:
+    - >-
+      She hasn't dropped a stitch. "He'll live," she says. "You're worth talking to. I'll remember your
+      face." It doesn't sound like a compliment.
+  effects:
+    - add_var: [rep.undercity, -2]
+    - set_flag: [vetch_crossed, true]
+  next: vetch_told
+
+vetch_told:
+  speaker: Ma Vetch
+  lines:
+    - >-
+      "Sold it on. Sergeant Holm, city watch, Tallow Street. Likes pretty things. Pays in coin he takes off
+      people like me." She almost smiles. "Funny old city."
+    - text: >-
+        She counts you back your ten in change, slowly, and one of the coins is one you've never seen: small,
+        dark, with a tiny crown stamped on one side. The crown is made of knotted tails.
+      if: {flag_set: vetch_beaten}
+    - text: >-
+        As you go, she presses a coin into your hand. "For your trouble." It's small and dark, stamped with a
+        tiny crown made of knotted tails. You don't think it's for your trouble.
+      if: {flag_not_set: vetch_beaten}
+  effects:
+    - add_gold: 10
+      if: {flag_set: vetch_beaten}
+    - give_item: Crowned Coin
+    - set_flag: [brennhold_crowned_coin, true]
+    - quest_stage: [brennhold_finch, watch_house]
+    - give_xp: 90
+  choices:
+    - text: Go to the Watch House.
+      next: watch_house
+    - text: Head back up to the street for now.
+
+# ------------------------------------------------------------------ the Watch House
+watch_house:
+  speaker: The Watch House, Tallow Street
+  lines:
+    - text: >-
+        A squat stone building with barred windows and a door painted Regency blue. Inside, behind a desk
+        stacked with forms, a large sergeant is eating a sausage with great seriousness.
+      if: {time_between: [6, 19]}
+    - text: >-
+        By night the Watch House is dark except for one lamp. The sergeant's chair is empty, and a door at the
+        back says EVIDENCE in letters someone took real care over.
+      if: {not: {time_between: [6, 19]}}
+  choices:
+    - text: Ask the sergeant for the finch.
+      if: {time_between: [6, 19]}
+      locked: Only by day
+      next: holm
+    - text: Sneak to the evidence room.
+      next: sneak
+    - text: Pick the evidence room lock.
+      if: {has_lockpick: true, not: {time_between: [6, 19]}}
+      locked: Needs a lockpick, and no one at the desk
+      next: lock
+    - text: Show your Iron Company token.
+      if: {future: iron_company_guild}
+      locked: Iron Company members only
+    - text: Leave.
+
+holm:
+  speaker: Sergeant Holm
+  lines:
+    - >-
+      He finishes the sausage before he answers. It takes a while. "Finch," he says. "Clockwork. Recovered
+      property. You'll want a Form Nine. Recovery of Goods, Stolen. Needs a magistrate's seal."
+    - '"Where do I get a magistrate''s seal?"'
+    - '"From a magistrate," he says, as though you''re slow. He starts another sausage.'
+  choices:
+    - text: Slide him some coin for the paperwork. (40 gold)
+      if: {min_gold: 40}
+      locked: true
+      next: holm_bribed
+      effects:
+        - add_gold: -40
+    - text: Point out it was never written in his ledger, so it isn't recovered property at all.
+      if: {min_stat: [charisma, 14]}
+      locked: true
+      next: holm_argued
+    - text: Fill in a Form Nine yourself, perfectly.
+      if: {min_stat: [intelligence, 13]}
+      locked: true
+      next: holm_form
+    - text: Leave.
+
+holm_bribed:
+  speaker: Sergeant Holm
+  lines:
+    - >-
+      The coins vanish under a form. He goes into the back and comes out with a small tin bird. "Form
+      waived," he says. "Special circumstances." He doesn't say which.
+  effects:
+    - add_var: [rep.iron_company, -1]
+  next: got_finch
+
+holm_argued:
+  speaker: Sergeant Holm
+  lines:
+    - >-
+      He opens his mouth. He closes it. He looks at the ledger, and at you, and at the sausage, which has no
+      opinion.
+    - '"Clerical error," he says at last, and fetches the finch. "Never happened."'
+  next: got_finch
+
+holm_form:
+  speaker: Sergeant Holm
+  lines:
+    - >-
+      You take a blank Form Nine and fill it in: every box, every line, the reason in triplicate, the
+      magistrate's name spelled correctly, the date in the old style.
+    - >-
+      Holm reads it twice. Something like joy crosses his face. "That," he says, "is a beautiful form." He
+      fetches the finch himself and shakes your hand.
+  effects:
+    - add_var: [rep.iron_company, 1]
+  next: got_finch
+
+sneak:
+  speaker: The Watch House, Tallow Street
+  lines:
+    - The evidence room is past the desk, the cells and two watchmen playing dice very badly.
+  effects:
+    - minigame:
+        type: stealth
+        dc: 12
+        title: Past the Watch
+        intro: Keep to the shadows. Wait for the dice to go badly for someone.
+        creature: The watch
+        duration: 16
+        success: evidence
+        partial: evidence
+        failure: caught
+        retreat: watch_house
+
+lock:
+  speaker: The Watch House, Tallow Street
+  lines:
+    - The lock on the evidence door is better than it looks. Someone in the watch cares about this room.
+  effects:
+    - minigame:
+        type: lockpick
+        dc: 12
+        title: The Evidence Room
+        intro: Good lock. Quiet hands.
+        success: evidence
+        partial: evidence
+        failure: caught
+        retreat: watch_house
+
+caught:
+  speaker: The Watch House, Tallow Street
+  lines:
+    - '"Oi!" A watchman with a club and an unpleasant expression. "That''s evidence, that is."'
+  choices:
+    - text: Fight your way to the evidence room.
+      next: caught_fight
+    - text: Pay the fine. (30 gold)
+      if: {min_gold: 30}
+      locked: true
+      next: caught_fined
+      effects:
+        - add_gold: -30
+    - text: Run.
+
+caught_fight:
+  speaker: The Watch House, Tallow Street
+  lines:
+    - He swings first.
+  effects:
+    - start_combat: corrupt_watchman
+      fled: watch_house
+    - add_var: [rep.iron_company, -2]
+  choices:
+    - text: Get into the evidence room before more come.
+      next: evidence
+
+caught_fined:
+  speaker: The Watch House, Tallow Street
+  lines:
+    - >-
+      He counts it twice, pockets it, and suddenly remembers the finch you were sneaking towards. "This it?
+      Take it. Saves me writing it down."
+  next: got_finch
+
+evidence:
+  speaker: The Evidence Room
+  lines:
+    - >-
+      Shelves of confiscated things: knives, a stuffed owl, a crate of boots, a very old cheese. On a high
+      shelf, a tiny clockwork finch with its head under its wing.
+    - >-
+      On the desk lies the watch's own ledger. Most of it is dull. Some of it isn't: a column of payments,
+      every week, marked only with a little drawing of a crown.
+  choices:
+    - text: Take the finch.
+      next: got_finch
+    - text: Take the finch, and tear out the ledger page.
+      next: got_finch
+      effects:
+        - set_flag: [brennhold_watch_ledger, true]
+        - give_item: Torn Ledger Page
+
+got_finch:
+  speaker: The Watch House, Tallow Street
+  lines:
+    - >-
+      The finch is warm in your hand, which brass shouldn't be. Somewhere inside it, something small and
+      patient is still ticking.
+  effects:
+    - give_item: Clockwork Finch
+    - quest_stage: [brennhold_finch, recovered]
+    - give_xp: 90
+  choices:
+    - text: Take it back to Pell.
+      next: pell_return
+    - text: Go.
+
+# ------------------------------------------------------------------ the finch sings
+pell_return:
+  lines:
+    - >-
+      Pell takes the finch in both hands as if it might break, which it might, given the hands. She winds it
+      with a key from round her neck.
+    - >-
+      The finch lifts its head, shakes out tin feathers, and sings the hour: eight bright notes, the last
+      one slightly flat. Pell bursts into tears. From the back room, Nim bursts into tears too.
+    - text: >-
+        "And here, the rest, as promised, and DON'T argue." Thirty more gold. "Picks are on the bench. And
+        this, the loupe, it was my master's, I want you to have it, I have four."
+      if: {flag_set: finch_paid_ahead}
+    - text: >-
+        "Sixty gold, as promised, and DON'T argue. Picks are on the bench. And this, the loupe, it was my
+        master's, I want you to have it, I have four."
+      if: {flag_not_set: finch_paid_ahead}
+    - text: >-
+        She turns the crowned coin over in her fingers and frowns. "Never seen this mint. Not Regency, not
+        Valorian. The crown's made of... tails?" She gives it back quickly. "Don't keep that where the rats
+        can smell it."
+      if: {flag_set: brennhold_crowned_coin}
+    - text: >-
+        You show her the torn ledger page. She reads it, then reads it again. "The watch takes Undercity money.
+        Everyone knows that. Writing it down is the strange part. Who writes it down?"
+      if: {flag_set: brennhold_watch_ledger}
+  effects:
+    - take_item: Clockwork Finch
+    - add_gold: 60
+      if: {flag_not_set: finch_paid_ahead}
+    - add_gold: 30
+      if: {flag_set: finch_paid_ahead}
+    - give_xp: 150
+    - give_item: tinkers_loupe
+    - unlock_shop: masterwork_lockpick
+    - add_var: [rep.pell, 2]
+    - complete_quest: brennhold_finch
+  choices:
+    - text: Ask her to go easy on Nim.
+      next: pell_nim_forgiven
+    - text: Leave her to it.
+
+pell_nim_forgiven:
+  lines:
+    - >-
+      "Easy?" Pell blows her nose on a rag that was, until recently, a clock cover. "Nim! Out. You're filing
+      cogs for a month. In your sleep." A pale small face appears round the door, grinning.
+  effects:
+    - set_flag: [finch_nim_forgiven, true]
+  next: workshop
+
+finch_after:
+  lines:
+    - text: The finch sits on Pell's shoulder and sings the hour as you come in. Still slightly flat on the last note.
+      if: {flag_set: finch_nim_forgiven}
+    - text: The finch sits on a shelf, singing the hour. Pell hums the flat note along with it.
+      if: {flag_not_set: finch_nim_forgiven}
+    - '"Nim''s fixing the flat note," Pell says. "Slowly. In their sleep, mostly."'
+  repeat: true
+  next: workshop

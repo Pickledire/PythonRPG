@@ -68,7 +68,8 @@ animal companions first).
 ## Suggested order
 
 1. ~~The Ledger, visit tracking and "once", conditional text, greyed choices, quests as data, YAML.~~ Done.
-2. The story tools: ~~linter~~ (done: `tools/story_check.py`), story bot, diagram export.
+2. The story tools: ~~linter~~ (done: `tools/story_check.py`), ~~story bot~~ (done: `tools/story_bot.py`),
+   diagram export.
 3. Regions, towns, travel, region hunts, bounties, regional bosses and Track.
 4. Reputation, guilds and allegiance.
 5. Origins and endings.

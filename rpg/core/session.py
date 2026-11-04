@@ -166,9 +166,11 @@ class GameSession:
             return self._prepare(self._story_enemy("goblin")), [note]
 
     def _story_enemy(self, enemy_id: str) -> Enemy:
-        """Story enemies keep their designed strength but grow with you if you arrive over-levelled."""
+        """Story enemies keep their designed strength but grow with you if you arrive over-levelled, and are
+        never weaker than the region you meet them in."""
         template = ENEMIES.templates[ENEMIES.resolve(enemy_id)]
-        return ENEMIES.create(enemy_id, self.rng, max(template.level, self.player.level))
+        floor = self.region.min_level if self.region else 1
+        return ENEMIES.create(enemy_id, self.rng, max(template.level, self.player.level, floor))
 
     def ghost_horror_available(self) -> bool:
         return not self.world.ghost_horror_seen

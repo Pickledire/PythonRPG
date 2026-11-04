@@ -19,9 +19,27 @@ class StoryDataError(Exception):
     pass
 
 
+class _StrictLoader(yaml.SafeLoader):
+    """Safe YAML that refuses duplicate keys (YAML would quietly keep only the last one)."""
+
+
+def _no_duplicates(loader: _StrictLoader, node: yaml.MappingNode, deep: bool = False) -> dict:
+    seen = set()
+    for key_node, _ in node.value:
+        key = loader.construct_object(key_node, deep=deep)
+        if key in seen:
+            raise yaml.constructor.ConstructorError(None, None, f"'{key}' appears twice in the same mapping",
+                                                    key_node.start_mark)
+        seen.add(key)
+    return loader.construct_mapping(node, deep)
+
+
+_StrictLoader.add_constructor(yaml.resolver.BaseResolver.DEFAULT_MAPPING_TAG, _no_duplicates)
+
+
 def load_yaml(path: Path) -> Any:
     try:
-        return yaml.safe_load(path.read_text(encoding="utf-8"))
+        return yaml.load(path.read_text(encoding="utf-8"), Loader=_StrictLoader)  # noqa: S506 (a SafeLoader)
     except yaml.YAMLError as exc:
         raise StoryDataError(f"{path.name}: {exc}") from None
     except OSError as exc:

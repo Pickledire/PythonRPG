@@ -1,0 +1,383 @@
+# The Frostreach: The Long Hunt (quest frost_hunt).
+#
+# Kesh of the White Antler: a young beastkin hunter. Eager, cheerful, talks too fast, scared and won't say so.
+# Elder Thorvi: stern, few words, decides who sits by the fire. Respects the truth over everything.
+# Yrsa: the clan's shaman. Odd, kind, listens to things nobody else hears.
+#
+# A cold welcome (gift, endurance, words or kinship), the stalk (stealth), the alpha (fight), and a choice of
+# whose kill it was. Flags for later: frost_kesh (honest / given / claimed / finished), frost_welcomed.
+# Reputation: rep.tribes. Placeholder: free_holds_member.
+
+_defaults:
+  speaker: Kesh
+
+camp:
+  speaker: The White Antler Camp
+  lines:
+    - text: >-
+        A ring of hide tents in the lee of a glacier, smoke rising straight up in the still cold. Antlers
+        everywhere: over doorways, on poles, woven into the tents. Dogs with frost on their whiskers watch you
+        come.
+      if: {first_visit: true}
+    - text: >-
+        Nobody comes out to meet you. Then one person does, at a run: a young woman with a fox's face and
+        a spear twice her height. "A southerner! Are you lost? Are you hunting? Are you here for the rite?
+        You're here for the rite. Please be here for the rite."
+      if: {first_visit: true, not_race: Beastkin}
+    - text: >-
+        The dogs stop barking when they smell you. A young hunter with a fox's face jogs out to meet you and
+        grins. "Kin! From which clan? Never mind. Are you here for the rite? Please say yes."
+      if: {first_visit: true, race: Beastkin}
+    - text: The White Antler camp. Kesh waves her spear at you from across the fires.
+      if: {first_visit: false}
+  choices:
+    - text: Ask what rite.
+      if: {quest_not_started: frost_hunt}
+      next: rite
+    - text: Ask to sit by the elder's fire.
+      if: {quest_at: [frost_hunt, started]}
+      next: elder
+    - text: Go out on the hunt with Kesh.
+      if: {quest_at: [frost_hunt, stalking]}
+      next: stalk
+    - text: Go back to the camp with Kesh.
+      if: {quest_at: [frost_hunt, after]}
+      next: return
+    - text: Visit the shaman's tent.
+      next: yrsa
+    - text: Show the Grey Wolf's token.
+      if: {future: free_holds_member}
+      locked: Free Holds sworn only
+    - text: Leave.
+
+rite:
+  lines:
+    - >-
+      "My rite! The Long Hunt." She bounces on her toes. "Every White Antler hunts a great beast, alone, to
+      sit at the elders' fire. Mine is the snowmane alpha, the big white one, the one that took Old Fen's
+      dogs." She lowers her voice. "And the rite has to be witnessed. By an outsider. Someone who'll tell the
+      truth because they don't care about our clan."
+    - '"Nobody comes here. Except you. So." She beams. "You."'
+  choices:
+    - text: I'll witness your hunt.
+      next: rite_yes
+      effects:
+        - start_quest: frost_hunt
+    - text: Ask what happens if she fails.
+      next: rite_fail
+    - text: Not my clan, not my hunt.
+
+rite_fail:
+  lines:
+    - '"Then I hunt again next winter. And everyone knows." She looks at the snow. "Fen failed twice. People still call him Fen Twice."'
+  next: rite
+
+rite_yes:
+  lines:
+    - '"Yes! Good! Wonderful." She grabs your arm. "First Elder Thorvi has to let you sit by the fire. She won''t want to. Southerners talk too much and smell of bread. Be... less southern."'
+  next: camp
+
+# ------------------------------------------------------------------ the elder's fire
+elder:
+  speaker: Elder Thorvi
+  lines:
+    - text: >-
+        An old woman with a wolf's grey muzzle and eyes like chips of ice, sitting so close to the fire her
+        furs steam. She doesn't look at you. "No."
+      if: {not_race: Beastkin}
+    - text: >-
+        An old woman with a wolf's grey muzzle looks you over and nods once at the empty place by the fire.
+        "Kin may sit. Kesh, stop bouncing."
+      if: {race: Beastkin}
+  choices:
+    - text: Sit down by the fire.
+      if: {race: Beastkin}
+      next: elder_kin
+    - text: Offer her a gift for the fire. (a Health Potion)
+      if: {not_race: Beastkin, has_item: Health Potion}
+      locked: Needs a Health Potion to give
+      next: elder_gift
+      effects:
+        - take_item: Health Potion
+    - text: Sit outside the ring of firelight all night, in the cold, without complaining.
+      if: {not_race: Beastkin, min_stat: [vitality, 13]}
+      locked: true
+      next: elder_endure
+    - text: Speak to her about the north with respect, the way the tribes speak of it.
+      if: {not_race: Beastkin, min_stat: [charisma, 14]}
+      locked: true
+      next: elder_words
+    - text: Ask the shaman to speak for you.
+      if: {not_race: Beastkin, visited: yrsa_kind}
+      next: elder_yrsa
+    - text: Go away and think about it.
+      next: camp
+
+elder_kin:
+  speaker: Elder Thorvi
+  lines:
+    - '"The rite is witnessed by an outsider," Thorvi says. "Kin is not outside." She considers you. "But you are far from your clan. That is outside enough."'
+  effects:
+    - set_flag: [frost_welcomed, kin]
+  next: elder_allows
+
+elder_gift:
+  speaker: Elder Thorvi
+  lines:
+    - >-
+      You hold out the potion. She doesn't take it. You put it by the fire. After a long time, she uncorks
+      it, sniffs it, and passes it to the old man beside her, whose cough has been terrible all evening.
+    - '"Southerners bring good medicine," she says. "Sometimes." There''s room by the fire, suddenly.'
+  effects:
+    - set_flag: [frost_welcomed, gift]
+  next: elder_allows
+
+elder_endure:
+  speaker: The White Antler Camp
+  lines:
+    - >-
+      You sit in the snow just outside the light. The cold comes up through you like water. The clan
+      watches from the fire and says nothing. Children come and stare. You don't complain. You don't move.
+    - >-
+      At dawn, Thorvi walks out to you, puts her own fur over your shoulders, and goes back to the fire
+      without a word.
+  effects:
+    - set_flag: [frost_welcomed, endured]
+    - damage: 15
+    - set_time: 7
+  next: elder_allows
+
+elder_words:
+  speaker: Elder Thorvi
+  lines:
+    - >-
+      You talk about the north the way the tribes do: not as a place, but as a person, old and hard and
+      fair. You don't call it cold. You call it honest.
+    - '"Hm," says Thorvi. "Who taught you that?" You don''t answer. She seems to like that better.'
+  effects:
+    - set_flag: [frost_welcomed, words]
+  next: elder_allows
+
+elder_yrsa:
+  speaker: Yrsa
+  lines:
+    - >-
+      Yrsa wanders over from her tent and sits down beside Thorvi, uninvited. "The ice likes this one," she
+      says. Thorvi gives her a long look. Yrsa smiles back. Thorvi sighs.
+  effects:
+    - set_flag: [frost_welcomed, yrsa]
+  next: elder_allows
+
+elder_allows:
+  speaker: Elder Thorvi
+  lines:
+    - '"Witness, then," Thorvi says. "And remember: you saw what you saw. Not what anyone wishes you saw."'
+  effects:
+    - quest_stage: [frost_hunt, stalking]
+    - add_var: [rep.tribes, 1]
+    - give_xp: 500
+  next: camp
+
+yrsa:
+  speaker: Yrsa
+  lines:
+    - text: >-
+        A tent full of smoke and bones and drying herbs. A small woman with a white owl's face sits in the
+        middle of it with her eyes closed, and her ear pressed to a block of ice.
+      if: {first_visit: true}
+    - text: Yrsa is listening to her block of ice again.
+      if: {first_visit: false}
+    - '"Shh," she says. "It''s talking."'
+  choices:
+    - text: Ask what it's saying.
+      next: yrsa_ice
+    - text: Ask her to help you at the elder's fire.
+      if: {quest_at: [frost_hunt, started]}
+      next: yrsa_kind
+    - text: Leave her to listen.
+      next: camp
+
+yrsa_ice:
+  speaker: Yrsa
+  lines:
+    - >-
+      "Sleep-talk. The ice has been talking in its sleep all winter. Long words. Slow." She frowns. "I don't
+      know them. My mother didn't know them. Her mother wrote some down, on a hide. We burned the hide." She
+      opens her eyes. "Seemed best."
+  next: yrsa
+
+yrsa_kind:
+  speaker: Yrsa
+  lines:
+    - '"Thorvi?" Yrsa laughs, a hooting laugh. "Thorvi is ice. You don''t melt ice. You sit beside it until it decides you''re weather." She pats your hand. "I''ll sit with you."'
+  next: camp
+
+# ------------------------------------------------------------------ the hunt
+stalk:
+  speaker: The Frozen Plain
+  lines:
+    - >-
+      Kesh leads you out across the plain at a lope, two hours into white nothing, until she drops flat in
+      the snow and points. Below, in a hollow, the pack: a dozen white wolves, and among them, bigger than
+      the rest, with a mane like frozen smoke, the alpha.
+    - '"We get close," she breathes. "Downwind. Quiet. Then I throw."'
+  choices:
+    - text: Creep in with her.
+      effects:
+        - minigame:
+            type: stealth
+            dc: 13
+            title: Downwind
+            intro: The pack is restless. Keep low. Breathe slow. Let the wind cover you.
+            creature: The pack
+            duration: 18
+            success: alpha_opener
+            partial: alpha
+            failure: alpha_ambushed
+            retreat: camp
+    - text: Not yet. Go back to camp.
+      next: camp
+
+alpha_opener:
+  speaker: The Frozen Plain
+  lines:
+    - >-
+      You're close enough to see the frost in its mane. Kesh lifts her spear. Her arm is shaking. She
+      doesn't throw. The alpha's head comes up, and you strike first.
+  effects:
+    - start_combat: snowmane_alpha
+      opener: 0.3
+      fled: fled
+  choices:
+    - text: Look at what you've done.
+      next: after
+
+alpha:
+  speaker: The Frozen Plain
+  lines:
+    - The pack scatters at the last moment, but the alpha turns and comes for you.
+  effects:
+    - start_combat: snowmane_alpha
+      fled: fled
+  choices:
+    - text: Look at what you've done.
+      next: after
+
+alpha_ambushed:
+  speaker: The Frozen Plain
+  lines:
+    - Kesh's foot breaks a crust of ice. Every wolf in the hollow turns at once. The alpha is already running.
+  effects:
+    - start_combat: snowmane_alpha
+      ambush: true
+      fled: fled
+  choices:
+    - text: Look at what you've done.
+      next: after
+
+fled:
+  speaker: The Frozen Plain
+  lines:
+    - >-
+      You run, and Kesh runs, and the pack lets you go. Halfway back to camp she sits down in the snow and
+      cries, furiously, and won't let you help her up. "Again," she says. "We go again."
+  next: camp
+
+after:
+  speaker: The Frozen Plain
+  lines:
+    - >-
+      The alpha lies in the snow, its sides heaving. Not dead. Not yet. Kesh stands over it with her spear
+      held the wrong way round, and her face is wet. "I couldn't," she says. "I had it, and I couldn't."
+  effects:
+    - quest_stage: [frost_hunt, after]
+    - give_xp: 600
+  choices:
+    - text: Hand her the spear the right way round. "It's still breathing. Finish your hunt."
+      if: {min_stat: [wisdom, 13]}
+      locked: true
+      next: kesh_finishes
+    - text: End it yourself. Tell her you'll say it was hers.
+      next: kesh_given
+    - text: End it yourself. Tell her you'll tell the truth.
+      next: kesh_honest
+    - text: End it yourself. This was your kill, and the clan will hear it.
+      next: kesh_claimed
+
+kesh_finishes:
+  lines:
+    - >-
+      She looks at the spear, at you, at the alpha. Then she turns the spear around, says something to the
+      wolf in her own tongue, gently, and ends it. She doesn't cry again. She stands up straighter, after.
+  effects:
+    - set_flag: [frost_kesh, finished]
+  next: return
+
+kesh_given:
+  lines:
+    - You end it. Kesh nods, and won't meet your eyes. "Thank you," she says, so quietly it might be "sorry."
+  effects:
+    - set_flag: [frost_kesh, given]
+  next: return
+
+kesh_honest:
+  lines:
+    - You end it. "Good," Kesh says, after a while. "Good. Thorvi will know if we lie. Thorvi always knows."
+  effects:
+    - set_flag: [frost_kesh, honest]
+  next: return
+
+kesh_claimed:
+  lines:
+    - You end it. Kesh doesn't say anything at all, the whole walk back.
+  effects:
+    - set_flag: [frost_kesh, claimed]
+  next: return
+
+# ------------------------------------------------------------------ the elders' fire
+return:
+  speaker: Elder Thorvi
+  lines:
+    - >-
+      The whole clan is at the fire when you drag the alpha in. Thorvi stands. She looks at the wolf, at
+      Kesh, at you. "Witness," she says. "Whose kill?"
+    - text: '"Hers," you say. "Her spear. Her hunt. I watched." Kesh holds her head up. Thorvi looks at her for a long time and then, for the first time you''ve seen, smiles. "Sit, Kesh. By me."'
+      if: {flag_is: [frost_kesh, finished]}
+    - text: >-
+        "Hers," you say. Thorvi looks at you, then at Kesh, who is looking at the snow. "Hm," says Thorvi.
+        "Sit, Kesh." Kesh sits. She doesn't look happy. Thorvi doesn't look fooled.
+      if: {flag_is: [frost_kesh, given]}
+    - text: >-
+        You tell it as it happened. The clan murmurs. Kesh stands straight through all of it. "Next winter,"
+        Thorvi says to her. "And you'll throw." She turns to you. "You told it true. The fire is yours whenever
+        you come north."
+      if: {flag_is: [frost_kesh, honest]}
+    - text: >-
+        "Mine," you say. The clan cheers you, a little. They don't cheer Kesh at all. Thorvi gives you the
+        alpha's mane with her own hands, and says nothing.
+      if: {flag_is: [frost_kesh, claimed]}
+  effects:
+    - add_var: [rep.tribes, 2]
+      if: {any: [{flag_is: [frost_kesh, finished]}, {flag_is: [frost_kesh, honest]}]}
+    - add_var: [rep.tribes, 1]
+      if: {any: [{flag_is: [frost_kesh, given]}, {flag_is: [frost_kesh, claimed]}]}
+  choices:
+    - text: Accept the clan's gift.
+      next: reward
+
+reward:
+  speaker: Elder Thorvi
+  lines:
+    - >-
+      Thorvi hangs an amulet of blue ice-stone round your neck. "It doesn't melt," she says. "Like the clan.
+      Come back when the ice talks louder. Yrsa says it will."
+    - text: '"And this," Kesh says, pushing a fur jerkin into your arms, grinning again at last. "I made it. Badly. It''s warm, though."'
+      if: {any: [{flag_is: [frost_kesh, finished]}, {flag_is: [frost_kesh, honest]}]}
+  effects:
+    - give_item: icewarden_amulet
+    - give_item: wolfhide_jerkin
+      if: {any: [{flag_is: [frost_kesh, finished]}, {flag_is: [frost_kesh, honest]}]}
+    - add_gold: 200
+    - give_xp: 800
+    - complete_quest: frost_hunt
+  next: camp

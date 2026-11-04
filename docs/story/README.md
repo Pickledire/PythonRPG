@@ -11,6 +11,7 @@ a working name. Sections marked **[Open]** need a decision.
 | [04_regions.md](04_regions.md) | The regions of the map, their hunts, bounties, regional bosses and legendary hunts |
 | [05_main_story.md](05_main_story.md) | The three story layers, the acts, the point of no return and the endings |
 | [06_systems.md](06_systems.md) | What the engine needs to support all of this (for the coding side) |
+| [07_side_quests.md](07_side_quests.md) | The side questline in each region, and the flags each one leaves for later |
 
 ## The vision in one paragraph
 

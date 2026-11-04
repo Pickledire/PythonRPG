@@ -557,4 +557,15 @@ def build(original: dict[str, EnemyTemplate]) -> list[EnemyTemplate]:
                  spellbook=(_spell("Rumble", SpellType.DAMAGE, 26, "The ground shrugs"),
                             _spell("Weight of Ages", SpellType.WEAKEN, 0, "You feel very, very old"))),
     )
+    # ============================================================ story only (side quests; not hunted anywhere)
+    add(
+        creature("hearth_inquisitor", "Hearth Order Inquisitor", "humanoid", "soldier", 15,
+                 "A sworn hunter of the unnatural in a scorched grey habit, carrying a torch and a mace.",
+                 spell_chance=0.3, on_hit=(burn(7, 3, 0.25),),
+                 spellbook=(_spell("Purging Flame", SpellType.BURN, 10, "The fire that cleanses"),
+                            _spell("Hearth Ward", SpellType.SHIELD, 0, "Faith, made solid"))),
+        creature("bounty_hunter", "Regency Bounty Hunter", "humanoid", "hunter", 19,
+                 "Paid by the head, and very good at counting.", on_hit=(bleed(7, 3, 0.25),),
+                 starts_with=(haste,)),
+    )
     return list(made.values())

@@ -1,0 +1,330 @@
+# Titanfell: Cartographer's Folly (quest titanfell_map).
+#
+# Wendel Aske: an old human cartographer. Cheerful, brilliant, slightly mad, delighted by everything,
+#   including the things trying to kill him.
+#
+# Three landmarks in any order (each with a fight or a cleverer way), a measurement (timing), and an ending
+# up to Wendel. The land up here is moving, a little, every year, always the same way. Nobody says why.
+# Flags for later: titanfell_wendel (stays / home), titanfell_drift (the landmarks have moved north).
+# Placeholder: collegium_member.
+
+_defaults:
+  speaker: Wendel Aske
+
+camp:
+  speaker: Wendel's Camp
+  lines:
+    - text: >-
+        A tent pegged to a boulder the size of a house, in a valley where the rocks are the wrong size and
+        the snow lies in strange folds. Maps are weighed down with stones all over the ground outside it.
+        Dozens of maps. Hundreds.
+      if: {first_visit: true}
+    - text: >-
+        An old man in five scarves pops out of the tent with a compass in each hand. "A person! A real one! You
+        haven't moved, have you? Since you got here? No? Wonderful. Everything else has."
+      if: {first_visit: true}
+    - text: '"You''re back! Stand still a moment, let me look at you. Yes. Still there. Good."'
+      if: {first_visit: false}
+  choices:
+    - text: Ask what he means, everything else has moved.
+      if: {quest_not_started: titanfell_map}
+      next: ask
+    - text: Go out to check his landmarks.
+      if: {quest_at: [titanfell_map, started]}
+      next: valley
+    - text: Help him take the measurement.
+      if: {quest_at: [titanfell_map, measure]}
+      next: measure
+    - text: Ask how the map is going.
+      if: {quest_done: titanfell_map}
+      next: after
+    - text: Have the Collegium check his figures.
+      if: {future: collegium_member}
+      locked: Collegium members only
+    - text: Leave.
+
+ask:
+  lines:
+    - >-
+      "My maps! Forty years I've mapped the north. Every map of the Frostreach in Brennhold is mine, every
+      one, and they're right, I promise you they're right." He shuffles through a pile. "But up here, they're
+      never right. I map a valley, I come back next year, it's not where I put it."
+    - >-
+      "Three landmarks. The Standing Ribs. The Glass Field. The Crack. I've marked them on this map, very
+      carefully, last spring. Go and see if they're still where I put them. I'd go, but things keep trying to
+      eat me, and I'm old, and I'm very chewy."
+  choices:
+    - text: I'll check your landmarks.
+      next: ask_yes
+      effects:
+        - start_quest: titanfell_map
+    - text: Ask why he keeps coming back up here.
+      next: ask_why
+    - text: Leave him to his maps.
+
+ask_why:
+  lines:
+    - >-
+      He thinks about it, which seems to be unusual for him. "Because a map is a promise," he says. "That the
+      world will be where you left it. And up here the world's breaking its promise, and I want to know why."
+      He beams. "Also it's very beautiful. Have you seen it? Of course you have. You're in it."
+  next: ask
+
+ask_yes:
+  lines:
+    - '"Splendid! Take the map. Mark where they really are. Try not to be eaten. Or at least, if you''re eaten, take good notes."'
+  effects:
+    - give_item: Wendel's Map
+  next: camp
+
+# ------------------------------------------------------------------ the three landmarks
+valley:
+  speaker: Titanfell
+  lines:
+    - >-
+      The valley opens out into a white plain broken by stone that looks like it was dropped from a great
+      height. Nothing here is the size it should be.
+    - text: You've checked the Standing Ribs.
+      if: {visited: ribs_marked}
+    - text: You've checked the Glass Field.
+      if: {visited: glass_marked}
+    - text: You've checked the Crack.
+      if: {visited: crack_marked}
+  choices:
+    - text: Go to the Standing Ribs.
+      if: {not_visited: ribs_marked}
+      next: ribs
+    - text: Go to the Glass Field.
+      if: {not_visited: glass_marked}
+      next: glass
+    - text: Go to the Crack.
+      if: {not_visited: crack_marked}
+      next: crack
+    - text: Take the map back to Wendel.
+      if: {all: [{visited: ribs_marked}, {visited: glass_marked}, {visited: crack_marked}]}
+      next: landmarks_done
+    - text: Go back to camp.
+      next: camp
+
+ribs:
+  speaker: The Standing Ribs
+  lines:
+    - >-
+      Curved white pillars rising out of the snow in two rows, forty feet tall: the ribs of something that
+      died here long ago. Between them, wind moans. And something walks between them, too: a giant, grey
+      and hollow, wind howling through its own ribs.
+  choices:
+    - text: Fight it.
+      next: ribs_fight
+    - text: Climb the tallest rib and sight the landmark from the top while it passes below.
+      if: {min_stat: [agility, 15]}
+      locked: true
+      next: ribs_marked
+    - text: Go back.
+      next: valley
+
+ribs_fight:
+  speaker: The Standing Ribs
+  lines:
+    - It turns its empty face toward you.
+  effects:
+    - start_combat: hollow_giant
+      fled: valley
+  choices:
+    - text: Mark the landmark.
+      next: ribs_marked
+
+ribs_marked:
+  speaker: The Standing Ribs
+  lines:
+    - >-
+      You take a bearing from the tallest rib, the way Wendel showed you, and mark it on his map. The Ribs
+      are not where he put them. They're about a hundred paces further north.
+  effects:
+    - give_xp: 1800
+  next: valley
+
+glass:
+  speaker: The Glass Field
+  lines:
+    - >-
+      A field of black glass, shining under the snow like a frozen lake. Some of it is solid. Some of it is a
+      crust over nothing at all. And something moves under the surface, black on black, casting no shadow.
+  choices:
+    - text: Read the cracks in the glass and walk only on the solid places.
+      if: {min_stat: [wisdom, 15]}
+      locked: true
+      next: glass_marked
+    - text: Walk straight across and deal with whatever comes up.
+      next: glass_fight
+    - text: Go back.
+      next: valley
+
+glass_fight:
+  speaker: The Glass Field
+  lines:
+    - The glass splits beside you, and it comes up out of it like a black blade.
+  effects:
+    - start_combat: obsidian_stalker
+      ambush: true
+      fled: valley
+  choices:
+    - text: Mark the landmark.
+      next: glass_marked
+
+glass_marked:
+  speaker: The Glass Field
+  lines:
+    - >-
+      From the middle of the field you sight the peak Wendel uses as his mark. The Glass Field is a hundred
+      paces further north than his map says, too. A hundred and three, by your count.
+  effects:
+    - give_xp: 1800
+  next: valley
+
+crack:
+  speaker: The Crack
+  lines:
+    - >-
+      A split in the earth a mile long, so deep you can't see the bottom. Warm air breathes up out of it, in
+      and out, very slowly. Things climb up the walls of it, sometimes. One is climbing now.
+  choices:
+    - text: Fight what's climbing out.
+      next: crack_fight
+    - text: Measure the crack's width with Wendel's rope and pegs, quickly, before it reaches the top.
+      if: {min_stat: [intelligence, 15]}
+      locked: true
+      next: crack_marked
+    - text: Go back.
+      next: valley
+
+crack_fight:
+  speaker: The Crack
+  lines:
+    - It pulls itself over the lip, and it is the wrong shape for anything.
+  effects:
+    - start_combat: riftborn_horror
+      fled: valley
+  choices:
+    - text: Mark the landmark.
+      next: crack_marked
+
+crack_marked:
+  speaker: The Crack
+  lines:
+    - >-
+      The Crack is where Wendel put it, almost. It's narrower than his notes say by a hand's width, and the
+      whole thing has slid north. A hundred paces. Again.
+  effects:
+    - give_xp: 1800
+  next: valley
+
+landmarks_done:
+  speaker: Wendel Aske
+  lines:
+    - >-
+      Wendel spreads the map on a rock and stares at your marks. "North," he whispers. "All three. A hundred
+      paces north, all three, in one year." He looks up, eyes shining. "Do you know what that means?"
+    - '"No," he says, before you can answer. "Neither do I! Isn''t it wonderful? We need a true measurement. One I can trust. My surveyor''s glass."'
+  effects:
+    - set_flag: [titanfell_drift, true]
+    - quest_stage: [titanfell_map, measure]
+  next: measure
+
+# ------------------------------------------------------------------ the measurement
+measure:
+  lines:
+    - >-
+      A brass tube on three legs, pointed at the far peak. "When the hairline crosses the summit, you call
+      the mark. Three marks, and I'll know exactly where we are. The trouble is, the summit keeps... drifting.
+      Just a little. You'll see."
+  choices:
+    - text: Look through the glass.
+      effects:
+        - minigame:
+            type: timing
+            dc: 14
+            title: The Surveyor's Glass
+            intro: Call the mark when the hairline crosses the summit.
+            action: Mark
+            strikes: 3
+            success: measure_true
+            partial: measure_rough
+            failure: measure_lost
+            retreat: camp
+    - text: Not now.
+      next: camp
+
+measure_true:
+  lines:
+    - >-
+      Three clean marks. Wendel works the figures, and works them again, and puts his pencil down. "There,"
+      he says, very quietly for him. "There it is. The whole valley. Moving north, a hair at a time, all
+      together, like..." He doesn't finish.
+  effects:
+    - set_flag: [titanfell_measured, true]
+    - give_xp: 2000
+  next: ending
+
+measure_rough:
+  lines:
+    - '"Close! Close enough!" He scribbles. "Close enough to know it''s real. Not close enough to know why."'
+  effects:
+    - give_xp: 1800
+  next: ending
+
+measure_lost:
+  lines:
+    - '"Missed it. Never mind. Never mind!" He laughs. "Forty years I''ve missed it. What''s one more?"'
+  effects:
+    - give_xp: 1600
+  next: ending
+
+ending:
+  lines:
+    - >-
+      He sits down on his rock with the map on his knees, looking out over the valley. For once he doesn't
+      say anything for a long while.
+    - '"It''s turning over," he says at last. "The whole valley. Like someone turning over in their sleep." He laughs, not quite comfortably. "A very slow someone."'
+    - '"So," he says. "Do I stay and map it? Or do I go home to Brennhold and have a very long bath?"'
+  choices:
+    - text: Tell him to stay. Someone should watch.
+      next: wendel_stays
+    - text: Tell him to go home. He's done enough.
+      next: wendel_home
+
+wendel_stays:
+  lines:
+    - '"Yes," he says at once, as though he''d only been waiting for permission. "Yes! Someone should watch. And write it down. And if it ever wakes up, someone should have a map."'
+  effects:
+    - set_flag: [titanfell_wendel, stays]
+  next: reward
+
+wendel_home:
+  lines:
+    - '"Home." He rolls the word round his mouth. "A bath. A chair. A map that stays where I put it." He begins, slowly, to pack. "I''ll send you a copy. The last true map of Titanfell. Probably the last."'
+  effects:
+    - set_flag: [titanfell_wendel, home]
+  next: reward
+
+reward:
+  lines:
+    - >-
+      "For you. My old friend made it, a dwarf from the Holds, to shoot at things that were trying to eat
+      me. It worked very well." He presses a heavy crossbow into your arms. "And keep the map. It's wrong, of
+      course. It's the best wrong map in the world."
+  effects:
+    - give_item: stonebore_crossbow
+    - add_gold: 450
+    - give_xp: 2200
+    - complete_quest: titanfell_map
+  next: camp
+
+after:
+  lines:
+    - text: Wendel's camp has grown. There are flags on poles now, marking where things were, and where they are, and how far apart. "Still turning," he says happily. "Still turning."
+      if: {flag_is: [titanfell_wendel, stays]}
+    - text: The camp is gone. There's a cairn where the tent stood, with a map folded inside it, weighed down with a stone. On the map, in Wendel's hand, the valley, and an arrow pointing north.
+      if: {flag_is: [titanfell_wendel, home]}
+  repeat: true
+  next: camp

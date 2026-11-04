@@ -1,0 +1,375 @@
+# The Ruins of Valoria: The Last Lesson (quest valoria_lesson).
+#
+# Magistra Ithriel: a human scholar of Valoria. Brilliant, impatient, sarcastic, sixty years old and
+#   twenty years past caring what anyone thinks.
+# The Instructor: a Valorian automaton still teaching a class of empty desks. Pedantic, polite, implacable.
+# The bound soul: one of the souls Valoria used in its binding. It wants to be let go.
+#
+# A rune-lock (memory), an examination (answers are on the chalkboard, if you read it; your score is counted),
+# and a choice about a soul. Flags for later: valoria_exam (passed / expelled), valoria_soul (freed / bound /
+# left), valoria_gave_crystal. Reputation: rep.collegium.
+
+_defaults:
+  speaker: Magistra Ithriel
+
+camp:
+  speaker: Ithriel's Camp
+  lines:
+    - text: >-
+        A tent pitched in what was once a plaza, among statues with no faces, preserved in ice and a strange
+        light that comes from nowhere. Inside, an old woman in three coats is writing furiously, and doesn't
+        look up.
+      if: {first_visit: true}
+    - text: '"If you''re a ghost, wait your turn. If you''re a looter, the good stuff is all in the Archive and you''ll die. If you''re neither, make yourself useful."'
+      if: {first_visit: true}
+    - text: Ithriel doesn't look up. "You again. Good. Useful people are rare here."
+      if: {first_visit: false}
+  choices:
+    - text: Ask how you can make yourself useful.
+      if: {quest_not_started: valoria_lesson}
+      next: ask
+    - text: Go to the schoolhouse door.
+      if: {quest_at: [valoria_lesson, started]}
+      next: door
+    - text: Go back into the schoolhouse.
+      if: {quest_at: [valoria_lesson, lesson]}
+      next: classroom
+    - text: Go down to the vault.
+      if: {quest_at: [valoria_lesson, vault]}
+      next: vault
+    - text: Tell Ithriel what you found.
+      if: {quest_at: [valoria_lesson, report]}
+      next: report
+    - text: Ask her about Valoria.
+      if: {not_visited: history}
+      next: history
+    - text: Leave.
+
+history:
+  lines:
+    - >-
+      "Valoria? Richest city in the world for one generation, and then gone in a night." She waves her pen at
+      the faceless statues. "They did something with the light. Under the city. The Collegium says it was a
+      sun-engine. The Hearth Order says it was blasphemy. I say they wrote it all down, and I want to read it."
+  next: camp
+
+ask:
+  lines:
+    - >-
+      "There's a schoolhouse two streets over. Valorian children learned their letters there. The door is
+      rune-locked, the old kind: it shows you a sequence, you repeat it. I've failed eleven times. My memory
+      isn't what it was. Neither are my knees."
+    - '"Open it, and anything we find, I''ll pay for. Anything with writing on it, I''ll pay double."'
+  choices:
+    - text: I'll open your door.
+      next: ask_yes
+      effects:
+        - start_quest: valoria_lesson
+    - text: Ask what's inside.
+      next: ask_inside
+    - text: Leave her to her writing.
+
+ask_inside:
+  lines:
+    - '"If I knew that, I wouldn''t need the door open." She finally looks up. "Something''s inside. I hear it at night. A bell, and a voice, saying the same thing over and over. Probably nothing."'
+  next: ask
+
+ask_yes:
+  lines:
+    - '"Splendid. Try not to die. The last one died." She thinks. "No, that was a different door."'
+  next: camp
+
+# ------------------------------------------------------------------ the door
+door:
+  speaker: The Schoolhouse Door
+  lines:
+    - >-
+      A bronze door, green with age, set with a ring of nine glass runes. As you approach, they light up one
+      after another, in a pattern, and go dark, and wait.
+  choices:
+    - text: Repeat the pattern.
+      effects:
+        - minigame:
+            type: memory
+            dc: 14
+            title: The Rune-Lock
+            intro: Watch the runes light. Touch them in the same order.
+            rounds: 3
+            success: door_open
+            partial: door_open
+            failure: door_shock
+            retreat: camp
+    - text: Read the runes' grammar instead, and simply tell the door the answer.
+      if: {min_stat: [intelligence, 15]}
+      locked: true
+      next: door_open
+    - text: Go back.
+      next: camp
+
+door_shock:
+  speaker: The Schoolhouse Door
+  lines:
+    - The runes flash white. Light comes out of the door and goes through you like a cold nail. Then they reset, patiently, and wait.
+  effects:
+    - damage: 25
+  next: door
+
+door_open:
+  speaker: The Schoolhouse Door
+  lines:
+    - >-
+      The ninth rune lights, and stays lit, and the door swings inward with a sound like a sigh. From inside
+      comes the sound of a small bell, and a calm, metallic voice: "Late. You are late. Sit down."
+  effects:
+    - quest_stage: [valoria_lesson, lesson]
+    - give_xp: 1000
+  next: classroom
+
+# ------------------------------------------------------------------ the lesson
+classroom:
+  speaker: The Schoolroom
+  lines:
+    - >-
+      Thirty little desks in rows, each with a slate and a chalk-stick, all empty. At the front, a tall
+      figure of brass and sun-crystal, holding a pointer, standing in front of a chalkboard.
+    - >-
+      The chalkboard says, in a careful old hand: "Lesson the First: The Sun Below. Lesson the Second: The
+      Nine Bells of the Hour. Lesson the Third: The First Virtue is Remembrance."
+    - '"Today is examination day," says the Instructor. "You will sit. You will answer. Those who pass may take the key. Those who fail will be expelled."'
+  effects:
+    - set_var: [valoria.exam, 0]
+  choices:
+    - text: Sit down at a desk.
+      next: q1
+    - text: Back out of the room.
+      next: camp
+
+q1:
+  speaker: The Instructor
+  lines:
+    - '"Question the first. From where does the light of Valoria come?"'
+  choices:
+    - text: '"From the sun."'
+      next: q2
+    - text: '"From below."'
+      next: q2
+      effects:
+        - add_var: [valoria.exam, 1]
+    - text: '"From the Emperor."'
+      next: q2
+
+q2:
+  speaker: The Instructor
+  lines:
+    - '"Question the second. How many bells ring the hour?"'
+  choices:
+    - text: '"Seven."'
+      next: q3
+    - text: '"Nine."'
+      next: q3
+      effects:
+        - add_var: [valoria.exam, 1]
+    - text: '"Twelve."'
+      next: q3
+
+q3:
+  speaker: The Instructor
+  lines:
+    - '"Question the third. What is the first virtue of a citizen of Valoria?"'
+  choices:
+    - text: '"Obedience."'
+      next: graded
+    - text: '"Remembrance."'
+      next: graded
+      effects:
+        - add_var: [valoria.exam, 1]
+    - text: '"Courage."'
+      next: graded
+    - text: '"To remember what was done here, and why."'
+      if: {min_stat: [wisdom, 14]}
+      locked: true
+      next: graded
+      effects:
+        - add_var: [valoria.exam, 2]
+
+graded:
+  speaker: The Instructor
+  lines:
+    - The Instructor lowers its pointer and regards you for a long moment.
+    - text: '"Satisfactory," it says. From its tone, this is the highest mark it has ever given. "You may take the key. Class is dismissed."'
+      if: {var: "valoria.exam >= 2"}
+    - text: '"Unsatisfactory," it says. "The penalty is expulsion." It raises the pointer, which begins to glow.'
+      if: {var: "valoria.exam < 2"}
+  choices:
+    - text: Take the key.
+      if: {var: "valoria.exam >= 2"}
+      next: passed
+    - text: Defend yourself.
+      if: {var: "valoria.exam < 2"}
+      next: expelled
+
+passed:
+  speaker: The Schoolroom
+  lines:
+    - >-
+      The Instructor hands you a small crystal key from its own chest. Then it turns back to the chalkboard,
+      and to the thirty empty desks, and begins the first lesson again, from the beginning, to no one.
+  effects:
+    - set_flag: [valoria_exam, passed]
+    - give_xp: 1100
+    - quest_stage: [valoria_lesson, vault]
+  next: vault
+
+expelled:
+  speaker: The Instructor
+  lines:
+    - '"This is for your own good," it says.'
+  effects:
+    - start_combat: valorian_automaton
+      fled: camp
+  choices:
+    - text: Take the key from its chest.
+      next: expelled_key
+
+expelled_key:
+  speaker: The Schoolroom
+  lines:
+    - >-
+      The Instructor lies across three of the little desks, its sun-crystal flickering. As you take the key
+      from its chest it says, very quietly, "Late. You are late. Sit down." And then nothing.
+  effects:
+    - set_flag: [valoria_exam, expelled]
+    - give_xp: 1000
+    - quest_stage: [valoria_lesson, vault]
+  next: vault
+
+# ------------------------------------------------------------------ the vault
+vault:
+  speaker: The Schoolhouse Vault
+  lines:
+    - >-
+      Under the schoolroom, a small round vault. Shelves of slates and tablets: the children's lessons,
+      every one, kept. In the centre, a pillar of sun-crystal, and inside it, curled up like a sleeping child,
+      a shape made of light.
+    - >-
+      It opens its eyes when you come in. "Is the lesson over?" it asks, in a child's voice. "They said I
+      could go home when the lesson was over. They said I was helping hold the light."
+  choices:
+    - text: Ask who said that.
+      if: {not_visited: vault_who}
+      next: vault_who
+    - text: Break the binding-sigil on the pillar and let it go home.
+      next: soul_freed
+    - text: Use the crystal key to draw it out into a crystal, safe, for study.
+      next: soul_bound
+    - text: Leave it be. Close the vault.
+      next: soul_left
+
+vault_who:
+  speaker: The Bound Soul
+  lines:
+    - >-
+      "The teachers. The day the light came up from below. They said every child in the school could help.
+      We just had to sit very still and think about the sun." It looks at the shelves. "That was a long time ago,
+      wasn't it?"
+  next: vault
+
+soul_freed:
+  speaker: The Bound Soul
+  lines:
+    - >-
+      The sigil is old and the crystal is tired. It breaks with a sound like a bell. The light uncurls, and
+      stands, and is a child, for a moment, looking at you.
+    - '"Thank you," it says. And for a moment the whole vault, the whole street outside, is full of warm light, coming up from somewhere far below. Then it''s dark, and it''s gone.'
+  effects:
+    - set_flag: [valoria_soul, freed]
+    - give_xp: 1300
+    - quest_stage: [valoria_lesson, report]
+  next: camp
+
+soul_bound:
+  speaker: The Bound Soul
+  lines:
+    - >-
+      The key fits a slot in the pillar. The light flows out of the pillar into a small crystal that drops
+      into your hand, warm as a heartbeat. "Is the lesson over now?" it asks from inside. You don't answer.
+  effects:
+    - set_flag: [valoria_soul, bound]
+    - give_item: Bound Soul Crystal
+    - give_xp: 1100
+    - quest_stage: [valoria_lesson, report]
+  next: camp
+
+soul_left:
+  speaker: The Schoolhouse Vault
+  lines:
+    - '"Is the lesson over?" it asks as you close the vault. You close it anyway. It doesn''t ask again.'
+  effects:
+    - set_flag: [valoria_soul, left]
+    - give_xp: 1000
+    - quest_stage: [valoria_lesson, report]
+  next: camp
+
+# ------------------------------------------------------------------ Ithriel
+report:
+  lines:
+    - text: >-
+        She listens to all of it, pen frozen over the page. "A schoolhouse," she says at last. "They bound the
+        light with a schoolhouse. With the children in it." She puts the pen down, which you've never seen
+        her do.
+      if: {any: [{flag_is: [valoria_soul, freed]}, {flag_is: [valoria_soul, left]}]}
+    - text: >-
+        You put the crystal on her table. She looks at it, and at you, and the light inside it looks back.
+        "Is that what I think it is?"
+      if: {flag_is: [valoria_soul, bound]}
+  choices:
+    - text: Give her the crystal, for study.
+      if: {flag_is: [valoria_soul, bound]}
+      next: report_crystal
+    - text: Keep the crystal.
+      if: {flag_is: [valoria_soul, bound]}
+      next: report_kept
+    - text: Tell her you let it go.
+      if: {flag_is: [valoria_soul, freed]}
+      next: report_freed
+    - text: Tell her you left it there.
+      if: {flag_is: [valoria_soul, left]}
+      next: report_left
+
+report_crystal:
+  lines:
+    - >-
+      She takes it in both hands, very carefully. "The Collegium would give a tower for this," she says.
+      "They're not getting it. I'm going to find out what was done here, and then I'm going to write it
+      down where everyone can read it." She looks at the crystal. "And then I'll let you go. I promise."
+  effects:
+    - take_item: Bound Soul Crystal
+    - set_flag: [valoria_gave_crystal, true]
+    - add_gold: 300
+    - add_var: [rep.collegium, 2]
+  next: reward
+
+report_kept:
+  lines:
+    - '"Keep it, then." She doesn''t argue, which is how you know she''s angry. "Keep it warm. It sounds like it''s used to being warm."'
+  next: reward
+
+report_freed:
+  lines:
+    - '"Good," she says, surprising you. "Good. Valoria has kept enough." She picks the pen back up. "But the slates. Tell me you brought me the slates."'
+  next: reward
+
+report_left:
+  lines:
+    - '"Left it." She stares at you. "Left a child in a box in the dark." Then she gets up, three coats and all, and limps toward the schoolhouse without another word. You don''t follow her.'
+  next: reward
+
+reward:
+  lines:
+    - '"For your trouble." She pushes a mantle across the table, embroidered with Valorian letters. "It belonged to a librarian of this city. It''s warmer than it looks. Everything here is."'
+  effects:
+    - give_item: archivists_mantle
+    - add_gold: 250
+    - give_xp: 1300
+    - complete_quest: valoria_lesson
+  next: camp

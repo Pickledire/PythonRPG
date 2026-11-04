@@ -1,0 +1,439 @@
+# Glassmere: Six Years Overdue (quest glassmere_book).
+#
+# Tobias Fennick: Collegium under-librarian. Human, anxious, whispers everything, deeply sincere about fines.
+# Mother Ressa: landlady of the Inkpot. Grumpy every day, monstrous on rent day (Kindlemorn).
+# Corwin Ashe: a student who never came back. Grieving, gentle, half-frozen.
+#
+# A weekday mood, a locked door (lockpick), the cracked ice (balance), and a quiet scene on the lake.
+# Flags for later: glassmere_lissa (rested / waiting), glassmere_book (returned / kept), glassmere_names (the
+# underlined passages about true names). Reputation: rep.collegium. Placeholder: collegium_member.
+
+_defaults:
+  speaker: Tobias Fennick
+
+library:
+  speaker: The Collegium's Lower Reading Room
+  lines:
+    - text: >-
+        Outsiders may come as far as the lower reading room and no further. It's still bigger than most
+        churches. A hundred lamps, a thousand books, and a silence so complete you can hear the ice on the lake
+        settling.
+      if: {first_visit: true}
+    - text: >-
+        A thin man in ink-stained grey rushes up to you, puts a finger to his lips, and whispers urgently,
+        "Do you have a library token? You don't. Of course you don't. Nobody does. Can I ask you a favour?"
+      if: {first_visit: true}
+    - text: Fennick spots you from across the reading room and hurries over, whispering before he's in earshot.
+      if: {first_visit: false}
+  choices:
+    - text: Ask what the favour is.
+      if: {quest_not_started: glassmere_book}
+      next: favour
+    - text: Go to Corwin's lodgings at the Inkpot.
+      if: {quest_at: [glassmere_book, started]}
+      next: inkpot
+    - text: Go out onto the lake.
+      if: {quest_at: [glassmere_book, lake]}
+      next: lake
+    - text: Go back to Corwin on the ice.
+      if: {quest_at: [glassmere_book, found]}
+      next: corwin
+    - text: Tell Fennick what happened.
+      if: {quest_at: [glassmere_book, returned]}
+      next: return
+    - text: Check the book out under your own name.
+      if: {future: collegium_member}
+      locked: Collegium members only
+    - text: Leave.
+
+favour:
+  lines:
+    - >-
+      "Gersh's Seventh Treatise on Lesser Wards. Borrowed six years ago by a second-year called Corwin Ashe.
+      Never returned. SIX YEARS." He looks around guiltily for having raised his voice to a whisper-and-a-half.
+    - >-
+      "It's the only copy. Volume Eight refers to it on every page. Reading Volume Eight without Volume Seven
+      is like eating soup with a fork. People try. I watch them try. It's very upsetting."
+    - >-
+      "He lodged at the Inkpot, in the scholars' town. Nobody's seen him since the autumn before last. The
+      fine is currently..." He checks a little book. "Four hundred and twelve gold and nine copper."
+  choices:
+    - text: I'll find your book.
+      next: favour_yes
+      effects:
+        - start_quest: glassmere_book
+    - text: Ask why nobody's gone looking for him, never mind the book.
+      next: favour_why
+    - text: Four hundred gold? Who's going to pay that?
+      next: favour_fine
+    - text: Not my problem.
+
+favour_why:
+  lines:
+    - >-
+      He looks uncomfortable. "Students leave. The Collegium is... demanding. They go home, or they go to
+      the Gutter in Brennhold and sell spells by the hour, or they go out on the ice." A pause. "We don't
+      look very hard. We should. We don't."
+  next: favour
+
+favour_fine:
+  lines:
+    - '"Nobody, obviously." He looks scandalised that you thought he meant it. "The fine is a matter of record. It''s not a matter of money. Everything should be written down correctly. Even the impossible things."'
+  next: favour
+
+favour_yes:
+  lines:
+    - '"Oh, thank you." He clasps your hand in both of his, which are freezing. "If you find him, tell him he''s not in trouble. Tell him the fine is notional. Tell him the book misses him."'
+  next: library
+
+# ------------------------------------------------------------------ the Inkpot
+inkpot:
+  speaker: The Inkpot
+  lines:
+    - >-
+      A lodging house of the cheap and cold kind, where students live four to a room and burn their notes
+      for heat. A broad woman with a key ring the size of a horseshoe blocks the stairs.
+    - text: '"Rent''s due," she snarls before you''ve opened your mouth. "Kindlemorn. Rent day. Everybody''s rent''s due. Yours is due. Who are you?"'
+      if: {weekday: Kindlemorn}
+    - text: '"Rooms are full," she says flatly, without looking up from her ledger. "They''re always full."'
+      if: {not: {weekday: Kindlemorn}}
+  choices:
+    - text: Ask about Corwin Ashe's room.
+      if: {not: {weekday: Kindlemorn}}
+      locked: Not on rent day. She's in no mood
+      next: ressa
+    - text: Pay her to let you in, rent day or not. (15 gold)
+      if: {min_gold: 15}
+      locked: true
+      next: ressa_paid
+      effects:
+        - add_gold: -15
+    - text: '"[Elf] I''m his tutor from the Collegium. I''ve come about his things."'
+      if: {race: Elf}
+      next: ressa_elf
+    - text: Slip upstairs and pick his door.
+      if: {has_lockpick: true}
+      locked: Needs a lockpick
+      next: pick_door
+    - text: Leave.
+
+ressa:
+  speaker: Mother Ressa
+  lines:
+    - >-
+      "Ashe? Owes me two winters' rent. Left his things, so I left the room, so I've been losing money on a
+      dead boy for two years." She glares. "If he's dead. Probably dead. Everyone on that lake is dead."
+    - '"Five gold to look. Or charm me. Nobody does."'
+  choices:
+    - text: Pay to look. (5 gold)
+      if: {min_gold: 5}
+      locked: true
+      next: room
+      effects:
+        - add_gold: -5
+    - text: Charm her.
+      if: {min_stat: [charisma, 11]}
+      locked: true
+      next: ressa_charmed
+    - text: Leave.
+
+ressa_charmed:
+  speaker: Mother Ressa
+  lines:
+    - You compliment the ledger. Its neatness. Its columns. The care that went into it.
+    - She stares at you for a long time. Then she goes red, from the neck up, and hands you the key without a word.
+  next: room
+
+ressa_paid:
+  speaker: Mother Ressa
+  lines:
+    - '"Rent day money''s still money." She takes it and stands aside. "Top floor, end. Don''t touch the window. It''s been frozen shut two years and I like it that way."'
+  next: room
+
+ressa_elf:
+  speaker: Mother Ressa
+  lines:
+    - >-
+      She looks at your ears, and her whole face changes. "Oh! Oh, a tutor. Come in, come in, I'll find the
+      key, I didn't know they sent elves for that sort of thing." You didn't know they did either.
+  next: room
+
+pick_door:
+  speaker: The Inkpot, Top Floor
+  lines:
+    - Corwin's door is the only one on the corridor with a real lock on it. Students don't usually have anything worth locking.
+  effects:
+    - minigame:
+        type: lockpick
+        dc: 11
+        title: Corwin's Door
+        intro: Mother Ressa is two floors down. She has very good ears.
+        success: room
+        partial: room
+        failure: pick_caught
+        retreat: inkpot
+
+pick_caught:
+  speaker: Mother Ressa
+  lines:
+    - >-
+      A pick snaps. Two floors down, a door bangs. "WHO'S THAT?" There's a sound of keys, and a sound of
+      someone very large climbing stairs very fast.
+    - You pay her ten gold for the lock before she'll even let you speak. Then she lets you in anyway.
+  effects:
+    - add_gold: -10
+  next: room
+
+room:
+  speaker: Corwin's Room
+  lines:
+    - >-
+      Frost on the inside of the window, in fern-patterns. A narrow bed, a cold stove, and every flat
+      surface covered in paper.
+    - >-
+      Letters, all to the same person: "Dear Lissa." Dozens of them. None sent. On the desk, a page of notes
+      in a tight hand: "She answers when I read to her. Only the wards. She likes the wards. The ice is
+      thinnest by the Drowned Steps."
+  choices:
+    - text: Read the letters.
+      next: room_letters
+    - text: Study the notes properly.
+      if: {min_stat: [intelligence, 12]}
+      locked: true
+      next: room_notes
+    - text: Head for the lake.
+      next: room_done
+
+room_letters:
+  speaker: Corwin's Room
+  lines:
+    - >-
+      Lissa was his sister. She went through the ice three winters ago, skating at night on a dare. The
+      letters start sad and get stranger. The last one says only: "I heard you today. I'm coming."
+  next: room
+
+room_notes:
+  speaker: Corwin's Room
+  lines:
+    - >-
+      The notes are good. Better than a second-year's should be. He's worked out which wards in Gersh's
+      Seventh are rest-wards, the old kind meant to lay the dead down gently, and which are binding-wards,
+      meant to hold them. He's marked the binding ones in red and crossed them out, hard.
+    - >-
+      In the margins of his copied pages, he's underlined every line about names: true names, the giving of
+      names, how a thing named truly will answer. Someone has written beside one, in different ink: "Not only
+      the dead."
+  effects:
+    - set_flag: [glassmere_names, true]
+    - give_xp: 60
+  next: room
+
+room_done:
+  speaker: Corwin's Room
+  lines:
+    - You leave the letters where they are. Somebody should read them, one day. Not you.
+  effects:
+    - quest_stage: [glassmere_book, lake]
+    - give_xp: 100
+  choices:
+    - text: Go out onto the lake.
+      next: lake
+    - text: Go back to the library for now.
+      next: library
+
+# ------------------------------------------------------------------ the lake
+lake:
+  speaker: Glassmere
+  lines:
+    - >-
+      The lake is a sheet of grey glass under a grey sky. Out by the old stone jetty, the Drowned Steps go
+      down into the ice and disappear. Beyond them, a long way out, someone is sitting very still.
+    - The ice between here and there is crazed with cracks. It sings when the wind blows.
+  choices:
+    - text: Walk out across the cracked ice.
+      effects:
+        - minigame:
+            type: balance
+            dc: 12
+            title: The Singing Ice
+            intro: Spread your weight. Don't stop. Don't listen to it sing.
+            duration: 14
+            success: corwin
+            partial: corwin
+            failure: ice_broke
+            retreat: lake
+    - text: Go back to shore.
+
+ice_broke:
+  speaker: Glassmere
+  lines:
+    - >-
+      The ice says something sharp, and your leg goes through to the knee. The water is so cold it feels
+      like burning. And something down there, something big, has heard you.
+  effects:
+    - damage: 12
+    - start_combat: ice_lurker
+      fled: lake
+  choices:
+    - text: Haul yourself out and keep going.
+      next: corwin
+
+corwin:
+  speaker: Corwin Ashe
+  lines:
+    - text: >-
+        A young man, blue-lipped, wrapped in three cloaks, sitting cross-legged beside a hole in the ice. A
+        heavy book lies open on his knees. He's reading aloud, softly, to the water.
+      if: {first_visit: true}
+    - text: >-
+        As he reads, the water in the hole goes still, and something pale rises just beneath the surface.
+        A girl's face, eyes open, listening.
+      if: {first_visit: true}
+    - text: Corwin is still by the hole in the ice. He hasn't stopped reading.
+      if: {first_visit: false}
+    - '"Don''t," he says without looking up. "If I stop, she goes back down."'
+  effects:
+    - quest_stage: [glassmere_book, found]
+  choices:
+    - text: Ask who she is.
+      if: {not_visited: glassmere/book/corwin_lissa}
+      next: corwin_lissa
+    - text: Persuade him to come home.
+      if: {min_stat: [charisma, 13]}
+      locked: true
+      next: corwin_home
+    - text: Read the rest-ward yourself, the way it's meant to be read.
+      if: {min_stat: [intelligence, 14]}
+      locked: true
+      next: corwin_rest
+    - text: Take the book from him.
+      next: corwin_take
+    - text: Leave him the book. Walk away.
+      next: corwin_leave
+
+corwin_lissa:
+  speaker: Corwin Ashe
+  lines:
+    - >-
+      "Lissa. My sister." He turns a page without missing a word. "She was cold, and she was alone, and
+      then I found out that if I read the wards to her she isn't. For a little while."
+    - '"I know what she is. I''m not stupid. I just can''t be the one who stops."'
+  next: corwin
+
+corwin_home:
+  speaker: Corwin Ashe
+  lines:
+    - >-
+      You sit down on the ice beside him. You talk about Lissa: what she was like, what she'd want, whether
+      she'd want her brother to freeze to death beside a hole in a lake.
+    - >-
+      He reads one more ward. Then he closes the book, very gently, and the pale face under the water
+      smiles, and sinks, and is gone. He gives you the book. "Tell Fennick I'm sorry about the fine."
+  effects:
+    - set_flag: [glassmere_lissa, waiting]
+    - set_flag: [glassmere_book, returned]
+    - give_item: Gersh's Seventh Treatise
+    - give_xp: 160
+    - quest_stage: [glassmere_book, returned]
+  next: library
+
+corwin_rest:
+  speaker: Corwin Ashe
+  lines:
+    - >-
+      You take the book. Corwin lets you. You find the rest-ward he's been circling for two years and never
+      dared finish, and you read it through to the end, every word, the way Gersh wrote it.
+    - >-
+      The face under the water closes its eyes. The water goes black and still. When the wind comes, the ice
+      doesn't sing any more.
+    - >-
+      Corwin cries for a long time. Then he stands up, stiff as an old man, and walks back toward the
+      shore. You understand something about wards you didn't before.
+  effects:
+    - set_flag: [glassmere_lissa, rested]
+    - set_flag: [glassmere_book, returned]
+    - give_item: Gersh's Seventh Treatise
+    - stat_change: [intelligence, 1]
+    - give_xp: 220
+    - quest_stage: [glassmere_book, returned]
+  next: library
+
+corwin_take:
+  speaker: Corwin Ashe
+  lines:
+    - >-
+      You reach for the book. He pulls it to his chest and stands, and the cold around him gets colder.
+      "No," he says. Frost runs up his fingers. He's been learning more than wards out here.
+  effects:
+    - start_combat: rogue_apprentice
+      fled: lake
+  choices:
+    - text: Take the book.
+      next: corwin_taken
+
+corwin_taken:
+  speaker: Corwin Ashe
+  lines:
+    - >-
+      He doesn't fight for it once he's down. He just watches the water. The pale face is gone, and doesn't
+      come back however long he waits.
+  effects:
+    - set_flag: [glassmere_lissa, waiting]
+    - set_flag: [glassmere_book, returned]
+    - give_item: Gersh's Seventh Treatise
+    - give_xp: 120
+    - quest_stage: [glassmere_book, returned]
+  next: library
+
+corwin_leave:
+  speaker: Corwin Ashe
+  lines:
+    - '"Thank you," he says, and keeps reading. You walk back across the ice with his voice following you all the way to shore.'
+  effects:
+    - set_flag: [glassmere_lissa, waiting]
+    - set_flag: [glassmere_book, kept]
+    - give_xp: 80
+    - quest_stage: [glassmere_book, returned]
+  next: library
+
+# ------------------------------------------------------------------ back to Fennick
+return:
+  lines:
+    - text: >-
+        You put the book on his desk. Fennick looks at it for a moment as though it might vanish. Then he
+        opens it, smells it, and closes his eyes.
+      if: {flag_is: [glassmere_book, returned]}
+    - text: '"And Corwin?" he whispers. You tell him. He listens with his hand over his mouth.'
+      if: {flag_is: [glassmere_book, returned]}
+    - text: >-
+        You tell him the book is staying on the lake, with a boy who needs it more. Fennick is quiet for a
+        long time.
+      if: {flag_is: [glassmere_book, kept]}
+    - text: '"Then it''s not overdue," he says at last. "It''s on loan. Indefinitely. I''ll write it down correctly."'
+      if: {flag_is: [glassmere_book, kept]}
+    - text: '"There is a late fee," he adds, very seriously. "Waived. Obviously. But it exists. I want you to know it exists."'
+      if: {flag_is: [glassmere_book, returned]}
+  effects:
+    - take_item: Gersh's Seventh Treatise
+    - give_item: scholars_pendant
+    - add_gold: 90
+      if: {flag_is: [glassmere_book, returned]}
+    - add_gold: 40
+      if: {flag_is: [glassmere_book, kept]}
+    - give_xp: 160
+    - add_var: [rep.collegium, 2]
+      if: {flag_is: [glassmere_book, returned]}
+    - complete_quest: glassmere_book
+  choices:
+    - text: Ask if anyone at the Collegium writes in the margins about true names.
+      if: {flag_set: glassmere_names}
+      next: return_names
+    - text: Leave.
+
+return_names:
+  lines:
+    - >-
+      Fennick goes very still. "Margins are for marginalia," he whispers. "Not for... that." He glances up,
+      toward the floors outsiders don't see. "There are people upstairs who would like to know who wrote that.
+      I'd rather they didn't find out from me."
+  next: library

@@ -31,8 +31,10 @@ flag_set, flag_not_set, flag_is [k, v], var ("rep.brannoc >= 3", or [key, op, va
 min_gold, min_stat [stat, value], min_skill [skill, value], has_item, has_lockpick, race (a name or a list),
 not_race, visited, not_visited, first_visit (true/false, the scene being entered), quest_active,
 quest_not_started, quest_done, quest_failed, quest_at [quest, stage], in_region (a region id or a list),
-weekday (a day name or a list), min_day, time_at, time_gte, time_between [a, b] (hours; wraps midnight), and the
-combinators any, all and not.
+weekday (a day name or a list), min_day, time_at, time_gte, time_between [a, b] (hours; wraps midnight), the
+combinators any, all and not, and future (a note about content that doesn't exist yet: never true, so a choice
+with ``if: {future: iron_company_rank}`` and ``locked: Iron Company members only`` shows greyed out until that
+content is written).
 
 Effects: set_flag [k, v], remove_flag, set_var [k, v], add_var [k, delta], set_health, heal, full_rest,
 set_mana, set_<stat> for any attribute, stat_change [stat, delta], add_gold, give_xp, advance_time, set_time,
@@ -40,7 +42,7 @@ give_item (id, name or spec dict), unlock_shop (item id), open_shop ("general"/"
 or name; "ambush": true if the enemy strikes first, "opener": 0.2 to start it missing 20% of its health,
 "fled": scene to go to if you run), damage (HP lost, never below 1), visual (+ "duration"), minigame (below),
 start_quest, quest_stage [quest, stage], complete_quest, fail_quest, end_game (an ending id, see
-``story/endings.yaml``).
+``story/endings.yaml``), take_item (an item name: hands one over, if you have it).
 
 Minigames::
 
@@ -374,7 +376,7 @@ PRIMARY_EFFECTS = {
     "set_flag", "remove_flag", "set_var", "add_var", "set_health", "heal", "full_rest", "set_mana", "set_stamina",
     *SET_STAT_EFFECTS, "stat_change", "add_gold", "give_xp", "advance_time", "set_time", "give_item",
     "unlock_shop", "open_shop", "start_combat", "visual", "damage", "minigame",
-    "start_quest", "quest_stage", "complete_quest", "fail_quest", "end_game",
+    "start_quest", "quest_stage", "complete_quest", "fail_quest", "end_game", "take_item",
 }
 KNOWN_EFFECTS = PRIMARY_EFFECTS | {"ambush", "opener", "fled", "duration", "if"}
 REWARD_EFFECTS = {"give_xp", "give_item", "unlock_shop", "add_var", *SET_STAT_EFFECTS}
@@ -383,7 +385,7 @@ KNOWN_CONDITIONS = {
     "flag_set", "flag_not_set", "flag_is", "var", "min_kills", "min_level", "min_gold", "min_stat", "min_skill",
     "has_item", "has_lockpick", "race", "not_race", "visited", "not_visited", "first_visit", "quest_active",
     "quest_not_started", "quest_done", "quest_failed", "quest_at", "in_region", "weekday", "min_day",
-    "time_at", "time_gte", "time_between",
+    "time_at", "time_gte", "time_between", "future",
     "any", "all", "not",
 }
 
@@ -484,6 +486,8 @@ def _quest_stage(ctx: DialogueContext, quest_id: str) -> str | None:
 def _check_one(ctx: DialogueContext, cond: dict, here: str | None = None) -> bool:
     world, player = ctx.world, ctx.player
     flags, bell = world.flags, world.bell
+    if "future" in cond:
+        return False  # content that isn't written yet
     try:
         if "flag_set" in cond and not flags.get(cond["flag_set"]):
             return False
@@ -596,6 +600,15 @@ def describe_unmet(ctx: DialogueContext, conditions: list[dict], here: str | Non
             if "race" in cond:
                 races = cond["race"] if isinstance(cond["race"], list) else [cond["race"]]
                 return " or ".join(races) + " only"
+            if "weekday" in cond:
+                days = cond["weekday"] if isinstance(cond["weekday"], list) else [cond["weekday"]]
+                return "Only on " + " or ".join(days)
+            if "time_between" in cond:
+                start, end = (int(v) for v in cond["time_between"][:2])
+                return {(20, 4): "Only at night", (19, 5): "Only at night", (6, 18): "Only by day",
+                        (7, 19): "Only by day"}.get((start, end), f"Only between hour {start} and {end}")
+            if "future" in cond:
+                return "Not yet"
         except (TypeError, ValueError, IndexError):
             pass
         return "Not available"
@@ -745,6 +758,11 @@ def _apply_one(ctx: DialogueContext, effect: dict, out: StepResult) -> None:
         _set_quest(ctx, str(effect["complete_quest"]), DONE, say)
     elif "fail_quest" in effect:
         _set_quest(ctx, str(effect["fail_quest"]), FAILED, say)
+    elif "take_item" in effect:
+        stack = player.inventory.find_by_name(str(effect["take_item"]))
+        if stack is not None:
+            player.inventory.remove(stack.item.uid, 1)
+            say(LogEvent(f"You hand over the {stack.item.name}.", Tone.INFO))
     elif "end_game" in effect:
         out.requests.append(EndGameRequest(str(effect["end_game"])))
     else:

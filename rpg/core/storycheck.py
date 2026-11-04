@@ -146,6 +146,8 @@ def check_story(repo: DialogueRepository, quests: QuestBook, endings: EndingBook
                 errors.append(f"{where}: start scene '{start}' is missing")
         check_conditions(where, list(entry.conditions) + [c for conds, _ in entry.routes for c in conds], True)
 
+    placeholders = sorted({str(c["future"]) for node in nodes.values() for c in _node_conditions(node)
+                           if "future" in c})
     for ending_id, definition in endings.endings.items():
         check_conditions(f"endings.yaml ({ending_id})", [c for line in definition.epilogue for c in line.conditions],
                          True)
@@ -168,4 +170,5 @@ def check_story(repo: DialogueRepository, quests: QuestBook, endings: EndingBook
         warnings.append(f"quest '{quest_id}' is never started")
     for ending_id in sorted(set(endings.endings) - endings_used):
         warnings.append(f"ending '{ending_id}' is never triggered")
+    check_story.placeholders = placeholders  # what's waiting on future content (for the report)
     return sorted(set(errors)), sorted(set(warnings))

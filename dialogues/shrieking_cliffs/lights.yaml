@@ -1,0 +1,417 @@
+# The Shrieking Cliffs: False Lights (quest cliffs_lights).
+#
+# Keeper Morwen: lighthouse keeper. Paranoid, twitchy, talks to her lamp (she calls it Old Gloam).
+# Dilly Marsh: halfling smuggler. Cheerful, cheeky, honest about being a crook.
+# The wreckers: hard men who light false lanterns. They answer to someone in Brennhold.
+#
+# A drowned sailor (talk, if you're one of the dead; fight, if not), the cliff (agility, kinship or time),
+# a deal with a smuggler, the strongbox (lockpick), and the false light (fight, bluff or a long drop).
+# Flags for later: cliffs_dilly (ally / turned_in), cliffs_merchant_note (a Brennhold merchant house pays the
+# wreckers), cliffs_sailor_rested. Reputation: rep.undercity, rep.coast. Placeholder: undercity_guild.
+
+_defaults:
+  speaker: Keeper Morwen
+
+lighthouse:
+  speaker: The Lighthouse
+  lines:
+    - text: >-
+        A white tower on the highest cliff, wind screaming round it like a living thing. Inside, a spiral
+        stair, and at the top, a great lamp and a small, wild-haired woman polishing it as if her life
+        depended on it.
+      if: {first_visit: true}
+    - text: '"Hush, Gloam," she says to the lamp. "It''s a visitor. Visitors are fine. Mostly." She turns to you. "Are you fine?"'
+      if: {first_visit: true}
+    - text: Morwen is polishing the lamp. She gives you a twitchy wave without stopping.
+      if: {first_visit: false}
+  choices:
+    - text: Ask what's wrong.
+      if: {quest_not_started: cliffs_lights}
+      next: problem
+    - text: Go down to the wreck.
+      if: {quest_at: [cliffs_lights, started]}
+      next: wreck
+    - text: Find a way down to the coves.
+      if: {quest_at: [cliffs_lights, cove]}
+      next: descent
+    - text: Go to the false light.
+      if: {quest_at: [cliffs_lights, false_light]}
+      next: false_light
+    - text: Leave.
+
+problem:
+  lines:
+    - >-
+      "Wrong? Ships are wrong. They keep coming in wrong." She grabs your sleeve. "Three this month, on the
+      Teeth, right under me. And every time, the night before, I see it: a light, down on the rocks, where
+      no light should be. Green, it is. Ships take it for Gloam. Gloam doesn't burn green. Do you, Gloam."
+    - '"Wreckers. Someone''s lighting false lights to bring the ships onto the Teeth, then going down with axes for the cargo. And the crews." She shivers. "Nobody believes me. The harbourmaster says I''m mad. I am mad. I''m also RIGHT."'
+  choices:
+    - text: I believe you. I'll find them.
+      next: problem_yes
+      effects:
+        - start_quest: cliffs_lights
+    - text: Ask why nobody's done anything.
+      next: problem_why
+    - text: Back away from the madwoman.
+
+problem_why:
+  lines:
+    - '"Because the cargo goes somewhere," she says, very sanely for a moment. "Somewhere with money. Somewhere that pays people not to listen to keepers."'
+  next: problem
+
+problem_yes:
+  lines:
+    - '"Newest wreck''s below, on the Teeth. The Gull''s Wing, out of Brennhold. Go and look. Gloam will watch you." She pats the lamp. "He''s very good at watching."'
+  next: lighthouse
+
+# ------------------------------------------------------------------ the wreck
+wreck:
+  speaker: The Teeth
+  lines:
+    - >-
+      The Gull's Wing lies broken-backed on the black rocks called the Teeth, waves breaking over her.
+      Barrels, rope, a figurehead of a gull with one wing snapped. Everything of value is already gone.
+    - >-
+      As you climb over the wreckage, something pulls itself up out of the surf: a man in a sailor's coat,
+      grey-skinned, eyes white as foam, a cutlass in his hand. He doesn't seem to know he's dead. He seems to
+      know you're alive.
+  choices:
+    - text: Speak to him, one of the dead to another.
+      if: {race: Revenant}
+      next: sailor_talk
+    - text: Fight.
+      next: sailor_fight
+    - text: Search the wreck while he's still finding his feet.
+      if: {min_stat: [agility, 12]}
+      locked: true
+      next: wreck_search
+
+sailor_talk:
+  speaker: The Drowned Sailor
+  lines:
+    - >-
+      He stops. Looks at you, really looks. Lowers the cutlass. "You too?" he says, in a voice full of water.
+      You nod. He sits down on a barrel, heavily, like a man coming off a long watch.
+    - >-
+      "Green light," he says. "Captain swore it was the tower. Then the rocks, and men on the rocks with
+      axes, and they had a lantern with green glass. Took it down the cliff after. To the coves."
+    - '"Tell my wife in Brennhold," he says, and walks back into the sea. You don''t know his wife. You''ll find her.'
+  effects:
+    - set_flag: [cliffs_sailor_rested, true]
+    - give_xp: 700
+  next: wreck_clue
+
+sailor_fight:
+  speaker: The Teeth
+  lines:
+    - He comes at you through the surf.
+  effects:
+    - start_combat: drowned_sailor
+      fled: lighthouse
+  choices:
+    - text: Search the wreck.
+      next: wreck_search
+
+wreck_search:
+  speaker: The Teeth
+  lines:
+    - >-
+      Most of it's picked clean. But wedged in a crack in the rocks, where the wreckers missed it, there's a
+      shard of thick green glass, the kind used in lantern panes. And a bootprint in the weed, leading down
+      toward the coves.
+  effects:
+    - give_item: Shard of Green Glass
+    - give_xp: 600
+  next: wreck_clue
+
+wreck_clue:
+  speaker: The Teeth
+  lines:
+    - The trail goes down. The cliff path to the coves is steep, and the light is going.
+  effects:
+    - quest_stage: [cliffs_lights, cove]
+  choices:
+    - text: Head for the coves.
+      next: descent
+    - text: Go back up to the lighthouse.
+      next: lighthouse
+
+# ------------------------------------------------------------------ the cliff
+descent:
+  speaker: The Cliff Path
+  lines:
+    - >-
+      The path down to the coves is goat-width and sheer, slick with spray, and the wind up here wants you off
+      it. Far below, a little lantern moves among the rocks: somebody's down there already.
+  choices:
+    - text: Climb straight down the rock face.
+      if: {min_stat: [agility, 13]}
+      locked: true
+      next: descent_climb
+    - text: Use the little handholds the smugglers cut, the ones made for small hands.
+      if: {race: [Halfling, Gnome]}
+      next: descent_climb
+    - text: Take the long way, the goat path round the headland.
+      next: descent_long
+    - text: Go back.
+      next: lighthouse
+
+descent_climb:
+  speaker: The Cliff Path
+  lines:
+    - >-
+      It's quick, and terrifying, and your fingers will never forget it. You drop onto the sand of the cove
+      just as the little lantern turns your way.
+  next: cove
+
+descent_long:
+  speaker: The Cliff Path
+  lines:
+    - The goat path takes hours. By the time you reach the coves the sun is down and the sea is black.
+  effects:
+    - advance_time: 4
+  next: cove
+
+# ------------------------------------------------------------------ the cove
+cove:
+  speaker: Dilly Marsh
+  lines:
+    - text: >-
+        A halfling woman with a lantern, a crowbar and a cheerful expression is going through a stack of
+        crates that definitely aren't hers. "Evening!" she says. "Lovely night for it. Whatever it is you're
+        here for. I'm here for these. Don't tell anyone."
+      if: {first_visit: true}
+    - text: Dilly is still here, sitting on a crate eating an apple. "Back again!"
+      if: {first_visit: false}
+    - text: She sizes you up and grins wider. "Oh, river folk! Well, that's all right then. You won't tell."
+      if: {first_visit: true, race: Halfling}
+  choices:
+    - text: Ask about the wreckers.
+      if: {not_visited: dilly_wreckers}
+      next: dilly_wreckers
+    - text: Offer her a deal. She knows the coves; you can deal with the wreckers.
+      if: {visited: dilly_wreckers, flag_not_set: cliffs_dilly}
+      next: dilly_deal
+    - text: Tell her she's under arrest for smuggling.
+      if: {visited: dilly_wreckers, flag_not_set: cliffs_dilly}
+      next: dilly_arrest
+    - text: Go to the wreckers' cave.
+      if: {flag_set: cliffs_dilly}
+      next: strongbox
+    - text: Give the Undercity sign.
+      if: {future: undercity_guild}
+      locked: Undercity members only
+    - text: Go back up.
+      next: lighthouse
+
+dilly_wreckers:
+  speaker: Dilly Marsh
+  lines:
+    - >-
+      Her face falls for the first time. "Them. Nasty lot. Smuggling's honest work, I'll have you know. You
+      take things from people who can afford it, quietly, nobody gets hurt. Wreckers drown whole crews for
+      a few barrels." She spits. "And every wreck brings the harbourmaster sniffing round my coves."
+    - '"They''ve a cave round the point. Strongbox in it. And when they light up, they do it on Gull Rock, after dark, every night the sea''s rough."'
+  next: cove
+
+dilly_deal:
+  speaker: Dilly Marsh
+  lines:
+    - >-
+      "A deal! I love a deal." She shakes your hand with great vigour. "I'll get you into their cave. You deal
+      with them. I don't get blamed. Everyone's happy, except the wreckers, who are horrible."
+  effects:
+    - set_flag: [cliffs_dilly, ally]
+    - add_var: [rep.undercity, 1]
+  next: strongbox
+
+dilly_arrest:
+  speaker: Dilly Marsh
+  lines:
+    - >-
+      She looks at you. She looks at the cliff. "Arrest me," she says, "with what? There's no harbourmaster
+      down here, love. There's you, and me, and a lot of dark." She tips her hat and is gone into it.
+    - You find the wreckers' cave yourself, eventually, but it takes most of the night.
+  effects:
+    - set_flag: [cliffs_dilly, turned_in]
+    - add_var: [rep.undercity, -1]
+    - advance_time: 3
+  next: strongbox
+
+strongbox:
+  speaker: The Wreckers' Cave
+  lines:
+    - >-
+      A sea cave round the point, stacked with salvage: barrels, bolts of cloth, a ship's bell. At the back,
+      an iron strongbox with a good lock.
+    - text: Dilly keeps watch at the mouth of the cave, humming.
+      if: {flag_is: [cliffs_dilly, ally]}
+  choices:
+    - text: Pick the lock.
+      if: {has_lockpick: true}
+      locked: Needs a lockpick
+      effects:
+        - minigame:
+            type: lockpick
+            dc: 13
+            title: The Wreckers' Strongbox
+            intro: Good iron, salt-stiff. The sea is loud enough to cover a slip. Probably.
+            success: box_open
+            partial: box_open
+            failure: box_noise
+            retreat: strongbox
+    - text: Smash it open with a rock.
+      next: box_noise
+    - text: Leave it. Go and find the false light.
+      next: false_light
+
+box_noise:
+  speaker: The Wreckers' Cave
+  lines:
+    - The noise booms round the cave like a bell. Somebody outside shouts. Somebody runs in with an axe.
+  effects:
+    - start_combat: wrecker
+      fled: cove
+  choices:
+    - text: Open the box.
+      next: box_open
+
+box_open:
+  speaker: The Wreckers' Cave
+  lines:
+    - >-
+      Inside: gold, a lot of it, and a lantern with panes of thick green glass, and a letter. The letter is
+      short: "The Gull's Wing, the Gannet and the Bright Morning. Usual rate. Cargo to the Tallow Bridge
+      warehouse." It's signed with a merchant's seal you've seen on the barrels in Brennhold.
+  effects:
+    - add_gold: 150
+    - set_flag: [cliffs_merchant_note, true]
+    - give_item: Wreckers' Letter
+    - give_xp: 700
+  next: box_after
+
+box_after:
+  speaker: The Wreckers' Cave
+  lines:
+    - text: '"Tallow Bridge," Dilly says over your shoulder, reading. "That''s the Gutter Market. That''s Undercity." She frowns. "That''s not supposed to be how this works."'
+      if: {flag_is: [cliffs_dilly, ally]}
+    - Outside, the sea is getting up, and the wind is screaming. A wrecker's night.
+  effects:
+    - quest_stage: [cliffs_lights, false_light]
+  next: false_light
+
+# ------------------------------------------------------------------ the false light
+false_light:
+  speaker: Gull Rock
+  lines:
+    - text: >-
+        Not yet. The wreckers only light up after dark, when the ships can't see the rocks. You'll have to wait.
+      if: {not: {time_between: [19, 5]}}
+    - text: >-
+        On Gull Rock, three men are hanging a lantern on a pole: green light, swinging out over the black
+        water. Out in the dark, a ship's lamp turns toward it.
+      if: {time_between: [19, 5]}
+  choices:
+    - text: Wait for dark.
+      if: {not: {time_between: [19, 5]}}
+      next: wait_dark
+    - text: Charge them.
+      if: {time_between: [19, 5]}
+      next: wreckers_fight
+    - text: Shout that the watch is coming up the path, with lanterns. Lots of lanterns.
+      if: {time_between: [19, 5], min_stat: [charisma, 14]}
+      locked: true
+      next: wreckers_bluff
+    - text: Climb above them and drop onto the lantern pole.
+      if: {time_between: [19, 5], min_stat: [agility, 13]}
+      locked: true
+      next: wreckers_drop
+    - text: Go back.
+      next: lighthouse
+
+wait_dark:
+  speaker: Gull Rock
+  lines:
+    - You find a dry crack in the rock and wait for the dark.
+  effects:
+    - set_time: 20
+  next: false_light
+
+wreckers_fight:
+  speaker: Gull Rock
+  lines:
+    - text: Dilly whistles from the dark on the other side of the rock. The wreckers turn toward her. You hit them from behind.
+      if: {flag_is: [cliffs_dilly, ally]}
+    - text: They see you coming.
+      if: {not: {flag_is: [cliffs_dilly, ally]}}
+  effects:
+    - start_combat: wrecker
+      opener: 0.3
+      if: {flag_is: [cliffs_dilly, ally]}
+      fled: lighthouse
+    - start_combat: wrecker
+      if: {not: {flag_is: [cliffs_dilly, ally]}}
+      fled: lighthouse
+  choices:
+    - text: Smash the green lantern.
+      next: lantern_smashed
+
+wreckers_bluff:
+  speaker: Gull Rock
+  lines:
+    - >-
+      You shout it like you mean it, and wave your own lantern back and forth behind a rock so it looks like
+      more than one. The wreckers don't wait to count. They're over the far side of Gull Rock and gone.
+  next: lantern_smashed
+
+wreckers_drop:
+  speaker: Gull Rock
+  lines:
+    - >-
+      You come down out of the dark and land on the pole with both feet. It snaps. The lantern goes into the
+      sea, and the wreckers go after it, yelling, and don't come back up the rocks.
+  next: lantern_smashed
+
+lantern_smashed:
+  speaker: Gull Rock
+  lines:
+    - >-
+      The green light goes out. A long moment later, out in the dark, the ship's lamp turns away from the
+      Teeth, toward open water, toward the steady white light of the lighthouse.
+  effects:
+    - give_xp: 800
+  next: reward
+
+reward:
+  lines:
+    - >-
+      Morwen is waiting at the top of the stair, Gloam blazing behind her. She saw it all. "Turned," she
+      says. "She turned. You turned her." She hugs you, briefly and very hard, and then hugs the lamp.
+    - text: >-
+        She reads the letter twice, then folds it very small. "Tallow Bridge. I knew it went somewhere with
+        money." She gives it back. "Keep it. Somebody in Brennhold will want it. Somebody else will want it
+        burned. Be careful which one you meet first."
+      if: {flag_set: cliffs_merchant_note}
+    - '"I can''t pay much. The tower doesn''t. But the last keeper left these, and Gloam says you should have one."'
+  effects:
+    - take_item: Shard of Green Glass
+    - add_var: [rep.coast, 2]
+    - complete_quest: cliffs_lights
+  choices:
+    - text: Take the marksman's band.
+      next: reward_done
+      effects:
+        - give_item: marksmans_band
+    - text: Take the ring of the fox.
+      next: reward_done
+      effects:
+        - give_item: ring_of_the_fox
+
+reward_done:
+  lines:
+    - '"Come back any time," she says. "Gloam likes you. He doesn''t like anyone."'
+  effects:
+    - add_gold: 180
+    - give_xp: 800
+  next: lighthouse

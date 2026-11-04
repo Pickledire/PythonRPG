@@ -96,6 +96,10 @@ Mouse clicks work everywhere too.
   need, rewards that pay once, quests listed in the camp's journal box, and endings that close the run. See
   [docs/STORY_ENGINE.md](docs/STORY_ENGINE.md).
 - **The Banked Fire**: Emberwick's inn, its innkeeper's odd jobs, and a secret ending.
+- **Eleven side questlines**, one per region: a clockwork finch in the Undercity, a poacher in the Ashwood, a
+  six-years-overdue library book, a dwarven brewing feud, a gravedigger's count, a beastkin rite, wreckers on
+  the cliffs, a swamp wedding, a Valorian examination, a pilgrim's question and a cartographer's folly. See
+  [docs/story/07_side_quests.md](docs/story/07_side_quests.md).
 - **The Sunken Vault**: a test quest that uses every trial (for development).
 - **Campfire rest**: full recovery, time passes, and the night may bring ambushes, thieves, gifts
   or visitors.
@@ -204,7 +208,8 @@ rpg/
 dialogues/             Scenes: new content in YAML (emberwick/), older quests in JSON
 story/                 board.yaml (the quest board), quests/ (journal quests), endings.yaml, regions.yaml
                        (the map), bestiary.yaml (creature lore)
-tools/                 story_check.py (checks the whole story), balance_sim.py (bot playthroughs for
+tools/                 story_check.py (checks the whole story), story_bot.py (plays every questline to
+                       prove it can be finished), balance_sim.py (bot playthroughs for
                        balancing), import_ascii_motion.py (ASCII Motion
                        exports), make_boss_art.py (boss portraits)
 docs/                  BALANCE_AUDIT.md (balance findings, targets and how to keep it balanced),

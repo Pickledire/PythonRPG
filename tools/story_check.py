@@ -27,6 +27,9 @@ def main() -> int:
     print(f"{len(repo.yaml_ids())} YAML scenes, {len(repo.json_ids())} JSON scenes, "
           f"{len(default_questbook().quests)} quests, {len(default_endings().endings)} endings, "
           f"{len(default_regions().regions)} regions, {len(lore)} creatures with lore")
+    waiting = getattr(check_story, "placeholders", [])
+    if waiting:
+        print(f"{len(waiting)} greyed-out placeholders waiting on future content: {', '.join(waiting)}")
     for line in errors:
         print(f"ERROR    {line}")
     for line in warnings:
